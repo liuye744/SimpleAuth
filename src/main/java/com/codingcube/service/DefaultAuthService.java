@@ -1,4 +1,4 @@
-package com.codingcube.annotation;
+package com.codingcube.service;
 
 import org.springframework.stereotype.Component;
 
