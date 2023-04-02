@@ -3,18 +3,15 @@ package com.codingcube.filter;
 
 import com.codingcube.exception.PermissionsException;
 import com.codingcube.implement.PermissionOperate;
-import org.springframework.stereotype.Component;
-
 import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebFilter
-@Component
 public abstract class AuthPermissions implements Filter, PermissionOperate {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (!setPermission(servletRequest, servletResponse)){
+        if (!attachPermission((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse)){
             //No access
             throw new PermissionsException("No access");
         }else {
@@ -23,5 +20,5 @@ public abstract class AuthPermissions implements Filter, PermissionOperate {
 
     }
 
-    abstract boolean setPermission(ServletRequest servletRequest, ServletResponse servletResponse);
+    public abstract boolean attachPermission(HttpServletRequest servletRequest, HttpServletResponse servletResponse);
 }

@@ -34,15 +34,15 @@ public class AutoAuth {
 
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         //authenticate authority
-        //若配置了Chain没有配置autoAuthService 则放弃执行DefaultAutoAuthService
+        //If the AutoAuthChain is configured and autoAuthService is not configured, the DefaultAutoAuthService will be abandoned.
         boolean isExecuteDefault = true;
         try {
             if (
-                    //Chain非默认
+                    //authentications(AutoAuthChain) parameter is the default.
                     !((Class[])IsAuthor.class.getMethod("authentications").getDefaultValue())[0].getName()
                     .equals(authentications[0].getName())
                     &&
-                    //AutoAuthService为默认
+                    //authentications(AutoAuthService) parameter is not the default
                     ((Class[])IsAuthor.class.getMethod("authentication").getDefaultValue())[0].getName()
                             .equals(autoAuthServices[0].getName())
             )
@@ -53,6 +53,7 @@ public class AutoAuth {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+        //execute autoAuthService
         if (isExecuteDefault){
             Arrays.stream(autoAuthServices).forEach(
                     (item)->{
@@ -64,6 +65,7 @@ public class AutoAuth {
                     }
             );
         }
+        //execute autoAuthChain
         Arrays.stream(authentications).forEach(
                 (items)->{
                     final AutoAuthServiceChain bean = applicationContext.getBean(items);

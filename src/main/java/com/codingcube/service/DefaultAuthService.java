@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * @author dhc
  */
 @Component
-public class DefaultAuthService extends AutoAuthService{
+public final class DefaultAuthService extends AutoAuthService{
     @Override
     public boolean isAuthor(HttpServletRequest request, String permission) {
         final ArrayList<String> userPermissions = getPermissions(request);
