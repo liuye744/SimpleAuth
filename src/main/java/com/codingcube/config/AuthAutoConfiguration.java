@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(Proper.class)
 @ComponentScan("com.codingcube.aspect")
-@ComponentScan("com.codingcube.service")
+@ComponentScan("com.codingcube.handler")
 public class AuthAutoConfiguration {
 
     private final Proper proper;

@@ -1,17 +1,16 @@
-package com.codingcube.service;
+package com.codingcube.handler;
 
 
 import com.codingcube.implement.PermissionOperate;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 
 /**
  * @author dhc
  */
 @Component
-public abstract class AutoAuthService implements PermissionOperate {
+public abstract class AutoAuthHandler implements PermissionOperate {
 
     /**
      * 判断是否符合权限 *

@@ -1,13 +1,12 @@
 package com.codingcube.aspect;
 
-import com.codingcube.service.AutoAuthService;
+import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.annotation.IsAuthor;
 import com.codingcube.exception.PermissionsException;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import com.codingcube.service.AutoAuthServiceChain;
-import com.codingcube.service.DefaultAuthService;
+import com.codingcube.handler.AutoAuthHandlerChain;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -27,8 +26,8 @@ public class AutoAuth {
 
     @Around("@within(isAuthor)")
     public Object isAuthorClass(ProceedingJoinPoint joinPoint, IsAuthor isAuthor){
-        final Class<? extends AutoAuthService>[] autoAuthServices = isAuthor.authentication();
-        final Class<? extends AutoAuthServiceChain>[] authentications = isAuthor.authentications();
+        final Class<? extends AutoAuthHandler>[] autoAuthServices = isAuthor.authentication();
+        final Class<? extends AutoAuthHandlerChain>[] authentications = isAuthor.authentications();
 
         final String permissions = isAuthor.value();
 
@@ -57,8 +56,8 @@ public class AutoAuth {
         if (isExecuteDefault){
             Arrays.stream(autoAuthServices).forEach(
                     (item)->{
-                        final AutoAuthService autoAuthService = applicationContext.getBean(item);
-                        if (!autoAuthService.isAuthor(request, permissions)){
+                        final AutoAuthHandler autoAuthHandler = applicationContext.getBean(item);
+                        if (!autoAuthHandler.isAuthor(request, permissions)){
                             //Permission not met
                             throw new PermissionsException("lack of permissions");
                         }
@@ -68,18 +67,18 @@ public class AutoAuth {
         //execute autoAuthChain
         Arrays.stream(authentications).forEach(
                 (items)->{
-                    final AutoAuthServiceChain bean = applicationContext.getBean(items);
+                    final AutoAuthHandlerChain bean = applicationContext.getBean(items);
                     final List<Object> autoAuthServiceList = bean.getAutoAuthServiceList();
                     autoAuthServiceList.forEach(
                             (item)->{
-                                final AutoAuthService autoAuth;
+                                final AutoAuthHandler autoAuth;
                                 if (item instanceof String ){
                                     //item is BeanName
-                                    autoAuth = applicationContext.getBean((String) item, AutoAuthService.class);
+                                    autoAuth = applicationContext.getBean((String) item, AutoAuthHandler.class);
 
                                 }else {
                                     //item is class of AutoAuthService
-                                    autoAuth = applicationContext.getBean((Class<? extends AutoAuthService>) item);
+                                    autoAuth = applicationContext.getBean((Class<? extends AutoAuthHandler>) item);
                                 }
 
                                 if (!autoAuth.isAuthor(request, permissions)){

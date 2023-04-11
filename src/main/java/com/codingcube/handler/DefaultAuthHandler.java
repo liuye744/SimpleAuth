@@ -1,4 +1,4 @@
-package com.codingcube.service;
+package com.codingcube.handler;
 
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * @author dhc
  */
 @Component
-public final class DefaultAuthService extends AutoAuthService{
+public final class DefaultAuthHandler extends AutoAuthHandler {
     @Override
     public boolean isAuthor(HttpServletRequest request, String permission) {
         final ArrayList<String> userPermissions = getPermissions(request);
