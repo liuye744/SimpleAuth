@@ -23,4 +23,8 @@ public interface PermissionOperate {
     default void setPermissions(HttpServletRequest request,ArrayList<String> target){
         request.setAttribute(PERMISSIONS, target);
     }
+
+    static <T> T principal(ServletRequest request){
+        return (T) request.getAttribute(PRINCIPAL);
+    }
 }
