@@ -6,7 +6,13 @@ This is a lightweight authority authentication plug-in based on SpringBoot. Suit
 When you want to control all the methods or one of the methods in a Controller, add the annotation @IsAuthor to the Controller or one of the methods.
 The whole authority check plug-in is based on @IsAuthor
 @IsAuthor mainly has two parameters, value and authentication, which are the permission value to enter the method and the class (which can be multiple functions) for permission verification.
-
+```
+<dependency>
+    <groupId>io.github.liuye744</groupId>
+    <artifactId>simpleAuth-spring-boot-starter</artifactId>
+    <version>0.1.1.RELEASE</version>
+</dependency>
+```
 ### 1.You can do this when you just want to verify the parameters in HeetServlertRequest.
  Create a class extends AutoAuthHandler.
  ```
