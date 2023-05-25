@@ -25,7 +25,7 @@ public class AutoAuth {
     private ApplicationContext applicationContext;
 
     @Around("@within(isAuthor)")
-    public Object isAuthorClass(ProceedingJoinPoint joinPoint, IsAuthor isAuthor){
+    public Object isAuthorClass(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable {
         final Class<? extends AutoAuthHandler>[] autoAuthServices = isAuthor.authentication();
         final Class<? extends AutoAuthHandlerChain>[] authentications = isAuthor.authentications();
 
@@ -90,16 +90,10 @@ public class AutoAuth {
 
                 }
         );
-
-        try {
-            return joinPoint.proceed();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return new RuntimeException();
+        return joinPoint.proceed();
     }
     @Around("@annotation(isAuthor)")
-    public Object isAuthormethod(ProceedingJoinPoint joinPoint, IsAuthor isAuthor){
+    public Object isAuthormethod(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable{
         return isAuthorClass(joinPoint, isAuthor);
     }
 
