@@ -10,7 +10,7 @@ The whole authority check plug-in is based on @IsAuthor
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.1.1.RELEASE</version>
+    <version>0.2.1.RELEASE</version>
 </dependency>
 ```
 ### 1.You can do this when you just want to verify the parameters in HeetServlertRequest.
@@ -39,7 +39,7 @@ public class KeyAutoAuthHandler extends AutoAuthHandler {
 public class MyController {
 }
  ```
- Note: If you have more than one AutoAuthHandler, you can write the comment @IsAuth (authentication = {KeyAutoAuthHandler1.class, KeyAutoAuthHandler2.class}) like this.
+ Note: If you have more than one AutoAuthHandler, you can write the comment @IsAuth (authentication = {KeyAutoAuthHandler1.class, KeyAutoAuthHandler2.class}) like this.the param of authentication also can write Bean name 
  These classes will run permission checks in sequence.
  Or add a class that inherits from AutoAuthHandlerChain and add all Handler to it.
  ```
