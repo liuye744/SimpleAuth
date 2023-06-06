@@ -56,7 +56,7 @@ public class LimitInfoMap {
                         personalRecord.addFirst(current);
                         return true;
                     }else {
-                        personalRecord.addFirst(current);
+                        personalRecord.addLast(personalRecord.getLast());
                         return false;
                     }
                 }else {
