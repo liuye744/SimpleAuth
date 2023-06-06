@@ -4,6 +4,7 @@ import java.util.*;
 
 public class LimitInfoMap {
     private static final Map<String,Map<String, Deque<Date>>> limitInfo = new HashMap<>();
+    private static final Map<String, Date> ban = new HashMap<>();
 
     /**
      * append record*
@@ -11,7 +12,25 @@ public class LimitInfoMap {
      * @param sign  record sign
      * @return Whether it overflows
      */
-    public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds, Integer max){
+    public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds, Integer banTime){
+        if (LimitInfoMap.ban.get(sign) != null && banTime!=0){
+            synchronized (sign.intern()){
+                final Date banData = LimitInfoMap.ban.get(sign);
+                if (LimitInfoMap.ban.get(sign) != null){
+                    if ((new Date().getTime()-banData.getTime())/1000 < banTime){
+                        return false;
+                    }else {
+                        ban.remove(sign);
+                        final Deque<Date> optionList = limitInfo.get(recordItem).get(sign);
+                        while (optionList.size()!=0){
+                            optionList.removeLast();
+                        }
+                    }
+
+                }
+
+            }
+        }
         if (limitInfo.get(recordItem) == null){
             synchronized (recordItem.intern()){
                 if (limitInfo.get(recordItem) == null){
@@ -43,49 +62,42 @@ public class LimitInfoMap {
         //All records exist.
         Deque<Date> personalRecord = stringListMap.get(sign);
         synchronized (sign.intern()){
-            if (personalRecord.size() == 0){
-                personalRecord.addFirst(new Date());
-                return true;
-            }
-            Date last = personalRecord.getLast();
-            final Date current = new Date();
             if (personalRecord.size()>=limit){
-                if (personalRecord.size() == limit){
+                //Remove expired data before judging, and return false if it still overflows.
+                while (personalRecord.size() > 0){
+                    final Date last = personalRecord.getLast();
+                    final Date current = new Date();
                     if ((current.getTime() - last.getTime())/1000 > seconds){
+                        //expired
                         personalRecord.removeLast();
-                        personalRecord.addFirst(current);
-                        return true;
                     }else {
-                        personalRecord.addFirst(current);
-                        return false;
-                    }
-                }else {
-                    if ((current.getTime() - last.getTime())/1000 > max){
-                        while ((current.getTime() - last.getTime())/1000 > seconds){
-                            personalRecord.removeLast();
-                            if (personalRecord.size() != 0){
-                                last = personalRecord.getLast();
-                            }else {
-                                break;
-                            }
-                        }
-                        personalRecord.addFirst(new Date());
-                        return true;
-                    }else {
-                        return false;
+                        break;
                     }
                 }
-
+                //After deleting expired records, the number of times the limit is met.
+                if (personalRecord.size()<limit){
+                    personalRecord.addFirst(new Date());
+                    return true;
+                }
+                LimitInfoMap.ban.put(sign, new Date());
+                return false;
             }else {
                 //Judge whether the top level has expired and add records.
+                if (personalRecord.size()==0){
+                    personalRecord.add(new Date());
+                    return true;
+                }
+                final Date last = personalRecord.getLast();
+                final Date current = new Date();
                 if ((current.getTime() - last.getTime())/1000 > seconds){
                     //expired
                     personalRecord.removeLast();
+                }else {
+                    personalRecord.addFirst(new Date());
+
                 }
-                personalRecord.addFirst(new Date());
                 return true;
             }
-
         }
     }
 }

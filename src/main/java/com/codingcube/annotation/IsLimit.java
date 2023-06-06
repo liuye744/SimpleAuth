@@ -12,6 +12,6 @@ public @interface IsLimit {
     int value() default 100;
     //Record operation time(Limited Time)
     int seconds() default 300;
-    //Maximum limited operating time
-    int max() default 300;
+    //ban time
+    int ban() default 0;
 }

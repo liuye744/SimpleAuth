@@ -1,9 +1,7 @@
 package com.codingcube.aspect;
 
-import com.codingcube.annotation.IsAuthor;
 import com.codingcube.annotation.IsLimit;
 import com.codingcube.exception.AccessIsRestricted;
-import com.codingcube.exception.PermissionsException;
 import com.codingcube.properties.LimitInfoMap;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -52,11 +50,7 @@ public class AutoLimit {
     public Boolean addRecord(String recordItem, String sign, IsLimit isLimit) throws Throwable{
         final int limit = isLimit.value();
         final int seconds = isLimit.seconds();
-        final int max = isLimit.max();
-        //If max is not specified, the parameter will be passed as seconds.
-        if (max == (Integer)IsLimit.class.getMethod("max").getDefaultValue()){
-            return LimitInfoMap.addRecord(recordItem, sign, limit, seconds, seconds);
-        }
-        return LimitInfoMap.addRecord(recordItem, sign, limit, seconds, max);
+        final int ban = isLimit.ban();
+        return LimitInfoMap.addRecord(recordItem, sign, limit, seconds, ban);
     }
 }
