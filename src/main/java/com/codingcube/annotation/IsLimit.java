@@ -8,8 +8,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface IsLimit {
-    //限制次数
+    //Limit the number of times
     int value() default 100;
-    //时间 s
+    //Record operation time(Limited Time)
     int seconds() default 300;
+    //Maximum limited operating time
+    int max() default 300;
 }

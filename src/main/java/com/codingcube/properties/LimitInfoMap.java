@@ -11,7 +11,7 @@ public class LimitInfoMap {
      * @param sign  record sign
      * @return Whether it overflows
      */
-    public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds){
+    public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds, Integer max){
         if (limitInfo.get(recordItem) == null){
             synchronized (recordItem.intern()){
                 if (limitInfo.get(recordItem) == null){
@@ -42,36 +42,50 @@ public class LimitInfoMap {
         }
         //All records exist.
         Deque<Date> personalRecord = stringListMap.get(sign);
-        if (personalRecord.size()>=limit){
-            //Remove expired data before judging, and return false if it still overflows.
-            while (personalRecord.size() > 0){
-                final Date last = personalRecord.getLast();
-                final Date current = new Date();
-                if ((current.getTime() - last.getTime())/1000 > seconds){
-                    //expired
-                    personalRecord.removeLast();
-                }else {
-                    break;
-                }
-            }
-            //After deleting expired records, the number of times the limit is met.
-            if (personalRecord.size()<limit){
+        synchronized (sign.intern()){
+            if (personalRecord.size() == 0){
                 personalRecord.addFirst(new Date());
                 return true;
             }
-            return false;
-        }else {
-            //Judge whether the top level has expired and add records.
-            final Date last = personalRecord.getLast();
+            Date last = personalRecord.getLast();
             final Date current = new Date();
-            if ((current.getTime() - last.getTime())/1000 > seconds){
-                //expired
-                personalRecord.removeLast();
-            }else {
-                personalRecord.addFirst(new Date());
+            if (personalRecord.size()>=limit){
+                if (personalRecord.size() == limit){
+                    if ((current.getTime() - last.getTime())/1000 > seconds){
+                        personalRecord.removeLast();
+                        personalRecord.addFirst(current);
+                        return true;
+                    }else {
+                        personalRecord.addFirst(current);
+                        return false;
+                    }
+                }else {
+                    if ((current.getTime() - last.getTime())/1000 > max){
+                        while ((current.getTime() - last.getTime())/1000 > seconds){
+                            personalRecord.removeLast();
+                            if (personalRecord.size() != 0){
+                                last = personalRecord.getLast();
+                            }else {
+                                break;
+                            }
+                        }
+                        personalRecord.addFirst(new Date());
+                        return true;
+                    }else {
+                        return false;
+                    }
+                }
 
+            }else {
+                //Judge whether the top level has expired and add records.
+                if ((current.getTime() - last.getTime())/1000 > seconds){
+                    //expired
+                    personalRecord.removeLast();
+                }
+                personalRecord.addFirst(new Date());
+                return true;
             }
-            return true;
+
         }
     }
 }

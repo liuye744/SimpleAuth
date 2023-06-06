@@ -29,9 +29,7 @@ public class AutoLimit {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         final String addr = request.getRemoteAddr();
 
-        final int limit = isLimit.value();
-        final int seconds = isLimit.seconds();
-        final Boolean addRecord = LimitInfoMap.addRecord(className, addr, limit, seconds);
+        final Boolean addRecord =  addRecord(className, addr, isLimit);
         if (addRecord){
             return joinPoint.proceed();
         }
@@ -44,13 +42,21 @@ public class AutoLimit {
         String methodName = joinPoint.getSignature().getName();
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         final String addr = request.getRemoteAddr();
-
-        final int limit = isLimit.value();
-        final int seconds = isLimit.seconds();
-        final Boolean addRecord = LimitInfoMap.addRecord(className+"."+methodName, addr, limit, seconds);
+        final Boolean addRecord = addRecord(className+"."+methodName, addr, isLimit);
         if (addRecord){
             return joinPoint.proceed();
         }
         throw new AccessIsRestricted();
+    }
+
+    public Boolean addRecord(String recordItem, String sign, IsLimit isLimit) throws Throwable{
+        final int limit = isLimit.value();
+        final int seconds = isLimit.seconds();
+        final int max = isLimit.max();
+        //If max is not specified, the parameter will be passed as seconds.
+        if (max == (Integer)IsLimit.class.getMethod("max").getDefaultValue()){
+            return LimitInfoMap.addRecord(recordItem, sign, limit, seconds, seconds);
+        }
+        return LimitInfoMap.addRecord(recordItem, sign, limit, seconds, max);
     }
 }
