@@ -2,7 +2,7 @@ package com.codingcube.aspect;
 
 import com.codingcube.annotation.IsLimit;
 import com.codingcube.exception.AccessIsRestricted;
-import com.codingcube.properties.LimitInfoMap;
+import com.codingcube.properties.LimitInfoUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -51,6 +51,6 @@ public class AutoLimit {
         final int limit = isLimit.value();
         final int seconds = isLimit.seconds();
         final int ban = isLimit.ban();
-        return LimitInfoMap.addRecord(recordItem, sign, limit, seconds, ban);
+        return LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban);
     }
 }

@@ -1,10 +1,11 @@
 package com.codingcube.properties;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class LimitInfoMap {
-    private static final Map<String,Map<String, Deque<Date>>> limitInfo = new HashMap<>();
-    private static final Map<String, Date> ban = new HashMap<>();
+public class LimitInfoUtil {
+    private static final Map<String,Map<String, Deque<Date>>> limitInfo = new ConcurrentHashMap<>();
+    private static final Map<String, Date> ban = new ConcurrentHashMap<>();
 
     /**
      * append record*
@@ -13,14 +14,15 @@ public class LimitInfoMap {
      * @return Whether it overflows
      */
     public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds, Integer banTime){
-        if (LimitInfoMap.ban.get(sign) != null && banTime!=0){
+        final String banKey = BanKeyStratagem.getBanKey(recordItem, sign);
+        if (LimitInfoUtil.ban.get(banKey) != null && banTime!=0){
             synchronized (sign.intern()){
-                final Date banData = LimitInfoMap.ban.get(sign);
-                if (LimitInfoMap.ban.get(sign) != null){
+                final Date banData = LimitInfoUtil.ban.get(banKey);
+                if (LimitInfoUtil.ban.get(banKey) != null){
                     if ((new Date().getTime()-banData.getTime())/1000 < banTime){
                         return false;
                     }else {
-                        ban.remove(sign);
+                        ban.remove(banKey);
                         final Deque<Date> optionList = limitInfo.get(recordItem).get(sign);
                         while (optionList.size()!=0){
                             optionList.removeLast();
@@ -35,7 +37,7 @@ public class LimitInfoMap {
             synchronized (recordItem.intern()){
                 if (limitInfo.get(recordItem) == null){
                     //No record exists.
-                    Map<String,Deque<Date>> item =  new HashMap<>();
+                    Map<String,Deque<Date>> item =  new ConcurrentHashMap<>();
 
                     Deque<Date> deque = new LinkedList<>();
                     deque.add(new Date());
@@ -79,7 +81,7 @@ public class LimitInfoMap {
                     personalRecord.addFirst(new Date());
                     return true;
                 }
-                LimitInfoMap.ban.put(sign, new Date());
+                LimitInfoUtil.ban.put(banKey, new Date());
                 return false;
             }else {
                 //Judge whether the top level has expired and add records.
@@ -99,5 +101,46 @@ public class LimitInfoMap {
                 return true;
             }
         }
+    }
+
+    /**
+     * Get banned IP Map*
+     * @return Map<IP, Ban Time>
+     */
+    public static Map<String, Date> getBanMap(){
+        return ban;
+    }
+
+    /**
+     * *
+     * @return Map<recordItem, Map<sign, Deque<Option Time>>>
+     */
+    public static Map<String,Map<String, Deque<Date>>> getLimitInfo(){
+        return limitInfo;
+    }
+
+    /**
+     * Get All RecordItem*
+     * @return Set<RecordItem></>
+     */
+    public static Set<String> getAllRecordItem(){
+        return limitInfo.keySet();
+    }
+
+    /**
+     * Get sign's option List*
+     * @return Deque<Option Date></>
+     */
+    public static Deque<Date> getSignOptionList(String recordItem, String sign){
+        return limitInfo.get(recordItem).get(sign);
+    }
+
+    public static void setBan(String recordItem, String sign, Date date){
+        final String banKey = BanKeyStratagem.getBanKey(recordItem, sign);
+        ban.put(banKey, date);
+    }
+    public static void setBan(String recordItem, String sign){
+        final String banKey = BanKeyStratagem.getBanKey(recordItem, sign);
+        ban.put(banKey, new Date());
     }
 }

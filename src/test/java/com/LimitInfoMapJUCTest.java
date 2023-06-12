@@ -1,7 +1,5 @@
 package com;
 
-import com.codingcube.properties.LimitInfoMap;
-
 public class LimitInfoMapJUCTest {
     public static void main(String[] args) {
         JUCTest();

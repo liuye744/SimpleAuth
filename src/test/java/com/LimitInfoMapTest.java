@@ -1,8 +1,6 @@
 package com;
 
-import com.codingcube.properties.LimitInfoMap;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import com.codingcube.properties.LimitInfoUtil;
 
 public class LimitInfoMapTest {
     public static void main(String[] args) {
@@ -14,7 +12,7 @@ public class LimitInfoMapTest {
         int i = 0;
         while (true){
             i++;
-            final Boolean aBoolean = LimitInfoMap.addRecord("check", "CodingCube", 10, 20, 60);
+            final Boolean aBoolean = LimitInfoUtil.addRecord("check", "CodingCube", 10, 20, 60);
             System.out.println(aBoolean);
         }
     }
