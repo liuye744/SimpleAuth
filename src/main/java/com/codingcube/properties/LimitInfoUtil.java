@@ -143,4 +143,8 @@ public class LimitInfoUtil {
         final String banKey = BanKeyStratagem.getBanKey(recordItem, sign);
         ban.put(banKey, new Date());
     }
+
+    public static Map<String, Deque<Date>> getRecordItem(String recordItem){
+        return limitInfo.get(recordItem);
+    }
 }

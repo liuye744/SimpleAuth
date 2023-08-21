@@ -1,5 +1,8 @@
 package com.codingcube.annotation;
 
+import com.codingcube.strategic.DefaultSignStrategic;
+import com.codingcube.strategic.SignStrategic;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,4 +17,6 @@ public @interface IsLimit {
     int seconds() default 300;
     //ban time
     int ban() default 0;
+    //Sign generation strategy
+    Class<? extends SignStrategic> signStrategic() default DefaultSignStrategic.class;
 }
