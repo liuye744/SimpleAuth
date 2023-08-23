@@ -4,8 +4,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LimitInfoUtil {
-    private static final Map<String,Map<String, Deque<Date>>> limitInfo = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, Deque<Date>>> limitInfo = new ConcurrentHashMap<>();
     private static final Map<String, Date> ban = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> secondsRecord = new ConcurrentHashMap<>();
 
     /**
      * append record*
@@ -44,6 +45,7 @@ public class LimitInfoUtil {
 
                     item.put(sign, deque);
                     limitInfo.put(recordItem,item);
+                    secondsRecord.put(recordItem, seconds);
                     return true;
                 }
             }
@@ -146,5 +148,34 @@ public class LimitInfoUtil {
 
     public static Map<String, Deque<Date>> getRecordItem(String recordItem){
         return limitInfo.get(recordItem);
+    }
+
+    /**
+     * Remove expired records*
+     */
+    public static void clearExpiredRecord(){
+        final Set<String> recordSet = secondsRecord.keySet();
+        recordSet.forEach(
+                LimitInfoUtil::removeRecordItemOutDateRecord
+        );
+    }
+    private static void removeRecordItemOutDateRecord(String sign){
+        final Map<String, Deque<Date>> operationQueue = limitInfo.get(sign);
+        final Integer recordSeconds = secondsRecord.get(sign);
+        operationQueue.keySet().forEach(
+                key->{
+                    final Deque<Date> deque = operationQueue.get(key);
+                    Date currentDate = new Date();
+                    while (deque.size()>0 &&(currentDate.getTime() - deque.getLast().getTime())/1000 > recordSeconds){
+                        deque.removeLast();
+                    }
+                    //remove userRecord
+                    if (deque.size()==0){
+                        synchronized (key.intern()){
+                            operationQueue.remove(key);
+                        }
+                    }
+                }
+        );
     }
 }

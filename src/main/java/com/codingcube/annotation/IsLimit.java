@@ -1,6 +1,8 @@
 package com.codingcube.annotation;
 
+import com.codingcube.strategic.DefaultEffectiveStrategic;
 import com.codingcube.strategic.DefaultSignStrategic;
+import com.codingcube.strategic.EffectiveStrategic;
 import com.codingcube.strategic.SignStrategic;
 
 import java.lang.annotation.ElementType;
@@ -19,4 +21,6 @@ public @interface IsLimit {
     int ban() default 0;
     //Sign generation strategy
     Class<? extends SignStrategic> signStrategic() default DefaultSignStrategic.class;
+    //Verify that this request is recorded.
+    Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
 }
