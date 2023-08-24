@@ -105,6 +105,24 @@ public class LimitInfoUtil {
         }
     }
 
+    public static Boolean delRecord(String recordItem, String sign){
+        final Map<String, Deque<Date>> stringDequeMap = limitInfo.get(recordItem);
+        if (stringDequeMap == null){
+            return false;
+        }
+        final Deque<Date> deque = stringDequeMap.get(sign);
+        if (deque == null){
+            return false;
+        }
+        if (deque.size()>0){
+            synchronized (sign.intern()){
+                deque.removeFirst();
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Get banned IP Map*
      * @return Map<IP, Ban Time>

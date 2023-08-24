@@ -19,8 +19,12 @@ public @interface IsLimit {
     int seconds() default 300;
     //ban time
     int ban() default 0;
-    //Sign generation strategy
+    //user Sign generation strategy
     Class<? extends SignStrategic> signStrategic() default DefaultSignStrategic.class;
+    //Sign of Controller
+    String item() default "";
     //Verify that this request is recorded.
     Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
+    //Whether effectiveStrategic judges after returning.
+    boolean judgeAfterReturn() default false;
 }
