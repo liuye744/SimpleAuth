@@ -26,5 +26,5 @@ public @interface IsLimit {
     //Verify that this request is recorded.
     Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
     //Whether effectiveStrategic judges after returning.
-    boolean judgeAfterReturn() default false;
+    boolean judgeAfterReturn() default true;
 }

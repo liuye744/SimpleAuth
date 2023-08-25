@@ -1,22 +1,14 @@
 package com.codingcube.aspect;
 
 import com.codingcube.annotation.IsLimit;
-import com.codingcube.exception.AccessIsRestricted;
+import com.codingcube.exception.AccessIsRestrictedException;
 import com.codingcube.properties.LimitInfoUtil;
 import com.codingcube.strategic.EffectiveStrategic;
 import com.codingcube.strategic.SignStrategic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -80,7 +72,7 @@ public class AutoLimit {
         final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban);
 
         if (!addRecord){
-            throw new AccessIsRestricted("Access is restricted.Is there an ExceptionHandler for AccessIsRestricted");
+            throw new AccessIsRestrictedException("Access is restricted.Is there an ExceptionHandler for AccessIsRestricted");
         }
         final Object result = joinPoint.proceed();
         //Judge whether to delete the record.
