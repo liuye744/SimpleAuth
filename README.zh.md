@@ -1,5 +1,5 @@
 # SimpleAuth
-👉[English Document](/SimpleAuth/blob/master/README.md)
+👉[English Document](/README.md)
 # 特性
 
 这是一款基于SpringBoot的轻量化的权限校验和访问控制的框架。适用于轻量级以及渐进式的项目。

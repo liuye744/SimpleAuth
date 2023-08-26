@@ -1,5 +1,5 @@
 # SimpleAuth
-👉[中文文档](/SimpleAuth/blob/master/README.zh.md)
+👉[中文文档](/README.zh.md)
 ## FEATURES
 This is a lightweight framework for permission validation and access control based on SpringBoot. It is suitable for lightweight and progressive projects.
 
