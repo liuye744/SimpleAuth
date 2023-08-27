@@ -45,7 +45,7 @@ public @interface IsLimit {
     //此次访问是否有效（是否被记录）
     Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
 
-    //验证访问是否被记录，是否在Controller返回后
+    //是否在Controller返回后运行effectiveStrategic
     boolean judgeAfterReturn() default true;
 }
 ```
@@ -64,6 +64,7 @@ public class MyController {
 ```
 
 ### 用例2：同一个接口传递不同的参数访问次数分别计算
+传递的参数不同访问限制不同(例如想要每隔一段时间每个资源只能点赞N次)
 
 ```java
 @RestController
@@ -79,6 +80,7 @@ public class MySignStrategic extends SignStrategic {
     public String sign(HttpServletRequest request, ProceedingJoinPoint joinPoint) {
         final Object[] args = joinPoint.getArgs();
         final Signature signature = joinPoint.getSignature();
+        //将参数拼接到用户sign中，保证每个用户传递不同的参数标志不相同
         StringBuilder sb = new StringBuilder();
         sb.append(signature);
         for (Object arg : args) {
@@ -90,7 +92,7 @@ public class MySignStrategic extends SignStrategic {
 }
 ```
 
-### 用例3：当返回成功时才记录数据
+### 用例3：当返回“success”时才记录数据
 
 ```java
 @RestController

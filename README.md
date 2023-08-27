@@ -31,7 +31,7 @@ public @interface IsLimit {
  String item() default "";
  // Whether the access for this request is valid (whether it is recorded)
  Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
- // Validate access records after Controller returns
+ // Whether to execute effectiveStrategic after the Controller returns
  boolean judgeAfterReturn() default true;
 }
 ```
@@ -47,6 +47,7 @@ public class MyController {
 }
 ```
 #### Example 2: Counting accesses separately for the same endpoint with different parameters
+The passed parameters result in different access restrictions (e.g. wanting to limit each resource to N likes every certain period of time).
 ```java
 @RestController
 public class MyController {
@@ -61,6 +62,7 @@ public class MySignStrategic extends SignStrategic {
  public String sign(HttpServletRequest request, ProceedingJoinPoint joinPoint) {
   final Object[] args = joinPoint.getArgs();
   final Signature signature = joinPoint.getSignature();
+  ////Concatenate the parameters into the user's sign.Ensure that each user passes different parameter flags, resulting in distinct values.
   StringBuilder sb = new StringBuilder();
   sb.append(signature);
   for (Object arg : args) {
