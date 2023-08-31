@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import com.codingcube.handler.AutoAuthHandlerChain;
+import com.codingcube.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -67,26 +68,8 @@ public class AutoAuth {
         //execute autoAuthChain
         Arrays.stream(authentications).forEach(
                 (items)->{
-                    final AutoAuthHandlerChain bean = applicationContext.getBean(items);
-                    final List<Object> autoAuthServiceList = bean.getAutoAuthServiceList();
-                    autoAuthServiceList.forEach(
-                            (item)->{
-                                final AutoAuthHandler autoAuth;
-                                if (item instanceof String ){
-                                    //item is BeanName
-                                    autoAuth = applicationContext.getBean((String) item, AutoAuthHandler.class);
-
-                                }else {
-                                    //item is class of AutoAuthService
-                                    autoAuth = applicationContext.getBean((Class<? extends AutoAuthHandler>) item);
-                                }
-
-                                if (!autoAuth.isAuthor(request, permissions)){
-                                    //Permission not met
-                                    throw new PermissionsException("lack of permissions");
-                                }
-                            }
-                    );
+                    final AutoAuthHandlerChain autoAuthHandlerChain = applicationContext.getBean(items);
+                    AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions);
 
                 }
         );
