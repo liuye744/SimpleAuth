@@ -15,7 +15,7 @@
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.3.8.RELEASE</version>
+    <version>0.4.0.RELEASE</version>
 </dependency>
 ```
 
@@ -150,7 +150,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.3.8.RELEASE</version>
+    <version>0.4.0.RELEASE</version>
 </dependency>
 ```
 

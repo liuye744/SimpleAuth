@@ -11,7 +11,7 @@ You can quickly implement features like allowing only 3 searches within 10 minut
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.3.8.RELEASE</version>
+    <version>0.4.0.RELEASE</version>
 </dependency>
 ```
 ### Step 2: Add Annotations to Controllers
@@ -128,7 +128,7 @@ When you want to control all methods within a Controller or specific methods, yo
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.3.8.RELEASE</version>
+    <version>0.4.0.RELEASE</version>
 </dependency>
 ```
 ### Step 2: Validate Permissions
