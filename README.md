@@ -246,11 +246,11 @@ public class MyController {
 
 @Configuration
 public class MyAuthConfig extends SimpleAuthWebConfig {
- @Override
- public void addAuthHandlers() {
-  addAuthHandler(MyAuthHandler.class)
-          .addPathPatterns("/say");
-  //addAuthHandlerChain(MyAuthHandlerChain.class).addPathPatterns("/say");
- }
+    @Override
+    public void addAuthHandlers() {
+    addAuthHandler(MyAuthHandler.class)
+            .addPathPatterns("/say");
+    //addAuthHandlerChain(MyAuthHandlerChain.class).addPathPatterns("/say");
+    }
 }
 ```
