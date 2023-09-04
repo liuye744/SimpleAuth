@@ -234,16 +234,50 @@ public class AddPermissionKeyHandler extends AutoAuthHandler {
 当请求`/say`时，由于注释`@IsAutor` 被添加到 MyController类上，`AddPermisonKeyHandler` 中的 IsAuthor 方法将首先运行。在这个方法中，字符串“visitor”被添加到用户的权限中，因此它将会验证通过并且您可以接收 HelloWorld。
 当请求`/say`时，由于权限列表中没有“vip”则会请求失败，抛出`PermissionsException`异常，可以通过全局异常处理完成权限校验
 
-### 用例3：配置SimpleAuth拦截器
+### 用例3：传递实例对象
 ```java
+//用到的实例
+public class User {
+    String name;
+    public User(String name) {this.name = name;}
+    public String getName() {return name;}
+}
+
 @RestController
 public class MyController {
-    @GetMapping("say")
-    public String say(String str){
-       return "Hello World";
+    @IsAuthor(authentication = {MyFirstHandler.class, MySecondHandler.class})
+    @GetMapping("/say")
+    public String say(){
+        return "Hello World";
     }
 }
 
+@Component
+public class MyFirstHandler extends AutoAuthHandler {
+    @Override
+    public boolean isAuthor(HttpServletRequest request, String permission) {
+        final String name = request.getParameter("name");
+        final User user = new User(name);
+        //传递实例对象
+        setPrincipal(user);
+        return true;
+    }
+}
+
+@Component
+public class MySecondHandler extends AutoAuthHandler {
+    @Override
+    public boolean isAuthor(HttpServletRequest request, String permission) {
+        //获取实例对象
+        final User user = getPrincipal();
+        return "CodingCube".equals(user.getName());
+    }
+}
+```
+当访问 `http://localhost:8080/say?name=CodingCube` 时可以通过，参数name为其他时抛出PermissionsException异常
+
+### 用例4：配置SimpleAuth拦截器
+```java
 @Configuration
 public class MyAuthConfig extends SimpleAuthWebConfig {
     @Override

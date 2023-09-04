@@ -13,7 +13,7 @@ public abstract class AuthPermissions implements Filter, PermissionOperate {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         if (!attachPermission((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse)){
             //No access
-            throw new PermissionsException("No access");
+            throw new PermissionsException("lack of permissions");
         }else {
             filterChain.doFilter(servletRequest, servletResponse);
         }

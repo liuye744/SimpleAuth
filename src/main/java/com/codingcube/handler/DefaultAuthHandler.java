@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public final class DefaultAuthHandler extends AutoAuthHandler {
     @Override
     public boolean isAuthor(HttpServletRequest request, String permission) {
-        final ArrayList<String> userPermissions = getPermissions(request);
+        final ArrayList<String> userPermissions = getPermissions();
         if (userPermissions!=null){
             return userPermissions.contains(permission);
         }else {

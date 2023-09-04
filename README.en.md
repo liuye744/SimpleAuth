@@ -19,20 +19,20 @@ Annotations can be added to the entire controller or individual methods within t
 #### Annotation Parameter Explanation
 ```java
 public @interface IsLimit {
- // Limit of access count
- int value() default 100;
- // Time for which restrictions are recorded
- int seconds() default 300;
- // Time for which access is banned after exceeding limits
- int ban() default 0;
- // User sign generation strategy
- Class<? extends SignStrategic> signStrategic() default DefaultSignStrategic.class;
- // Name of the interface flag for access control (default is fully qualified name of the interface)
- String item() default "";
- // Whether the access for this request is valid (whether it is recorded)
- Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
- // Whether to execute effectiveStrategic after the Controller returns
- boolean judgeAfterReturn() default true;
+    // Limit of access count
+    int value() default 100;
+    // Time for which restrictions are recorded
+    int seconds() default 300;
+    // Time for which access is banned after exceeding limits
+    int ban() default 0;
+    // User sign generation strategy
+    Class<? extends SignStrategic> signStrategic() default DefaultSignStrategic.class;
+    // Name of the interface flag for access control (default is fully qualified name of the interface)
+    String item() default "";
+    // Whether the access for this request is valid (whether it is recorded)
+    Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
+    // Whether to execute effectiveStrategic after the Controller returns
+    boolean judgeAfterReturn() default true;
 }
 ```
 #### Example 1: Allowing only 5 accesses within 10 minutes, followed by a 10-minute ban if exceeded
@@ -51,26 +51,26 @@ The passed parameters result in different access restrictions (e.g. wanting to l
 ```java
 @RestController
 public class MyController {
- @GetMapping("say")
- @IsLimit(signStrategic = MySignStrategic.class)
- public String say(String str){
-  return "Hello World";
- }
+    @GetMapping("say")
+    @IsLimit(signStrategic = MySignStrategic.class)
+    public String say(String str){
+    return "Hello World";
+    }
 }
 public class MySignStrategic extends SignStrategic {
  @Override
  public String sign(HttpServletRequest request, ProceedingJoinPoint joinPoint) {
-  final Object[] args = joinPoint.getArgs();
-  final Signature signature = joinPoint.getSignature();
-  ////Concatenate the parameters into the user's sign.Ensure that each user passes different parameter flags, resulting in distinct values.
-  StringBuilder sb = new StringBuilder();
-  sb.append(signature);
-  for (Object arg : args) {
-   sb.append(arg.toString());
-  }
-  System.out.println(sb);
-  return sb.toString();
- }
+    final Object[] args = joinPoint.getArgs();
+    final Signature signature = joinPoint.getSignature();
+    ////Concatenate the parameters into the user's sign.Ensure that each user passes different parameter flags, resulting in distinct values.
+    StringBuilder sb = new StringBuilder();
+    sb.append(signature);
+    for (Object arg : args) {
+        sb.append(arg.toString());
+    }
+    System.out.println(sb);
+        return sb.toString();
+    }
 }
 ```
 #### Example 3: Recording data only when request is successful
@@ -194,16 +194,50 @@ public class AddPermissionKeyHandler extends AutoAuthHandler {
  ```
 When requesting /say, since the @IsAuthor annotation is added to the MyController class, the isAuthor method in AddPermisonKeyHandler will run first. In this method, the string "visitor" is added to the user's permissions, so it will be validated successfully and you will receive "Hello World". When requesting /eat, since the permission list does not contain "vip", the request will fail and throw a PermissionsException which can be handled through global exception handling to complete the authorization validation.
 
-### Example 3: Configuring the SimpleAuth Interceptor
+### Example 3: Passing Instance Objects
 ```java
+// Instance used
+public class User {
+    String name;
+    public User(String name) {this.name = name;}
+    public String getName() {return name;}
+}
+
 @RestController
 public class MyController {
-    @GetMapping("say")
-    public String say(String str){
-       return "Hello World";
+    @IsAuthor(authentication = {MyFirstHandler.class, MySecondHandler.class})
+    @GetMapping("/say")
+    public String say(){
+        return "Hello World";
     }
 }
 
+@Component
+public class MyFirstHandler extends AutoAuthHandler {
+    @Override
+    public boolean isAuthor(HttpServletRequest request, String permission) {
+        final String name = request.getParameter("name");
+        final User user = new User(name);
+        // Pass the instance object
+        setPrincipal(user);
+        return true;
+    }
+}
+
+@Component
+public class MySecondHandler extends AutoAuthHandler {
+    @Override
+    public boolean isAuthor(HttpServletRequest request, String permission) {
+        // Get the instance object
+        final User user = getPrincipal();
+        return "CodingCube".equals(user.getName());
+    }
+}
+```
+When accessing `http://localhost:8080/say?name=CodingCube`, it will pass through, but when the parameter name is something other than "CodingCube," it will throw a PermissionsException exception.
+
+### Example 4: Configuring the SimpleAuth Interceptor
+```java
 @Configuration
 public class MyAuthConfig extends SimpleAuthWebConfig {
  @Override

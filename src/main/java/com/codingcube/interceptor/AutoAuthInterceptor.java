@@ -22,12 +22,12 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         final AutoAuthHandler autoAuthHandler = applicationContext.getBean(handlerClass);
-        final ArrayList<String> permissions = autoAuthHandler.getPermissions(request);
+        final ArrayList<String> permissions = autoAuthHandler.getPermissions();
         String permissionString = permissions==null?"":permissions.toString();
 
         final boolean author = autoAuthHandler.isAuthor(request, permissionString);
         if (!author){
-            throw new PermissionsException();
+            throw new PermissionsException("lack of permissions");
         }
         return true;
     }
