@@ -1,6 +1,7 @@
 package com.codingcube.util;
 
 import com.codingcube.exception.PermissionsException;
+import com.codingcube.exception.TargetNotFoundException;
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.handler.AutoAuthHandlerChain;
 import org.springframework.context.ApplicationContext;
@@ -18,9 +19,11 @@ public class AuthHandlerUtil {
                         //item is BeanName
                         autoAuth = applicationContext.getBean((String) item, AutoAuthHandler.class);
 
-                    }else {
+                    }else if (item instanceof Class){
                         //item is class of AutoAuthService
                         autoAuth = applicationContext.getBean((Class<? extends AutoAuthHandler>) item);
+                    }else {
+                        throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
                     }
 
                     if (!autoAuth.isAuthor(request, permissions)){

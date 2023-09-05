@@ -28,6 +28,10 @@ public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
         return registry.addInterceptor(new AutoAuthInterceptor(autoAuthHandler, applicationContext));
     }
 
+    public InterceptorRegistration addAuthHandler(String handlerBeanName){
+        return registry.addInterceptor(new AutoAuthInterceptor(handlerBeanName, applicationContext));
+    }
+
     public InterceptorRegistration addAuthHandlerChain(Class<? extends AutoAuthHandlerChain> autoAuthHandlerChain){
         return registry.addInterceptor(new AutoAuthChainInterceptor(autoAuthHandlerChain, applicationContext));
     }
