@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author dhc
+ * @author CodingCube<br>
+ * Authentication Handler*
  */
-@Component
 public abstract class AutoAuthHandler implements PermissionOperate {
 
     /**
-     * 判断是否符合权限 *
+     * Judge whether the permission is met. *
      * @param request HttpServletRequest
-     * @return true符合 false不符合
+     * @return True passes false, but not true.
      */
     public abstract boolean isAuthor(HttpServletRequest request, String permission);
 

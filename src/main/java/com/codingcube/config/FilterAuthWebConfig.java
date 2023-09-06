@@ -9,6 +9,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.annotation.Resource;
 
+/**
+ * @author CodingCube<br>
+ * Dynamic Permission Filtering Configuration Class*
+ */
 public class FilterAuthWebConfig implements WebMvcConfigurer {
     @Resource
     RequestAuthItemProvider requestAuthItemProvider;

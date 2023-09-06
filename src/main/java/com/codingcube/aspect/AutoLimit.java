@@ -18,6 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+/**
+ * @author CodingCube<br>
+ * The specific aspect class that executes the @IsLimit annotation*
+ */
 @Aspect
 @Component
 public class AutoLimit {

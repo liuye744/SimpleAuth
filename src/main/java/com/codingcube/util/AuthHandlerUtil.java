@@ -9,6 +9,10 @@ import org.springframework.context.ApplicationContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+/**
+ * @author CodingCube<br>*
+ * Utility Class for Handling Handlers*
+ */
 public class AuthHandlerUtil {
     public static void handlerChain(AutoAuthHandlerChain autoAuthHandlerChain, ApplicationContext applicationContext, HttpServletRequest request, String permissions){
         final List<Object> autoAuthServiceList = autoAuthHandlerChain.getAutoAuthServiceList();

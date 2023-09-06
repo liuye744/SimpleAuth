@@ -9,6 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
+/**
+ * @author CodingCube<br>
+ * The Handler Interceptor of SimpleAuth<br>
+ * Implementing Rapid Interceptor Configuration Functionality*
+ */
 public class AutoAuthInterceptor implements HandlerInterceptor {
     private Class<? extends AutoAuthHandler> handlerClass;
     private String handlerBeanName;

@@ -3,6 +3,10 @@ package com.codingcube.properties;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author CodingCube<br>*
+ * Core Utility Class for Access Limitation Feature*
+ */
 public class LimitInfoUtil {
     private static final Map<String, Map<String, Deque<Date>>> limitInfo = new ConcurrentHashMap<>();
     private static final Map<String, Date> ban = new ConcurrentHashMap<>();

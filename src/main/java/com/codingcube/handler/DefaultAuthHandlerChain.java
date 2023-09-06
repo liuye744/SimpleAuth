@@ -2,10 +2,13 @@ package com.codingcube.handler;
 
 import org.springframework.stereotype.Component;
 
-@Component
+/**
+ * @author CodingCube<br>
+ * Default Authentication Handler Chain Class*
+ */
 public final class DefaultAuthHandlerChain extends AutoAuthHandlerChain {
     @Override
     public void addChain() {
-        //鉴权链置空
+        //The default is empty.
     }
 }

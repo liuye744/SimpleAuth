@@ -18,7 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.InvalidParameterException;
 import java.util.List;
 
-
+/**
+ * @author CodingCube<br>
+ * The Dynamic HandlerChain Interceptor of SimpleAuth<br>
+ * Implementing Dynamic Permission Configuration Functionality*
+ */
 public class DynamicAuthInterceptor implements HandlerInterceptor {
     private final RequestAuthItemProvider requestAuthItemProvider;
     private final ApplicationContext applicationContext;

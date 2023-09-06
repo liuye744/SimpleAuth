@@ -5,6 +5,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author CodingCube<br>*
+ * Utility Class for Obtaining Beans*
+ */
 @Component
 public class ApplicationContextProvider implements ApplicationContextAware {
     private static ApplicationContext applicationContextSpring;
@@ -15,7 +19,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
     }
  
     /**
-     * 通过class 获取Bean
+     * Get Bean through class
      */
     public static <T> T getBean(Class<T> clazz) {
         return applicationContextSpring.getBean(clazz);

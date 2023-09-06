@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * @author CodingCube<br>
+ * PermissionOperate*
+ */
 public interface PermissionOperate {
     String PRINCIPAL = "$PRINCIPAL$";
     String PERMISSIONS = "$PERMISSIONS$";

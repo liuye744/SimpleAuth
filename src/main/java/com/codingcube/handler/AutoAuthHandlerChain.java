@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+/**
+ * @author CodingCube<br>
+ * Authentication Handler Chain*
+ */
 public abstract class AutoAuthHandlerChain {
     private final List<Object> autoAuthServiceList = new ArrayList<>();
 

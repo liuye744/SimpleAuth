@@ -5,6 +5,7 @@ import com.codingcube.handler.AutoAuthHandlerChain;
 import com.codingcube.handler.DefaultAuthHandler;
 import com.codingcube.interceptor.AutoAuthChainInterceptor;
 import com.codingcube.interceptor.AutoAuthInterceptor;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.annotation.Resource;
 
+/**
+ * @author CodingCube<br>
+ * SimpleAuth Interceptor Configuration Class*
+ */
 @Configuration
 public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
     @Resource

@@ -7,6 +7,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.lang.annotation.*;
 
+/**
+ * @author CodingCube<br>
+ * Turn on dynamic rights management *
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited

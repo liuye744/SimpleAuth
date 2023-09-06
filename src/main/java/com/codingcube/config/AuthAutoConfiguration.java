@@ -5,6 +5,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+
+/**
+ * @author CodingCube<br>
+ * Directory Scanning Configuration*
+ */
 @Configuration
 @EnableConfigurationProperties(Proper.class)
 @ComponentScan("com.codingcube.aspect")

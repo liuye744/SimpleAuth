@@ -11,6 +11,12 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * @author CodingCube<br>
+ * The HandlerChain Interceptor of SimpleAuth<br>
+ * Implementing Rapid Interceptor Configuration Functionality*
+
+ */
 public class AutoAuthChainInterceptor  implements HandlerInterceptor {
     private final Class<? extends AutoAuthHandlerChain> handlerChainClass;
     private final ApplicationContext applicationContext;

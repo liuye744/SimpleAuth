@@ -19,6 +19,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @author CodingCube<br>
+ * The specific aspect class that executes the @IsAuthor annotation*
+ */
 @Aspect
 @Component
 public class AutoAuth {
@@ -76,7 +80,7 @@ public class AutoAuth {
         return joinPoint.proceed();
     }
     @Around("@annotation(isAuthor)")
-    public Object isAuthormethod(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable{
+    public Object isAuthorMethod(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable{
         return isAuthorClass(joinPoint, isAuthor);
     }
 

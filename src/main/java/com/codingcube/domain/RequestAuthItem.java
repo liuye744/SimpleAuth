@@ -3,6 +3,10 @@ package com.codingcube.domain;
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.handler.AutoAuthHandlerChain;
 
+/**
+ * @author CodingCube<br>
+ * SimpleAuth Authentication Configuration item*
+ */
 public class RequestAuthItem {
     String path;
     String permission;

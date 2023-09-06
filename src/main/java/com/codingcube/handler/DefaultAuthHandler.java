@@ -7,9 +7,9 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
 /**
- * @author dhc
+ * @author CodingCube<br>
+ * Default Authentication Handler Class*
  */
-@Component
 public final class DefaultAuthHandler extends AutoAuthHandler {
     @Override
     public boolean isAuthor(HttpServletRequest request, String permission) {
