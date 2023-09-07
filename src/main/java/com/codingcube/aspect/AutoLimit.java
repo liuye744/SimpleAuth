@@ -76,7 +76,7 @@ public class AutoLimit {
         final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban);
 
         if (!addRecord){
-            throw new AccessIsRestrictedException("Access is restricted.Is there an ExceptionHandler for AccessIsRestricted");
+            throw new AccessIsRestrictedException();
         }
         final Object result = joinPoint.proceed();
         //Judge whether to delete the record.

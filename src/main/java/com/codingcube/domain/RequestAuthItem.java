@@ -8,10 +8,10 @@ import com.codingcube.handler.AutoAuthHandlerChain;
  * SimpleAuth Authentication Configuration item*
  */
 public class RequestAuthItem {
-    String path;
-    String permission;
-    Class<? extends AutoAuthHandler> handlerClass;
-    Class<? extends AutoAuthHandlerChain> handlerChainClass;
+    private String path;
+    private String permission;
+    private Class<? extends AutoAuthHandler> handlerClass;
+    private Class<? extends AutoAuthHandlerChain> handlerChainClass;
 
     public RequestAuthItem(String path, String permission, Class<? extends AutoAuthHandler> handlerClass) {
         this.path = path;

@@ -21,6 +21,6 @@ public class FilterAuthWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new DynamicAuthInterceptor(requestAuthItemProvider, applicationContext)).addPathPatterns("/*");
+        registry.addInterceptor(new DynamicAuthInterceptor(requestAuthItemProvider, applicationContext)).addPathPatterns("/*").order(Integer.MAX_VALUE);
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  * Configuration Class for Scheduled Cleanup of Expired Access Records*
  */
 public class AutoClearExpiredRecordScheduled {
-    @Scheduled(cron = "${simple-auth.cron:0 30 3 * * 1}")
+    @Scheduled(cron = "${simple-auth.clear.cron:0 30 3 * * 1}")
     public void execute(){
         LimitInfoUtil.clearExpiredRecord();
     }

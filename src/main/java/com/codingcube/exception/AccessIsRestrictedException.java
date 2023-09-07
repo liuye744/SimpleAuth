@@ -6,5 +6,6 @@ public class AccessIsRestrictedException extends RuntimeException{
     }
 
     public AccessIsRestrictedException() {
+        super("Access is restricted.Is there an ExceptionHandler for AccessIsRestricted");
     }
 }

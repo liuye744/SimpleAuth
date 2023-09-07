@@ -4,9 +4,13 @@ import com.codingcube.exception.PermissionsException;
 import com.codingcube.exception.TargetNotFoundException;
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.handler.AutoAuthHandlerChain;
+import com.codingcube.strategic.SignStrategic;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -37,5 +41,18 @@ public class AuthHandlerUtil {
                 }
         );
 
+    }
+
+    public static String getSignStrategic(Class<? extends SignStrategic> signStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint){
+        //Create sign
+        try{
+            final Method signMethod = signStrategic.getMethod("sign", HttpServletRequest.class, ProceedingJoinPoint.class);
+            final SignStrategic signStrategicInstance = signStrategic.getConstructor().newInstance();
+            return  (String) signMethod.invoke(signStrategicInstance, request, joinPoint);
+
+        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
+            e.printStackTrace();
+            return "";
+        }
     }
 }
