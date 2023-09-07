@@ -11,7 +11,7 @@ You can quickly implement features like allowing only 3 searches within 10 minut
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.4.0.RELEASE</version>
+    <version>1.0.0.RELEASE</version>
 </dependency>
 ```
 ### Step 2: Add Annotations to Controllers
@@ -128,7 +128,7 @@ When you want to control all methods within a Controller or specific methods, yo
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.4.0.RELEASE</version>
+    <version>1.0.0.RELEASE</version>
 </dependency>
 ```
 ### Step 2: Validate Permissions
@@ -246,5 +246,23 @@ public class MyAuthConfig extends SimpleAuthWebConfig {
           .addPathPatterns("/say");
   //addAuthHandlerChain(MyAuthHandlerChain.class).addPathPatterns("/say");
  }
+}
+```
+### Example 5: Dynamic Configuration of Permission Validation
+Dynamically configure paths that require access control and the handlers or handler chains needed for different paths.
+
+```java
+@Component
+public class MyRequestAuthItemProvider implements RequestAuthItemProvider {
+    @Override
+    public List<RequestAuthItem> getRequestAuthItem() {
+        List<RequestAuthItem> requestAuthItems = new ArrayList<>();
+        // Alternatively, configure permissions by querying a data source
+        // new RequestAuthItem(matchedPath, requiredPermission, handler for processing the permission)
+        requestAuthItems.add(new RequestAuthItem("/user/*", "vip", MyAuthHandler.class));
+        // new RequestAuthItem(handler chain for processing the permission, matchedPath, requiredPermission)
+        requestAuthItems.add(new RequestAuthItem(MyAuthHandlerChain.class, "/say", "visitor"));
+        return requestAuthItems;
+    }
 }
 ```

@@ -15,7 +15,7 @@
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.4.0.RELEASE</version>
+    <version>1.0.0.RELEASE</version>
 </dependency>
 ```
 
@@ -150,7 +150,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
 <dependency>
     <groupId>io.github.liuye744</groupId>
     <artifactId>simpleAuth-spring-boot-starter</artifactId>
-    <version>0.4.0.RELEASE</version>
+    <version>1.0.0.RELEASE</version>
 </dependency>
 ```
 
@@ -285,6 +285,23 @@ public class MyAuthConfig extends SimpleAuthWebConfig {
     addAuthHandler(MyAuthHandler.class)
             .addPathPatterns("/say");
     //addAuthHandlerChain(MyAuthHandlerChain.class).addPathPatterns("/say");
+    }
+}
+```
+### 用例5：动态配置权限校验
+动态配置需要访问控制的路径，和处理不同路径需要用到的Handler或HandlerChain
+```java
+@Component
+public class MyRequestAuthItemProvider implements RequestAuthItemProvider {
+    @Override
+    public List<RequestAuthItem> getRequestAuthItem() {
+        List<RequestAuthItem> requestAuthItems = new ArrayList<>();
+        //或通过查询数据源配置权限
+        //new RequestAuthItem(匹配的路径, 路径需要的权限名, 处理权限所需的Handler)
+        requestAuthItems.add(new RequestAuthItem("/user/*","vip", MyAuthHandler.class));
+        //new RequestAuthItem(处理权限所需的HandlerChain, 匹配的路径, 路径需要的权限名)
+        requestAuthItems.add(new RequestAuthItem(MyAuthHandlerChain.class,"/say","visitor"));
+        return requestAuthItems;
     }
 }
 ```
