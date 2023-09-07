@@ -38,23 +38,27 @@ public class DynamicAuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         final List<RequestAuthItem> requestAuthItem = requestAuthItemProvider.getRequestAuthItem();
         for (RequestAuthItem authItem : requestAuthItem) {
-            if (antPathMatcher.match(authItem.getPath(),request.getRequestURI())){
-                final String permission = authItem.getPermission();
-                final Class<? extends AutoAuthHandler> handlerClass = authItem.getHandlerClass();
-                final Class<? extends AutoAuthHandlerChain> handlerChainClass = authItem.getHandlerChainClass();
+            final List<String> paths = authItem.getPath();
+            for (String path: paths){
+                if (antPathMatcher.match(path,request.getRequestURI())){
+                    final String permission = authItem.getPermission();
+                    final Class<? extends AutoAuthHandler> handlerClass = authItem.getHandlerClass();
+                    final Class<? extends AutoAuthHandlerChain> handlerChainClass = authItem.getHandlerChainClass();
 
-                if (handlerClass != null){
-                    //deal with Handler
-                    final AutoAuthHandler authHandler = applicationContext.getBean(handlerClass);
-                    authHandler.isAuthor(request, permission);
-                }else if (handlerChainClass != null){
-                    //deal with handlerChain
-                    final AutoAuthHandlerChain authHandlerChain = applicationContext.getBean(handlerChainClass);
-                    AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission);
-                }else {
-                    //parameter error
-                    throw new InvalidParameterException("Need AutoAuthHandler or AutoAuthHandlerChain");
+                    if (handlerClass != null){
+                        //deal with Handler
+                        final AutoAuthHandler authHandler = applicationContext.getBean(handlerClass);
+                        authHandler.isAuthor(request, permission);
+                    }else if (handlerChainClass != null){
+                        //deal with handlerChain
+                        final AutoAuthHandlerChain authHandlerChain = applicationContext.getBean(handlerChainClass);
+                        AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission);
+                    }else {
+                        //parameter error
+                        throw new InvalidParameterException("Need AutoAuthHandler or AutoAuthHandlerChain");
+                    }
                 }
+
             }
         }
 

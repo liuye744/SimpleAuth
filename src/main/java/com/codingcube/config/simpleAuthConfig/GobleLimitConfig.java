@@ -7,6 +7,6 @@ import com.codingcube.handler.simpleAuthHandler.GobleLimitHandler;
 public class GobleLimitConfig extends SimpleAuthWebConfig {
     @Override
     public void addAuthHandlers() {
-        addAuthHandler(GobleLimitHandler.class).addPathPatterns("/*").order(1);
+        addAuthHandler(GobleLimitHandler.class).addPathPatterns("/*").order(Integer.MIN_VALUE);
     }
 }
