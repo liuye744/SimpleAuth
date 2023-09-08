@@ -2,11 +2,13 @@ package com.codingcube.aspect;
 
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.annotation.IsAuthor;
-import com.codingcube.exception.PermissionsException;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import com.codingcube.handler.AutoAuthHandlerChain;
+import com.codingcube.logging.Log;
+import com.codingcube.logging.LogFactory;
 import com.codingcube.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -16,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,6 +29,11 @@ import java.util.Objects;
 public class AutoAuth {
     @Resource
     private ApplicationContext applicationContext;
+    Log log;
+
+    public AutoAuth(LogFactory logFactory) {
+        this.log = logFactory.getLog(this.getClass());
+    }
 
     @Around("@within(isAuthor)")
     public Object isAuthorClass(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable {
@@ -61,11 +67,7 @@ public class AutoAuth {
         if (isExecuteDefault){
             Arrays.stream(autoAuthServices).forEach(
                     (item)->{
-                        final AutoAuthHandler autoAuthHandler = applicationContext.getBean(item);
-                        if (!autoAuthHandler.isAuthor(request, permissions)){
-                            //Permission not met
-                            throw new PermissionsException("lack of permissions");
-                        }
+                        AuthHandlerUtil.handler(request, permissions, item, applicationContext, log, "annotation");
                     }
             );
         }
@@ -73,7 +75,7 @@ public class AutoAuth {
         Arrays.stream(authentications).forEach(
                 (items)->{
                     final AutoAuthHandlerChain autoAuthHandlerChain = applicationContext.getBean(items);
-                    AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions);
+                    AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions, log, "annotation");
 
                 }
         );

@@ -5,6 +5,8 @@ import com.codingcube.handler.AutoAuthHandlerChain;
 import com.codingcube.handler.DefaultAuthHandler;
 import com.codingcube.interceptor.AutoAuthChainInterceptor;
 import com.codingcube.interceptor.AutoAuthInterceptor;
+import com.codingcube.logging.Log;
+import com.codingcube.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -23,6 +25,8 @@ import javax.annotation.Resource;
 public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
     @Resource
     private ApplicationContext applicationContext;
+    @Resource
+    private LogFactory logFactory;
     InterceptorRegistry registry;
 
     @Override
@@ -37,7 +41,7 @@ public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
      * @return InterceptorRegistration
      */
     public InterceptorRegistration addAuthHandler(Class<? extends AutoAuthHandler> autoAuthHandler){
-        return registry.addInterceptor(new AutoAuthInterceptor(autoAuthHandler, applicationContext));
+        return registry.addInterceptor(new AutoAuthInterceptor(autoAuthHandler, applicationContext, logFactory));
     }
 
     /**
@@ -55,7 +59,7 @@ public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
      * @return InterceptorRegistration
      */
     public InterceptorRegistration addAuthHandlerChain(Class<? extends AutoAuthHandlerChain> autoAuthHandlerChain){
-        return registry.addInterceptor(new AutoAuthChainInterceptor(autoAuthHandlerChain, applicationContext));
+        return registry.addInterceptor(new AutoAuthChainInterceptor(autoAuthHandlerChain, applicationContext, logFactory));
     }
 
     public abstract void addAuthHandlers();

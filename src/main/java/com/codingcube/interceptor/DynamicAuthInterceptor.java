@@ -3,16 +3,14 @@ package com.codingcube.interceptor;
 import com.codingcube.domain.RequestAuthItem;
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.handler.AutoAuthHandlerChain;
+import com.codingcube.logging.Log;
+import com.codingcube.logging.LogFactory;
 import com.codingcube.properties.RequestAuthItemProvider;
 import com.codingcube.util.AuthHandlerUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.InvalidParameterException;
@@ -26,12 +24,14 @@ import java.util.List;
 public class DynamicAuthInterceptor implements HandlerInterceptor {
     private final RequestAuthItemProvider requestAuthItemProvider;
     private final ApplicationContext applicationContext;
+    private final Log log;
 
     AntPathMatcher antPathMatcher = new AntPathMatcher();
 
-    public DynamicAuthInterceptor(RequestAuthItemProvider requestAuthItemProvider, ApplicationContext applicationContext) {
+    public DynamicAuthInterceptor(RequestAuthItemProvider requestAuthItemProvider, ApplicationContext applicationContext, LogFactory logFactory) {
         this.requestAuthItemProvider = requestAuthItemProvider;
         this.applicationContext = applicationContext;
+        this.log = logFactory.getLog(this.getClass());
     }
 
     @Override
@@ -47,12 +47,11 @@ public class DynamicAuthInterceptor implements HandlerInterceptor {
 
                     if (handlerClass != null){
                         //deal with Handler
-                        final AutoAuthHandler authHandler = applicationContext.getBean(handlerClass);
-                        authHandler.isAuthor(request, permission);
+                        AuthHandlerUtil.handler(request, permission, handlerClass, applicationContext, log, "Dynamic Permission Configuration");
                     }else if (handlerChainClass != null){
                         //deal with handlerChain
                         final AutoAuthHandlerChain authHandlerChain = applicationContext.getBean(handlerChainClass);
-                        AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission);
+                        AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission, log, "Dynamic Permission Configuration");
                     }else {
                         //parameter error
                         throw new InvalidParameterException("Need AutoAuthHandler or AutoAuthHandlerChain");

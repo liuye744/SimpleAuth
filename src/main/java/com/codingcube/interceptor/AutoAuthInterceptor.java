@@ -2,6 +2,9 @@ package com.codingcube.interceptor;
 
 import com.codingcube.exception.PermissionsException;
 import com.codingcube.handler.AutoAuthHandler;
+import com.codingcube.logging.Log;
+import com.codingcube.logging.LogFactory;
+import com.codingcube.logging.LogAuthFormat;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -19,10 +22,12 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
     private String handlerBeanName;
     private AutoAuthHandler handler;
     private final ApplicationContext applicationContext;
+    private Log log;
 
-    public AutoAuthInterceptor(Class<? extends AutoAuthHandler> handlerClass, ApplicationContext applicationContext) {
+    public AutoAuthInterceptor(Class<? extends AutoAuthHandler> handlerClass, ApplicationContext applicationContext, LogFactory logFactory) {
         this.handlerClass = handlerClass;
         this.applicationContext = applicationContext;
+        this.log = logFactory.getLog(this.getClass());
     }
 
     public AutoAuthInterceptor(String handlerBeanName, ApplicationContext applicationContext) {
@@ -46,6 +51,8 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
         String permissionString = permissions==null?"":permissions.toString();
 
         final boolean author = this.handler.isAuthor(request, permissionString);
+        LogAuthFormat logAuthFormat = new LogAuthFormat(request, "SimpleAuth Interceptor", author, this.handlerClass.getName(), permissionString);
+        log.debug(logAuthFormat.toString());
         if (!author){
             throw new PermissionsException("lack of permissions");
         }

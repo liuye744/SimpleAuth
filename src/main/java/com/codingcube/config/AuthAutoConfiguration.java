@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(Proper.class)
 @ComponentScan("com.codingcube.aspect")
 @ComponentScan("com.codingcube.handler")
+@ComponentScan("com.codingcube.logging")
 @ConfigurationPropertiesScan("com.codingcube.properties")
 public class AuthAutoConfiguration {
 

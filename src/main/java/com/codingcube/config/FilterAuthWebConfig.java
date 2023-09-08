@@ -2,6 +2,7 @@ package com.codingcube.config;
 
 
 import com.codingcube.interceptor.DynamicAuthInterceptor;
+import com.codingcube.logging.LogFactory;
 import com.codingcube.properties.RequestAuthItemProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -18,9 +19,11 @@ public class FilterAuthWebConfig implements WebMvcConfigurer {
     RequestAuthItemProvider requestAuthItemProvider;
     @Resource
     private ApplicationContext applicationContext;
+    @Resource
+    private LogFactory logFactory;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new DynamicAuthInterceptor(requestAuthItemProvider, applicationContext)).addPathPatterns("/*").order(Integer.MAX_VALUE);
+        registry.addInterceptor(new DynamicAuthInterceptor(requestAuthItemProvider, applicationContext, logFactory)).addPathPatterns("/*").order(Integer.MAX_VALUE);
     }
 }

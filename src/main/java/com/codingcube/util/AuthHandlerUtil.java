@@ -4,6 +4,8 @@ import com.codingcube.exception.PermissionsException;
 import com.codingcube.exception.TargetNotFoundException;
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.handler.AutoAuthHandlerChain;
+import com.codingcube.logging.Log;
+import com.codingcube.logging.LogAuthFormat;
 import com.codingcube.strategic.SignStrategic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.context.ApplicationContext;
@@ -18,7 +20,7 @@ import java.util.List;
  * Utility Class for Handling Handlers*
  */
 public class AuthHandlerUtil {
-    public static void handlerChain(AutoAuthHandlerChain autoAuthHandlerChain, ApplicationContext applicationContext, HttpServletRequest request, String permissions){
+    public static void handlerChain(AutoAuthHandlerChain autoAuthHandlerChain, ApplicationContext applicationContext, HttpServletRequest request, String permissions, Log log, String source){
         final List<Object> autoAuthServiceList = autoAuthHandlerChain.getAutoAuthServiceList();
         autoAuthServiceList.forEach(
                 (item)->{
@@ -33,14 +35,26 @@ public class AuthHandlerUtil {
                     }else {
                         throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
                     }
-
-                    if (!autoAuth.isAuthor(request, permissions)){
+                    final boolean author = autoAuth.isAuthor(request, permissions);
+                    LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+ " handlerChain "+autoAuthHandlerChain.getClass().getName(), author, autoAuth.getClass().getName(), permissions);
+                    log.debug(logAuthFormat.toString());
+                    if (!author){
                         //Permission not met
                         throw new PermissionsException("lack of permissions");
                     }
                 }
         );
 
+    }
+
+    public static void handler(HttpServletRequest request, String permission, Class<? extends AutoAuthHandler> handlerClass, ApplicationContext applicationContext, Log log, String source) {
+        final AutoAuthHandler authHandler = applicationContext.getBean(handlerClass);
+        final boolean author = authHandler.isAuthor(request, permission);
+        LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission);
+        log.debug(logAuthFormat.toString());
+        if (!author){
+            throw new PermissionsException("lack of permissions");
+        }
     }
 
     public static String getSignStrategic(Class<? extends SignStrategic> signStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint){
