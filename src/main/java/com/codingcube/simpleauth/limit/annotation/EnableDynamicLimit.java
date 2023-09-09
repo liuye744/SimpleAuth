@@ -1,6 +1,7 @@
 package com.codingcube.simpleauth.limit.annotation;
 
 import com.codingcube.simpleauth.limit.dynamic.DynamicLimitConfig;
+import com.codingcube.simpleauth.limit.dynamic.sign.DynamicLimitSignBean;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -12,6 +13,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Import({DynamicLimitConfig.class})
+@Import({DynamicLimitSignBean.class})
 public @interface EnableDynamicLimit {
 }

@@ -1,6 +1,6 @@
 package com.codingcube.simpleauth.auth.annotation;
 
-import com.codingcube.simpleauth.auth.dynamic.FilterAuthWebConfig;
+import com.codingcube.simpleauth.auth.dynamic.sign.DynamicSignBean;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -12,6 +12,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Import(FilterAuthWebConfig.class)
+@Import(DynamicSignBean.class)
 public @interface EnableDynamicAuthRequest {
 }

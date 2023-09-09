@@ -6,6 +6,8 @@ import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -16,7 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-
+@Configuration
+@ConditionalOnProperty("simple-auth.func.dynamic-limit")
 public class DynamicLimitConfig implements WebMvcConfigurer {
     @Resource
     RequestLimitItemProvider requestLimitItemProvider;
