@@ -1,6 +1,6 @@
 package com;
 
-import com.codingcube.properties.LimitInfoUtil;
+import com.codingcube.simpleauth.limit.LimitInfoUtil;
 
 public class LimitInfoMapTest {
     public static void main(String[] args) {
