@@ -1,9 +1,13 @@
-package com.codingcube.config.simpleAuthConfig;
+package com.codingcube.config.simpleauthconfig;
 
 import com.codingcube.domain.RequestLimitItem;
 import com.codingcube.exception.AccessIsRestrictedException;
+import com.codingcube.logging.Log;
+import com.codingcube.logging.LogFactory;
+import com.codingcube.logging.logformat.LogLimitFormat;
 import com.codingcube.properties.LimitInfoUtil;
 import com.codingcube.properties.RequestLimitItemProvider;
+import com.codingcube.strategic.EffectiveStrategic;
 import com.codingcube.util.AuthHandlerUtil;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -20,6 +24,11 @@ public class GobleLimitConfig implements WebMvcConfigurer {
     @Resource
     RequestLimitItemProvider requestLimitItemProvider;
     AntPathMatcher antPathMatcher = new AntPathMatcher();
+    private final Log log;
+
+    public GobleLimitConfig(LogFactory logFactory) {
+        this.log = logFactory.getLimitLog(this.getClass());
+    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -38,7 +47,20 @@ public class GobleLimitConfig implements WebMvcConfigurer {
                             final Integer times = limitItem.getTimes();
                             final Integer ban = limitItem.getBan();
                             final Integer seconds = limitItem.getSeconds();
-                            if (!LimitInfoUtil.addRecord(item, sign, times, seconds, ban)){
+                            final Boolean effective = AuthHandlerUtil.getEffectiveStrategic(limitItem.getEffectiveStrategic(), request, null, null);
+                            if (!effective){
+                                LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
+                                        limitItem.getSignStrategic(),sign,false,
+                                        limitItem.getEffectiveStrategic(),false, true);
+                                log.debug(limitFormat.toString());
+                                return true;
+                            }
+                            final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, times, seconds, ban);
+                            LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
+                                    limitItem.getSignStrategic(),sign,false,
+                                    limitItem.getEffectiveStrategic(),true, addRecord);
+                            log.debug(limitFormat.toString());
+                            if (!addRecord){
                                 throw new AccessIsRestrictedException();
                             }else {
                                 return true;

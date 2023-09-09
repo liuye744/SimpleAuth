@@ -1,6 +1,6 @@
 package com.codingcube.annotation;
 
-import com.codingcube.config.simpleAuthConfig.GobleLimitConfig;
+import com.codingcube.config.simpleauthconfig.GobleLimitConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;

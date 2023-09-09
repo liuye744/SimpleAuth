@@ -2,6 +2,9 @@ package com.codingcube.aspect;
 
 import com.codingcube.annotation.IsLimit;
 import com.codingcube.exception.AccessIsRestrictedException;
+import com.codingcube.logging.Log;
+import com.codingcube.logging.LogFactory;
+import com.codingcube.logging.logformat.LogLimitFormat;
 import com.codingcube.properties.LimitInfoUtil;
 import com.codingcube.strategic.EffectiveStrategic;
 import com.codingcube.strategic.SignStrategic;
@@ -27,6 +30,11 @@ import java.util.Objects;
 public class AutoLimit {
     @Resource
     private ConfigurableApplicationContext configurableApplicationContext;
+    private final Log log;
+
+    public AutoLimit(LogFactory logFactory) {
+        this.log = logFactory.getLimitLog(this.getClass());
+    }
 
     @Around("@within(isLimit)")
     public Object isLimitClass(ProceedingJoinPoint joinPoint, IsLimit isLimit) throws Throwable {
@@ -68,13 +76,16 @@ public class AutoLimit {
         //Whether effectiveStrategic judges after returning.
         if (!judgeAfterReturn){
             final Boolean isEffective = (Boolean) effective.invoke(effectiveStrategicInstance, request, joinPoint, null);
+            LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategic,sign, false,effectiveStrategic,true, true);
+            log.debug(limitFormat.toString());
             if (!isEffective){
                 return joinPoint.proceed();
             }
         }
 
         final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban);
-
+        LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategic,sign,judgeAfterReturn,effectiveStrategic,true, addRecord);
+        log.debug(limitFormat.toString());
         if (!addRecord){
             throw new AccessIsRestrictedException();
         }

@@ -4,7 +4,7 @@ import com.codingcube.exception.PermissionsException;
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.logging.Log;
 import com.codingcube.logging.LogFactory;
-import com.codingcube.logging.LogAuthFormat;
+import com.codingcube.logging.logformat.LogAuthFormat;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.HandlerInterceptor;
 

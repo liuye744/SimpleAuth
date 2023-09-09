@@ -1,4 +1,4 @@
-package com.codingcube.logging;
+package com.codingcube.logging.logformat;
 
 import com.codingcube.implement.PermissionOperate;
 
@@ -25,12 +25,12 @@ public class LogAuthFormat {
 
     @Override
     public String toString() {
-        return "SimpleAuth run => \n\turi: "+request.getRequestURI() +"\n"+
-                "\thandlerName: "+handlerName+"\n"+
-                "\tsource: "+source+"\n"+
-                "\tRequired permission: "+permission+"\n"+
-                "\tPermissions to carry: "+ request.getAttribute(PermissionOperate.PERMISSIONS) +"\n"+
-                "\tPrincipal to carry: "+ request.getAttribute(PermissionOperate.PRINCIPAL) +"\n"+
+        return "SimpleAuth auth => \r\n\turi: "+request.getRequestURI() +"\r\n"+
+                "\thandlerName: "+handlerName+"\r\n"+
+                "\tsource: "+source+"\r\n"+
+                "\tRequired permission: "+permission+"\r\n"+
+                "\tPermissions to carry: "+ request.getAttribute(PermissionOperate.PERMISSIONS) +"\r\n"+
+                "\tPrincipal to carry: "+ request.getAttribute(PermissionOperate.PRINCIPAL) +"\r\n"+
                 "\tPass or not: "+pass+"";
     }
 }

@@ -1,9 +1,6 @@
 package com.codingcube.domain;
 
-import com.codingcube.strategic.DefaultItemStrategic;
-import com.codingcube.strategic.DefaultSignStrategic;
-import com.codingcube.strategic.EffectiveStrategic;
-import com.codingcube.strategic.SignStrategic;
+import com.codingcube.strategic.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,14 +12,16 @@ public class RequestLimitItem {
     private Integer ban;
     private Class<? extends SignStrategic> itemStrategic = DefaultItemStrategic.class;
     private Class<? extends SignStrategic> signStrategic = DefaultSignStrategic.class;
+    private Class<? extends EffectiveStrategic> effectiveStrategic = DefaultEffectiveStrategic.class;
 
-    public RequestLimitItem(List<String> path, Integer times, Integer seconds, Integer ban, Class<? extends SignStrategic> itemStrategic, Class<? extends SignStrategic> signStrategic) {
+    public RequestLimitItem(List<String> path, Integer times, Integer seconds, Integer ban, Class<? extends SignStrategic> itemStrategic, Class<? extends SignStrategic> signStrategic, Class<? extends EffectiveStrategic> effectiveStrategic) {
         this.path = path;
         this.times = times;
         this.seconds = seconds;
         this.ban = ban;
         this.itemStrategic = itemStrategic;
         this.signStrategic = signStrategic;
+        this.effectiveStrategic = effectiveStrategic;
     }
 
     public RequestLimitItem(String path, Integer times, Integer seconds, Integer ban, Class<? extends SignStrategic> itemStrategic, Class<? extends SignStrategic> signStrategic) {
@@ -99,5 +98,13 @@ public class RequestLimitItem {
 
     public void setSignStrategic(Class<? extends SignStrategic> signStrategic) {
         this.signStrategic = signStrategic;
+    }
+
+    public Class<? extends EffectiveStrategic> getEffectiveStrategic() {
+        return effectiveStrategic;
+    }
+
+    public void setEffectiveStrategic(Class<? extends EffectiveStrategic> effectiveStrategic) {
+        this.effectiveStrategic = effectiveStrategic;
     }
 }

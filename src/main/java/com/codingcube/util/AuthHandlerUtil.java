@@ -5,7 +5,8 @@ import com.codingcube.exception.TargetNotFoundException;
 import com.codingcube.handler.AutoAuthHandler;
 import com.codingcube.handler.AutoAuthHandlerChain;
 import com.codingcube.logging.Log;
-import com.codingcube.logging.LogAuthFormat;
+import com.codingcube.logging.logformat.LogAuthFormat;
+import com.codingcube.strategic.EffectiveStrategic;
 import com.codingcube.strategic.SignStrategic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.context.ApplicationContext;
@@ -67,6 +68,19 @@ public class AuthHandlerUtil {
         }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
             return "";
+        }
+    }
+
+    public static Boolean getEffectiveStrategic(Class<? extends EffectiveStrategic> effectiveStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint, Object result){
+        //Create sign
+        try{
+            final Method signMethod = effectiveStrategic.getMethod("effective", HttpServletRequest.class, ProceedingJoinPoint.class, Object.class);
+            final EffectiveStrategic effectiveStrategicInstance = effectiveStrategic.getConstructor().newInstance();
+            return (Boolean) signMethod.invoke(effectiveStrategicInstance, request, joinPoint, result);
+
+        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
+            e.printStackTrace();
+            return true;
         }
     }
 }
