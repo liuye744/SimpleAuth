@@ -3,9 +3,9 @@ package com.codingcube.simpleauth.auth;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -26,22 +26,22 @@ public interface PermissionOperate {
         request.setAttribute(PRINCIPAL, target);
     }
 
-    default ArrayList<String> getPermissions(){
+    default List<String> getPermissions(){
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
-        final ArrayList<String> attribute = (ArrayList<String>) request.getAttribute(PERMISSIONS);
+        final List<String> attribute = (List<String>) request.getAttribute(PERMISSIONS);
         if (attribute == null){
             return new ArrayList<>();
         }
         return attribute;
     }
 
-    default void setPermissions(ArrayList<String> target){
+    default void setPermissions(List<String> target){
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         request.setAttribute(PERMISSIONS, target);
     }
 
     default void setPermissions(String permission){
-        final ArrayList<String> permissions = getPermissions();
+        final List<String> permissions = getPermissions();
         permissions.add(permission);
         setPermissions(permissions);
     }
