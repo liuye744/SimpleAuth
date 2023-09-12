@@ -2,15 +2,17 @@ package com.codingcube.simpleauth.auth.interceptor;
 
 import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
+import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
+import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author CodingCube<br>
@@ -41,13 +43,15 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
             final AutoAuthHandler autoAuthHandler;
             if (handlerClass != null){
                 autoAuthHandler = applicationContext.getBean(handlerClass);
-            }else {
+            }else if (handlerBeanName != null){
                 autoAuthHandler = (AutoAuthHandler) applicationContext.getBean(handlerBeanName);
+            }else {
+                throw new TargetNotFoundException("need handlerClass or handlerBeanName");
             }
             this.handler = autoAuthHandler;
         }
 
-        final ArrayList<String> permissions = this.handler.getPermissions();
+        final List<String> permissions = this.handler.getPermissions();
         String permissionString = permissions==null?"":permissions.toString();
 
         final boolean author = this.handler.isAuthor(request, permissionString);

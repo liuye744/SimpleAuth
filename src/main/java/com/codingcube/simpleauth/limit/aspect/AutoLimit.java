@@ -11,6 +11,8 @@ import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -29,7 +31,7 @@ import java.util.Objects;
 @Component
 public class AutoLimit {
     @Resource
-    private ConfigurableApplicationContext configurableApplicationContext;
+    private ApplicationContext applicationContext;
     private final Log log;
 
     public AutoLimit(LogFactory logFactory) {
@@ -63,21 +65,31 @@ public class AutoLimit {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 
         //Create sign
-        final Class<? extends SignStrategic> signStrategic = isLimit.signStrategic();
-        final Method signMethod = signStrategic.getMethod("sign", HttpServletRequest.class, ProceedingJoinPoint.class);
-        final SignStrategic signStrategicInstance = signStrategic.getConstructor().newInstance();
-        final String sign = (String) signMethod.invoke(signStrategicInstance, request, joinPoint);
+        final Class<? extends SignStrategic> signStrategicClazz = isLimit.signStrategic();
+        String sign;
+        SignStrategic signStrategic;
+        try{
+            signStrategic = applicationContext.getBean(signStrategicClazz);
+        }catch (NoSuchBeanDefinitionException e){
+            signStrategic = signStrategicClazz.getConstructor().newInstance();
+        }
+        sign = signStrategic.sign(request, joinPoint);
+
 
         //Verify that this request is recorded.
         final Class<? extends EffectiveStrategic> effectiveStrategic = isLimit.effectiveStrategic();
-        final Method effective = effectiveStrategic.getMethod("effective", HttpServletRequest.class, ProceedingJoinPoint.class, Object.class);
-        final EffectiveStrategic effectiveStrategicInstance = effectiveStrategic.getConstructor().newInstance();
+        EffectiveStrategic effectiveStrategicInstance;
+        try{
+            effectiveStrategicInstance = applicationContext.getBean(effectiveStrategic);
+        }catch (NoSuchBeanDefinitionException e){
+            effectiveStrategicInstance = effectiveStrategic.getConstructor().newInstance();
+        }
 
         //Whether effectiveStrategic judges after returning.
         if (!judgeAfterReturn){
-            final Boolean isEffective = (Boolean) effective.invoke(effectiveStrategicInstance, request, joinPoint, null);
+            final Boolean isEffective = effectiveStrategicInstance.effective(request, joinPoint,null);
             if (!isEffective){
-                LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategic,sign, "annotation limit",false,effectiveStrategic,true, false);
+                LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign, "annotation limit",false,effectiveStrategic,true, false);
                 log.debug(limitFormat.toString());
                 return joinPoint.proceed();
             }
@@ -85,7 +97,7 @@ public class AutoLimit {
 
         final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban);
         if (!addRecord){
-            LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategic,sign,
+            LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
                     "annotation limit", judgeAfterReturn,effectiveStrategic,true, false);
             log.debug(limitFormat.toString());
             throw new AccessIsRestrictedException();
@@ -93,8 +105,8 @@ public class AutoLimit {
         final Object result = joinPoint.proceed();
         //Judge whether to delete the record.
         if (judgeAfterReturn){
-            final Boolean isEffective = (Boolean) effective.invoke(effectiveStrategicInstance, request, joinPoint, result);
-            LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategic,sign,
+            final Boolean isEffective = effectiveStrategicInstance.effective(request, joinPoint, result);
+            LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
                     "annotation limit", judgeAfterReturn,effectiveStrategic,isEffective, true);
             log.debug(limitFormat.toString());
             if (!isEffective){

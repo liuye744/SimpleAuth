@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author CodingCube<br>
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 public final class DefaultAuthHandler extends AutoAuthHandler {
     @Override
     public boolean isAuthor(HttpServletRequest request, String permission) {
-        final ArrayList<String> userPermissions = getPermissions();
+        final List<String> userPermissions = getPermissions();
         if (userPermissions!=null){
             return userPermissions.contains(permission);
         }else {
