@@ -13,10 +13,13 @@ import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -66,17 +69,14 @@ public class AutoAuth {
         //execute autoAuthService
         if (isExecuteDefault){
             Arrays.stream(autoAuthServices).forEach(
-                    (item)->{
-                        AuthHandlerUtil.handler(request, permissions, item, applicationContext, log, "annotation");
-                    }
+                    (item)-> AuthHandlerUtil.handler(request, permissions, item, applicationContext, log, "annotation")
             );
         }
         //execute autoAuthChain
         Arrays.stream(authentications).forEach(
                 (items)->{
-                    final AutoAuthHandlerChain autoAuthHandlerChain = applicationContext.getBean(items);
+                    AutoAuthHandlerChain autoAuthHandlerChain = AuthHandlerUtil.getBean(applicationContext, items);
                     AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions, log, "annotation");
-
                 }
         );
         return joinPoint.proceed();

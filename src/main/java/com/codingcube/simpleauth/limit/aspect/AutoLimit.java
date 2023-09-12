@@ -8,6 +8,7 @@ import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -66,14 +67,8 @@ public class AutoLimit {
 
         //Create sign
         final Class<? extends SignStrategic> signStrategicClazz = isLimit.signStrategic();
-        String sign;
-        SignStrategic signStrategic;
-        try{
-            signStrategic = applicationContext.getBean(signStrategicClazz);
-        }catch (NoSuchBeanDefinitionException e){
-            signStrategic = signStrategicClazz.getConstructor().newInstance();
-        }
-        sign = signStrategic.sign(request, joinPoint);
+        SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, signStrategicClazz);
+        final String sign = signStrategic.sign(request, joinPoint);
 
 
         //Verify that this request is recorded.

@@ -50,7 +50,7 @@ public class DynamicAuthInterceptor implements HandlerInterceptor {
                         AuthHandlerUtil.handler(request, permission, handlerClass, applicationContext, log, "Dynamic Permission Configuration");
                     }else if (handlerChainClass != null){
                         //deal with handlerChain
-                        final AutoAuthHandlerChain authHandlerChain = applicationContext.getBean(handlerChainClass);
+                        final AutoAuthHandlerChain authHandlerChain = AuthHandlerUtil.getBean(applicationContext, handlerChainClass);
                         AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission, log, "Dynamic Permission Configuration");
                     }else {
                         //parameter error

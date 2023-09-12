@@ -6,12 +6,15 @@ import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
+import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -40,9 +43,9 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
         if (this.handler == null){
-            final AutoAuthHandler autoAuthHandler;
+            AutoAuthHandler autoAuthHandler;
             if (handlerClass != null){
-                autoAuthHandler = applicationContext.getBean(handlerClass);
+                autoAuthHandler = AuthHandlerUtil.getBean(applicationContext, handlerClass);
             }else if (handlerBeanName != null){
                 autoAuthHandler = (AutoAuthHandler) applicationContext.getBean(handlerBeanName);
             }else {

@@ -9,6 +9,7 @@ import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
@@ -24,14 +25,13 @@ public class AuthHandlerUtil {
         final List<Object> autoAuthServiceList = autoAuthHandlerChain.getAutoAuthServiceList();
         autoAuthServiceList.forEach(
                 (item)->{
-                    final AutoAuthHandler autoAuth;
+                    AutoAuthHandler autoAuth;
                     if (item instanceof String ){
                         //item is BeanName
                         autoAuth = applicationContext.getBean((String) item, AutoAuthHandler.class);
-
                     }else if (item instanceof Class){
                         //item is class of AutoAuthService
-                        autoAuth = applicationContext.getBean((Class<? extends AutoAuthHandler>) item);
+                        autoAuth = getBean(applicationContext, (Class) item);
                     }else {
                         throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
                     }
@@ -48,7 +48,7 @@ public class AuthHandlerUtil {
     }
 
     public static void handler(HttpServletRequest request, String permission, Class<? extends AutoAuthHandler> handlerClass, ApplicationContext applicationContext, Log log, String source) {
-        final AutoAuthHandler authHandler = applicationContext.getBean(handlerClass);
+        AutoAuthHandler authHandler = getBean(applicationContext, handlerClass);
         final boolean author = authHandler.isAuthor(request, permission);
         LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission);
         log.debug(logAuthFormat.toString());
@@ -80,6 +80,17 @@ public class AuthHandlerUtil {
         }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
             return true;
+        }
+    }
+    public static <T> T getBean(ApplicationContext applicationContext, Class clazz){
+        try{
+            return (T) applicationContext.getBean(clazz);
+        }catch (NoSuchBeanDefinitionException e){
+            try {
+                return (T) clazz.getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+                throw new NullPointerException();
+            }
         }
     }
 }
