@@ -11,16 +11,19 @@ import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ResolvableType;
+
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
-
+import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author CodingCube<br>*
  * Utility Class for Handling Handlers*
  */
+
 public class AuthHandlerUtil {
+    public static ConcurrentHashMap<String, Object> beanMap = new ConcurrentHashMap<>(16);
     public static void handlerChain(AutoAuthHandlerChain autoAuthHandlerChain, ApplicationContext applicationContext, HttpServletRequest request, String permissions, Log log, String source){
         final List<Object> autoAuthServiceList = autoAuthHandlerChain.getAutoAuthServiceList();
         autoAuthServiceList.forEach(
@@ -31,7 +34,7 @@ public class AuthHandlerUtil {
                         autoAuth = applicationContext.getBean((String) item, AutoAuthHandler.class);
                     }else if (item instanceof Class){
                         //item is class of AutoAuthService
-                        autoAuth = getBean(applicationContext, (Class) item);
+                        autoAuth = getBean(applicationContext, (Class<? extends AutoAuthHandler>) item);
                     }else {
                         throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
                     }
@@ -57,40 +60,38 @@ public class AuthHandlerUtil {
         }
     }
 
-    public static String getSignStrategic(Class<? extends SignStrategic> signStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint){
+    public static String getSignStrategic(Class<? extends SignStrategic> signStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint, ApplicationContext application){
         //Create sign
-        try{
-            final Method signMethod = signStrategic.getMethod("sign", HttpServletRequest.class, ProceedingJoinPoint.class);
-            final SignStrategic signStrategicInstance = signStrategic.getConstructor().newInstance();
-            return  (String) signMethod.invoke(signStrategicInstance, request, joinPoint);
+        final SignStrategic signStrategicInstance = getBean(application, signStrategic);
+        return signStrategicInstance.sign(request, joinPoint);
 
-        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
-            return "";
-        }
     }
 
-    public static Boolean getEffectiveStrategic(Class<? extends EffectiveStrategic> effectiveStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint, Object result){
+    public static Boolean getEffectiveStrategic(Class<? extends EffectiveStrategic> effectiveStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint, Object result, ApplicationContext applicationContext){
         //Create sign
-        try{
-            final Method signMethod = effectiveStrategic.getMethod("effective", HttpServletRequest.class, ProceedingJoinPoint.class, Object.class);
-            final EffectiveStrategic effectiveStrategicInstance = effectiveStrategic.getConstructor().newInstance();
-            return (Boolean) signMethod.invoke(effectiveStrategicInstance, request, joinPoint, result);
 
-        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
-            return true;
-        }
+        final EffectiveStrategic effectiveStrategicInstance = getBean(applicationContext, effectiveStrategic);
+        return effectiveStrategicInstance.effective(request, joinPoint, result);
+
     }
-    public static <T> T getBean(ApplicationContext applicationContext, Class clazz){
+
+    public static <T> T getBean(ApplicationContext applicationContext, Class<T> clazz){
         try{
-            return (T) applicationContext.getBean(clazz);
+            return applicationContext.getBean(clazz);
         }catch (NoSuchBeanDefinitionException e){
             try {
-                return (T) clazz.getConstructor().newInstance();
+                final Object obj = beanMap.get(clazz.getName());
+                if (obj != null){
+                    return clazz.cast(obj);
+                }
+                final T objInstance = clazz.getConstructor().newInstance();
+                beanMap.put(clazz.getName(), objInstance);
+                return objInstance;
+
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-                throw new NullPointerException();
+                throw new NullPointerException("Required a parameterless constructor");
             }
         }
     }
+
 }

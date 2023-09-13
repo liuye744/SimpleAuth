@@ -54,7 +54,7 @@ public class DynamicAuthInterceptor implements HandlerInterceptor {
                         AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission, log, "Dynamic Permission Configuration");
                     }else {
                         //parameter error
-                        throw new InvalidParameterException("Need AutoAuthHandler or AutoAuthHandlerChain");
+                        throw new InvalidParameterException("Requires either AutoAuthHandler or AutoAuthHandlerChain");
                     }
                 }
 

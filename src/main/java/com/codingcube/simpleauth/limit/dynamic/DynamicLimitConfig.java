@@ -7,6 +7,7 @@ import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -23,6 +24,8 @@ import java.util.List;
 public class DynamicLimitConfig implements WebMvcConfigurer {
     @Resource
     RequestLimitItemProvider requestLimitItemProvider;
+    @Resource
+    ApplicationContext applicationContext;
     AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final Log log;
 
@@ -34,7 +37,7 @@ public class DynamicLimitConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new HandlerInterceptor() {
             @Override
-            public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+            public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
                 final String requestURI = request.getRequestURI();
                 final List<RequestLimitItem> requestLimitItem = requestLimitItemProvider.getRequestLimitItem();
                 for (RequestLimitItem limitItem : requestLimitItem) {
@@ -42,12 +45,12 @@ public class DynamicLimitConfig implements WebMvcConfigurer {
                     for (String path : pathList) {
                         if (antPathMatcher.match(path, requestURI)){
                             //初始化参数
-                            final String item = AuthHandlerUtil.getSignStrategic(limitItem.getItemStrategic(), request, null);
-                            final String sign = AuthHandlerUtil.getSignStrategic(limitItem.getSignStrategic(), request, null);
+                            final String item = AuthHandlerUtil.getSignStrategic(limitItem.getItemStrategic(), request, null, applicationContext);
+                            final String sign = AuthHandlerUtil.getSignStrategic(limitItem.getSignStrategic(), request, null, applicationContext);
                             final Integer times = limitItem.getTimes();
                             final Integer ban = limitItem.getBan();
                             final Integer seconds = limitItem.getSeconds();
-                            final Boolean effective = AuthHandlerUtil.getEffectiveStrategic(limitItem.getEffectiveStrategic(), request, null, null);
+                            final Boolean effective = AuthHandlerUtil.getEffectiveStrategic(limitItem.getEffectiveStrategic(), request, null, null, applicationContext);
                             if (!effective){
                                 LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
                                         limitItem.getSignStrategic(),sign,"dynamic limit",false,

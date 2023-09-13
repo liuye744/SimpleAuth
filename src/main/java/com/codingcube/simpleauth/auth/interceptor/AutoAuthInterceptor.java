@@ -49,7 +49,7 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
             }else if (handlerBeanName != null){
                 autoAuthHandler = (AutoAuthHandler) applicationContext.getBean(handlerBeanName);
             }else {
-                throw new TargetNotFoundException("need handlerClass or handlerBeanName");
+                throw new TargetNotFoundException("Requires either handlerClass or handlerBeanName");
             }
             this.handler = autoAuthHandler;
         }

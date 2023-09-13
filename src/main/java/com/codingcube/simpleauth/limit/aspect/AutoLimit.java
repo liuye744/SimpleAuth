@@ -73,12 +73,7 @@ public class AutoLimit {
 
         //Verify that this request is recorded.
         final Class<? extends EffectiveStrategic> effectiveStrategic = isLimit.effectiveStrategic();
-        EffectiveStrategic effectiveStrategicInstance;
-        try{
-            effectiveStrategicInstance = applicationContext.getBean(effectiveStrategic);
-        }catch (NoSuchBeanDefinitionException e){
-            effectiveStrategicInstance = effectiveStrategic.getConstructor().newInstance();
-        }
+        EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, effectiveStrategic);
 
         //Whether effectiveStrategic judges after returning.
         if (!judgeAfterReturn){
