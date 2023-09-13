@@ -26,8 +26,6 @@ public class LogFactory {
         final String limitLogImpl = logProper.getLimitLogImpl();
         limitLogConstructor = getLogImpl(limitLogImpl);
 
-        LogProper.setStaticShowOptList(logProper.getShowOptList());
-
         getLog(this.getClass()).debug("Auth Logging initialized using "+logConstructor.getDeclaringClass()+" adapter.");
         getLimitLog(this.getClass()).debug("Limit Logging initialized using "+limitLogConstructor.getDeclaringClass()+" adapter.");
     }
@@ -72,7 +70,7 @@ public class LogFactory {
 
     private Constructor<? extends Log> getImplementation(Class<? extends Log> implClass) {
         try {
-            return implClass.getConstructor(new Class[] { String.class });
+            return implClass.getConstructor(String.class);
         } catch (Throwable t) {
             throw new LogException("Error setting Log implementation. Needs to have a constructor that takes a String as a parameter.");
         }

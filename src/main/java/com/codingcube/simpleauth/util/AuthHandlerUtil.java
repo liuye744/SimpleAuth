@@ -8,11 +8,10 @@ import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.properties.FunctionProper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
-
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -24,6 +23,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthHandlerUtil {
     public static ConcurrentHashMap<String, Object> beanMap = new ConcurrentHashMap<>(16);
+
+    /**
+     * * 处理HandlerChain
+     * @param autoAuthHandlerChain HandlerChain
+     * @param applicationContext SpringFactory
+     * @param request 当前请求的request
+     * @param permissions 需要的Permission字符串
+     * @param log log类
+     * @param source 请求来源
+     */
     public static void handlerChain(AutoAuthHandlerChain autoAuthHandlerChain, ApplicationContext applicationContext, HttpServletRequest request, String permissions, Log log, String source){
         final List<Object> autoAuthServiceList = autoAuthHandlerChain.getAutoAuthServiceList();
         autoAuthServiceList.forEach(
@@ -50,6 +59,15 @@ public class AuthHandlerUtil {
 
     }
 
+    /**
+     * 处理Handler*
+     * @param request 当前请求的request
+     * @param permission 需要的Permission字符串
+     * @param handlerClass Handler的类
+     * @param applicationContext SpringFactory
+     * @param log log类
+     * @param source 请求来源
+     */
     public static void handler(HttpServletRequest request, String permission, Class<? extends AutoAuthHandler> handlerClass, ApplicationContext applicationContext, Log log, String source) {
         AutoAuthHandler authHandler = getBean(applicationContext, handlerClass);
         final boolean author = authHandler.isAuthor(request, permission);
@@ -67,6 +85,15 @@ public class AuthHandlerUtil {
 
     }
 
+    /**
+     * 获取effectiveStrategic*
+     * @param effectiveStrategic Class类
+     * @param request 当前请求的request
+     * @param joinPoint aspect joinPoint
+     * @param result 返回结果
+     * @param applicationContext springFactory
+     * @return 是否记录
+     */
     public static Boolean getEffectiveStrategic(Class<? extends EffectiveStrategic> effectiveStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint, Object result, ApplicationContext applicationContext){
         //Create sign
 
@@ -75,18 +102,24 @@ public class AuthHandlerUtil {
 
     }
 
+    /**
+     * 获取Bean，先委派Spring，查询Bean，若没有则反射创建 *
+     */
     public static <T> T getBean(ApplicationContext applicationContext, Class<T> clazz){
         try{
             return applicationContext.getBean(clazz);
         }catch (NoSuchBeanDefinitionException e){
             try {
-                final Object obj = beanMap.get(clazz.getName());
-                if (obj != null){
-                    return clazz.cast(obj);
+                if (FunctionProper.isHandlerCacheStatic()){
+                    final Object obj = beanMap.get(clazz.getName());
+                    if (obj != null){
+                        return clazz.cast(obj);
+                    }
+                    final T objInstance = clazz.getConstructor().newInstance();
+                    beanMap.put(clazz.getName(), objInstance);
+                    return objInstance;
                 }
-                final T objInstance = clazz.getConstructor().newInstance();
-                beanMap.put(clazz.getName(), objInstance);
-                return objInstance;
+                return clazz.getConstructor().newInstance();
 
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
                 throw new NullPointerException("Required a parameterless constructor");
