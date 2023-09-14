@@ -82,7 +82,7 @@ public class AuthHandlerUtil {
     public static String getSignStrategic(Class<? extends SignStrategic> signStrategic, HttpServletRequest request, ProceedingJoinPoint joinPoint, ApplicationContext application){
         //Create sign
         final SignStrategic signStrategicInstance = getBean(application, signStrategic);
-        return signStrategicInstance.sign(request, joinPoint);
+        return signStrategicInstance.sign(request, new SimpleJoinPoint(joinPoint));
 
     }
 

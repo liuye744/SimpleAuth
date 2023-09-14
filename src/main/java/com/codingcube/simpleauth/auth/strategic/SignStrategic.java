@@ -1,5 +1,6 @@
 package com.codingcube.simpleauth.auth.strategic;
 
+import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,5 +10,5 @@ import javax.servlet.http.HttpServletRequest;
  * sign Generation Strategy*
  */
 public abstract class SignStrategic {
-    public abstract String sign(HttpServletRequest request, ProceedingJoinPoint joinPoint);
+    public abstract String sign(HttpServletRequest request, SimpleJoinPoint joinPoint);
 }

@@ -1,6 +1,7 @@
 package com.codingcube.simpleauth.limit.strategic.sign;
 
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 
@@ -8,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class DiffParameterSign extends SignStrategic {
     @Override
-    public String sign(HttpServletRequest request, ProceedingJoinPoint joinPoint) {
+    public String sign(HttpServletRequest request, SimpleJoinPoint joinPoint) {
         final Object[] args = joinPoint.getArgs();
         final Signature signature = joinPoint.getSignature();
         StringBuilder sb = new StringBuilder();

@@ -69,7 +69,7 @@ public class AutoLimit {
         //Create sign
         final Class<? extends SignStrategic> signStrategicClazz = isLimit.signStrategic();
         SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, signStrategicClazz);
-        final String sign = signStrategic.sign(request, joinPoint);
+        final String sign = signStrategic.sign(request, new SimpleJoinPoint(joinPoint));
 
 
         //Verify that this request is recorded.

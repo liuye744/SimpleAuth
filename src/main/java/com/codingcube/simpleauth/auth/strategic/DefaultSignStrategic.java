@@ -1,5 +1,6 @@
 package com.codingcube.simpleauth.auth.strategic;
 
+import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DefaultSignStrategic extends SignStrategic{
     @Override
-    public String sign(HttpServletRequest request, ProceedingJoinPoint joinPoint) {
+    public String sign(HttpServletRequest request, SimpleJoinPoint joinPoint) {
         return request.getRemoteAddr();
     }
 }
