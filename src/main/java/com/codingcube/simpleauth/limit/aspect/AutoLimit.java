@@ -2,6 +2,7 @@ package com.codingcube.simpleauth.limit.aspect;
 
 import com.codingcube.simpleauth.limit.annotation.IsLimit;
 import com.codingcube.simpleauth.exception.AccessIsRestrictedException;
+import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
@@ -77,7 +78,7 @@ public class AutoLimit {
 
         //Whether effectiveStrategic judges after returning.
         if (!judgeAfterReturn){
-            final Boolean isEffective = effectiveStrategicInstance.effective(request, joinPoint,null);
+            final Boolean isEffective = effectiveStrategicInstance.effective(request, new SimpleJoinPoint(joinPoint),null);
             if (!isEffective){
                 LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign, "annotation limit",false,effectiveStrategic,true, false);
                 log.debug(limitFormat.toString());
@@ -95,7 +96,7 @@ public class AutoLimit {
         final Object result = joinPoint.proceed();
         //Judge whether to delete the record.
         if (judgeAfterReturn){
-            final Boolean isEffective = effectiveStrategicInstance.effective(request, joinPoint, result);
+            final Boolean isEffective = effectiveStrategicInstance.effective(request, new SimpleJoinPoint(joinPoint), result);
             LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
                     "annotation limit", judgeAfterReturn,effectiveStrategic,isEffective, true);
             log.debug(limitFormat.toString());

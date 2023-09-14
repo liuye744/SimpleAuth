@@ -4,6 +4,7 @@ import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
+import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
@@ -98,7 +99,7 @@ public class AuthHandlerUtil {
         //Create sign
 
         final EffectiveStrategic effectiveStrategicInstance = getBean(applicationContext, effectiveStrategic);
-        return effectiveStrategicInstance.effective(request, joinPoint, result);
+        return effectiveStrategicInstance.effective(request, new SimpleJoinPoint(joinPoint), result);
 
     }
 

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 public class DefaultEffectiveStrategic extends EffectiveStrategic {
 
     @Override
-    public Boolean effective(HttpServletRequest request, ProceedingJoinPoint joinPoint, Object result) {
+    public Boolean effective(HttpServletRequest request, SimpleJoinPoint joinPoint, Object result) {
         return true;
     }
 }

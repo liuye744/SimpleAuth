@@ -17,10 +17,4 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("com.codingcube.simpleauth.properties")
 @ConfigurationPropertiesScan("com.codingcube.simpleauth.properties")
 public class AuthAutoConfiguration {
-
-    private final ClearProper clearProper;
-
-    public AuthAutoConfiguration(ClearProper clearProper) {
-        this.clearProper = clearProper;
-    }
 }
