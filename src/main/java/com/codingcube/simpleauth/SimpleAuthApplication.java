@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@EnableDynamicLimit
 public class SimpleAuthApplication {
     public static void main(String[] args) {
         SpringApplication.run(SimpleAuthApplication.class, args);

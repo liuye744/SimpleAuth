@@ -14,25 +14,6 @@ public class FunctionProper {
     private boolean handlerCache = true;
     private static boolean handlerCacheStatic = true;
 
-    private List<String> clickjackingPath = new ArrayList<>();
-    private String XFrameOptions = "SAMEORIGIN";
-
-    public String getXFrameOptions() {
-        return XFrameOptions;
-    }
-
-    public void setXFrameOptions(String XFrameOptions) {
-        this.XFrameOptions = XFrameOptions;
-    }
-
-    public List<String> getClickjackingPath() {
-        return clickjackingPath;
-    }
-
-    public void setClickjackingPath(List<String> clickjackingPath) {
-        this.clickjackingPath = clickjackingPath;
-    }
-
     public boolean isHandlerCache() {
         return handlerCache;
     }

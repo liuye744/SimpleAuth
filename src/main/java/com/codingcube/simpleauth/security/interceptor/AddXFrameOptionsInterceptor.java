@@ -5,10 +5,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class AddXFrameOptions implements HandlerInterceptor {
+public class AddXFrameOptionsInterceptor implements HandlerInterceptor {
     private final String xFrameOptions;
 
-    public AddXFrameOptions(String xFrameOptions) {
+    public AddXFrameOptionsInterceptor(String xFrameOptions) {
         this.xFrameOptions = xFrameOptions;
     }
 
