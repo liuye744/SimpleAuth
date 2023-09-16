@@ -1,6 +1,5 @@
 package com.codingcube.simpleauth.limit.annotation;
 
-import com.codingcube.simpleauth.limit.dynamic.DynamicLimitConfig;
 import com.codingcube.simpleauth.limit.dynamic.sign.DynamicLimitSignBean;
 import org.springframework.context.annotation.Import;
 
