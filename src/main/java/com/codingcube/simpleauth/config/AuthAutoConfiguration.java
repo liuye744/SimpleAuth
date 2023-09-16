@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("com.codingcube.simpleauth.limit")
 @ComponentScan("com.codingcube.simpleauth.logging")
 @ComponentScan("com.codingcube.simpleauth.properties")
+@ComponentScan("com.codingcube.simpleauth.security")
 @ConfigurationPropertiesScan("com.codingcube.simpleauth.properties")
 public class AuthAutoConfiguration {
 }
