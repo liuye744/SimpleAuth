@@ -9,13 +9,31 @@ import java.util.List;
 public class SecurityProper {
 
     private List<String> XFrameOptionsPath = new ArrayList<>();
+    private List<String> XFrameOptionsExcludePath = new ArrayList<>();
     private String XFrameOptions = "SAMEORIGIN";
 
     private List<String> contentSecurityPolicyPath = new ArrayList<>();
+    private List<String> contentSecurityPolicyExcludePath = new ArrayList<>();
     private String ContentSecurityPolicy = "default-src 'self'";
 
     public List<String> getXFrameOptionsPath() {
         return XFrameOptionsPath;
+    }
+
+    public List<String> getContentSecurityPolicyExcludePath() {
+        return contentSecurityPolicyExcludePath;
+    }
+
+    public void setContentSecurityPolicyExcludePath(List<String> contentSecurityPolicyExcludePath) {
+        this.contentSecurityPolicyExcludePath = contentSecurityPolicyExcludePath;
+    }
+
+    public List<String> getXFrameOptionsExcludePath() {
+        return XFrameOptionsExcludePath;
+    }
+
+    public void setXFrameOptionsExcludePath(List<String> XFrameOptionsExcludePath) {
+        this.XFrameOptionsExcludePath = XFrameOptionsExcludePath;
     }
 
     public void setXFrameOptionsPath(List<String> XFrameOptionsPath) {

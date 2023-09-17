@@ -4,6 +4,7 @@ import com.codingcube.simpleauth.properties.SecurityProper;
 import com.codingcube.simpleauth.security.interceptor.AddXFrameOptionsInterceptor;
 import com.codingcube.simpleauth.security.interceptor.ContentSecurityPolicyInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -20,15 +21,23 @@ public class SecurityWebConfigurer implements WebMvcConfigurer {
         final List<String> clickjackingPath = securityProper.getXFrameOptionsPath();
         if (clickjackingPath.size() != 0){
             final String xFrameOptions = securityProper.getXFrameOptions();
-            clickjackingPath.forEach(registry.addInterceptor(new AddXFrameOptionsInterceptor(xFrameOptions))::addPathPatterns);
+            final InterceptorRegistration interceptorRegistration = registry.addInterceptor(new AddXFrameOptionsInterceptor(xFrameOptions));
+            clickjackingPath.forEach(interceptorRegistration::addPathPatterns);
+
+            final List<String> xFrameOptionsExcludePath = securityProper.getXFrameOptionsExcludePath();
+            xFrameOptionsExcludePath.forEach(interceptorRegistration::excludePathPatterns);
+
         }
 
         //set Header 'Content-Security-Policy'
         final List<String> contentSecurityPolicyPath = securityProper.getContentSecurityPolicyPath();
         if (contentSecurityPolicyPath.size() != 0){
             final String contentSecurityPolicy = securityProper.getContentSecurityPolicy();
-            contentSecurityPolicyPath.forEach(registry.addInterceptor(new ContentSecurityPolicyInterceptor(contentSecurityPolicy))::addPathPatterns);
+            final InterceptorRegistration interceptorRegistration = registry.addInterceptor(new ContentSecurityPolicyInterceptor(contentSecurityPolicy));
+            contentSecurityPolicyPath.forEach(interceptorRegistration::addPathPatterns);
 
+            final List<String> contentSecurityPolicyExcludePath = securityProper.getContentSecurityPolicyExcludePath();
+            contentSecurityPolicyExcludePath.forEach(interceptorRegistration::excludePathPatterns);
         }
     }
 }
