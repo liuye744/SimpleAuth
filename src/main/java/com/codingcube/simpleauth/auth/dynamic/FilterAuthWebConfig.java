@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Resource;
+import javax.annotation.Autowired;
 
 /**
  * @author CodingCube<br>
@@ -21,11 +21,11 @@ import javax.annotation.Resource;
 @Configuration
 @ConditionalOnProperty("simple-auth.func.dynamic-auth")
 public class FilterAuthWebConfig implements WebMvcConfigurer {
-    @Resource
+    @Autowired
     RequestAuthItemProvider requestAuthItemProvider;
-    @Resource
+    @Autowired
     private ApplicationContext applicationContext;
-    @Resource
+    @Autowired
     private LogFactory logFactory;
 
     @Override

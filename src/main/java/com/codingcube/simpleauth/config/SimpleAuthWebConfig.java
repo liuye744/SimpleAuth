@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Resource;
+import javax.annotation.Autowired;
 
 /**
  * @author CodingCube<br>
@@ -19,9 +19,9 @@ import javax.annotation.Resource;
  */
 @Configuration
 public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
-    @Resource
+    @Autowired
     private ApplicationContext applicationContext;
-    @Resource
+    @Autowired
     private LogFactory logFactory;
     InterceptorRegistry registry;
 

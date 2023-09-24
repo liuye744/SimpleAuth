@@ -3,7 +3,7 @@ package com.codingcube.simpleauth.auth.aspect;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.annotation.IsAuthor;
 
-import javax.annotation.Resource;
+import javax.annotation.Autowired;
 import javax.servlet.http.HttpServletRequest;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
@@ -30,7 +30,7 @@ import java.util.Objects;
 @Aspect
 @Component
 public class AutoAuth {
-    @Resource
+    @Autowired
     private ApplicationContext applicationContext;
     Log log;
 
