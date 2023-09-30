@@ -2,6 +2,7 @@ package com.codingcube.simpleauth.limit.aspect;
 
 import com.codingcube.simpleauth.limit.annotation.IsLimit;
 import com.codingcube.simpleauth.exception.AccessIsRestrictedException;
+import com.codingcube.simpleauth.limit.annotation.SimpleLimit;
 import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
@@ -13,16 +14,12 @@ import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.annotation.Autowired;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -32,7 +29,7 @@ import java.util.Objects;
 @Aspect
 @Component
 public class AutoLimit {
-    @Autowired
+    @Resource
     private ApplicationContext applicationContext;
     private final Log log;
 
@@ -53,6 +50,19 @@ public class AutoLimit {
         return addRecord(className+"."+methodName, isLimit, joinPoint);
     }
 
+    @Around("@within(simpleLimit)")
+    public Object isLimitClass(ProceedingJoinPoint joinPoint, SimpleLimit simpleLimit) throws Throwable {
+        final String className = joinPoint.getSignature().getDeclaringTypeName();
+        return addRecord(className, simpleLimit, joinPoint);
+    }
+
+    @Around("@annotation(simpleLimit)")
+    public Object isAuthorMethod(ProceedingJoinPoint joinPoint, SimpleLimit simpleLimit) throws Throwable{
+        final String className =  joinPoint.getSignature().getDeclaringTypeName();
+        String methodName = joinPoint.getSignature().getName();
+        return addRecord(className+"."+methodName, simpleLimit, joinPoint);
+    }
+
     public Object addRecord(String recordItem, IsLimit isLimit, ProceedingJoinPoint joinPoint) throws Throwable{
         //Initialization parameter
         final int limit = isLimit.value();
@@ -60,6 +70,33 @@ public class AutoLimit {
         final int ban = isLimit.ban();
         final boolean judgeAfterReturn = isLimit.judgeAfterReturn();
         final String annotationItem = isLimit.item();
+        final Class<? extends SignStrategic> signStrategicClazz = isLimit.signStrategic();
+        final Class<? extends EffectiveStrategic> effectiveStrategic = isLimit.effectiveStrategic();
+        return addRecord(joinPoint, recordItem, limit, seconds, ban, judgeAfterReturn, annotationItem, signStrategicClazz, effectiveStrategic);
+    }
+
+    public Object addRecord(String recordItem, SimpleLimit simpleLimit, ProceedingJoinPoint joinPoint) throws Throwable{
+        //Initialization parameter
+        final Class<? extends SignStrategic> signStrategicClazz = simpleLimit.signStrategic();
+        final Class<? extends EffectiveStrategic> effectiveStrategic = simpleLimit.effectiveStrategic();
+        final int limit = simpleLimit.value();
+        final int seconds = simpleLimit.seconds();
+        final int ban = simpleLimit.ban();
+        final boolean judgeAfterReturn = simpleLimit.judgeAfterReturn();
+        final String annotationItem = simpleLimit.item();
+        return addRecord(joinPoint, recordItem, limit, seconds, ban, judgeAfterReturn, annotationItem, signStrategicClazz, effectiveStrategic);
+    }
+
+    public Object addRecord(ProceedingJoinPoint joinPoint,
+                            String recordItem,
+                            int limit,
+                            int seconds,
+                            int ban,
+                            boolean judgeAfterReturn,
+                            String annotationItem,
+                            Class<? extends SignStrategic> signStrategicClazz,
+                            Class<? extends EffectiveStrategic> effectiveStrategic
+    )throws Throwable {
         if (!"".equals(annotationItem)){
             //Analytic SpEL
             recordItem = annotationItem;
@@ -67,13 +104,11 @@ public class AutoLimit {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 
         //Create sign
-        final Class<? extends SignStrategic> signStrategicClazz = isLimit.signStrategic();
         SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, signStrategicClazz);
         final String sign = signStrategic.sign(request, new SimpleJoinPoint(joinPoint));
 
 
         //Verify that this request is recorded.
-        final Class<? extends EffectiveStrategic> effectiveStrategic = isLimit.effectiveStrategic();
         EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, effectiveStrategic);
 
         //Whether effectiveStrategic judges after returning.

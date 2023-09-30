@@ -1,9 +1,10 @@
 package com.codingcube.simpleauth.auth.aspect;
 
+import com.codingcube.simpleauth.auth.annotation.SimpleAuth;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.annotation.IsAuthor;
 
-import javax.annotation.Autowired;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
@@ -13,13 +14,10 @@ import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -30,7 +28,7 @@ import java.util.Objects;
 @Aspect
 @Component
 public class AutoAuth {
-    @Autowired
+    @Resource
     private ApplicationContext applicationContext;
     Log log;
 
@@ -42,26 +40,51 @@ public class AutoAuth {
     public Object isAuthorClass(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable {
         final Class<? extends AutoAuthHandler>[] autoAuthServices = isAuthor.handler();
         final Class<? extends AutoAuthHandlerChain>[] authentications = isAuthor.handlerChain();
-
         final String permissions = isAuthor.value();
 
+        return doAuth(joinPoint, autoAuthServices, authentications, permissions);
+    }
+    @Around("@annotation(isAuthor)")
+    public Object isAuthorMethod(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable{
+        return isAuthorClass(joinPoint, isAuthor);
+    }
+
+    @Around("@within(simpleAuth)")
+    public Object isAuthorClass(ProceedingJoinPoint joinPoint, SimpleAuth simpleAuth) throws Throwable {
+        final Class<? extends AutoAuthHandler>[] autoAuthServices = simpleAuth.handler();
+        final Class<? extends AutoAuthHandlerChain>[] authentications = simpleAuth.handlerChain();
+        final String permissions = simpleAuth.value();
+
+        return doAuth(joinPoint, autoAuthServices, authentications, permissions);
+    }
+    @Around("@annotation(simpleAuth)")
+    public Object isAuthorMethod(ProceedingJoinPoint joinPoint, SimpleAuth simpleAuth) throws Throwable{
+        return isAuthorClass(joinPoint, simpleAuth);
+    }
+
+
+    public Object doAuth(ProceedingJoinPoint joinPoint,
+                         Class<? extends AutoAuthHandler>[] autoAuthServices,
+                         Class<? extends AutoAuthHandlerChain>[] authentications,
+                         String permissions
+    )throws Throwable{
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         //authenticate authority
         //If the AutoAuthChain is configured and autoAuthService is not configured, the DefaultAutoAuthService will be abandoned.
         boolean isExecuteDefault = true;
         try {
             if (
-                    //authentications(AutoAuthChain) parameter is the default.
+                //authentications(AutoAuthChain) parameter is the default.
                     !((Class[])IsAuthor.class.getMethod("handlerChain").getDefaultValue())[0].getName()
-                    .equals(authentications[0].getName())
-                    &&
-                    //authentications(AutoAuthService) parameter is not the default
-                    ((Class[])IsAuthor.class.getMethod("handler").getDefaultValue())[0].getName()
-                            .equals(autoAuthServices[0].getName())
+                            .equals(authentications[0].getName())
+                            &&
+                            //authentications(AutoAuthService) parameter is not the default
+                            ((Class[])IsAuthor.class.getMethod("handler").getDefaultValue())[0].getName()
+                                    .equals(autoAuthServices[0].getName())
             )
 
             {
-                    isExecuteDefault = false;
+                isExecuteDefault = false;
             }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -80,10 +103,7 @@ public class AutoAuth {
                 }
         );
         return joinPoint.proceed();
-    }
-    @Around("@annotation(isAuthor)")
-    public Object isAuthorMethod(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable{
-        return isAuthorClass(joinPoint, isAuthor);
+
     }
 
 }

@@ -8,12 +8,12 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Autowired;
+import javax.annotation.Resource;
 import java.util.List;
 
 @Configuration
 public class SecurityWebConfigurer implements WebMvcConfigurer {
-    @Autowired
+    @Resource
     private SecurityProper securityProper;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

@@ -1,18 +1,14 @@
 package com.codingcube.simpleauth.auth.dynamic;
 
 
-import com.codingcube.simpleauth.auth.dynamic.sign.DynamicSignBean;
 import com.codingcube.simpleauth.auth.interceptor.DynamicAuthInterceptor;
 import com.codingcube.simpleauth.logging.LogFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import javax.annotation.Autowired;
+import javax.annotation.Resource;
 
 /**
  * @author CodingCube<br>
@@ -21,11 +17,11 @@ import javax.annotation.Autowired;
 @Configuration
 @ConditionalOnProperty("simple-auth.func.dynamic-auth")
 public class FilterAuthWebConfig implements WebMvcConfigurer {
-    @Autowired
+    @Resource
     RequestAuthItemProvider requestAuthItemProvider;
-    @Autowired
+    @Resource
     private ApplicationContext applicationContext;
-    @Autowired
+    @Resource
     private LogFactory logFactory;
 
     @Override

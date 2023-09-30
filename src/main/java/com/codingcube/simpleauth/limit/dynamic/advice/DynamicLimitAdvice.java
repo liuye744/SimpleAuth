@@ -20,16 +20,16 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import javax.annotation.Autowired;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @ControllerAdvice
 @ConditionalOnProperty("simple-auth.func.dynamic-limit")
 public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
-    @Autowired
+    @Resource
     private RequestLimitItemProvider requestLimitItemProvider;
-    @Autowired
+    @Resource
     private ApplicationContext applicationContext;
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final Log log;
