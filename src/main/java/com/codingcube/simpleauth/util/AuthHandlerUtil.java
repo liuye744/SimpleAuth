@@ -1,5 +1,7 @@
 package com.codingcube.simpleauth.util;
 
+import com.codingcube.simpleauth.SimpleAuthApplication;
+import com.codingcube.simpleauth.annotation.SimpleCache;
 import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
@@ -10,12 +12,19 @@ import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.properties.FunctionProper;
+import com.codingcube.simpleauth.util.support.BeanDefinition;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author CodingCube<br>*
@@ -23,7 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 public class AuthHandlerUtil {
-    public static ConcurrentHashMap<String, Object> beanMap = new ConcurrentHashMap<>(16);
+    public static final ConcurrentHashMap<String, Object> beanMap = new ConcurrentHashMap<>(16);
+    public static final ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(16);
 
     /**
      * * 处理HandlerChain
@@ -112,13 +122,66 @@ public class AuthHandlerUtil {
         }catch (NoSuchBeanDefinitionException e){
             try {
                 if (FunctionProper.isHandlerCacheStatic()){
-                    final Object obj = beanMap.get(clazz.getName());
-                    if (obj != null){
-                        return clazz.cast(obj);
+                    BeanDefinition beanDefinition = beanDefinitionMap.get(clazz.getName());
+                    if (beanDefinition == null){
+                        beanDefinition = initBeanDefinition(clazz);
                     }
-                    final T objInstance = clazz.getConstructor().newInstance();
-                    beanMap.put(clazz.getName(), objInstance);
-                    return objInstance;
+                    switch (beanDefinition.getType()){
+                        default:
+                        case 0:
+                        case 2:
+                            //false & proto
+                            return clazz.getConstructor().newInstance();
+                        case 1:
+                            //singleton
+                            final Object obj = beanMap.get(clazz.getName());
+                            if (obj != null){
+                                return clazz.cast(obj);
+                            }
+                            synchronized (getSingletonMutex()){
+                                final T objInstance = clazz.getConstructor().newInstance();
+                                beanMap.put(clazz.getName(), objInstance);
+                                return objInstance;
+                            }
+                        case 3:
+                            //request
+                            final HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+                            final String requestBeanKey = requestBeanKey(clazz);
+                            final Object attribute = request.getAttribute(requestBeanKey);
+                            if (attribute == null){
+                                synchronized (request){
+                                    final Object syncAttribute = request.getAttribute(requestBeanKey);
+                                    if (syncAttribute == null){
+                                        final T objInstance = clazz.getConstructor().newInstance();
+                                        request.setAttribute(requestBeanKey, objInstance);
+                                        return objInstance;
+                                    }else {
+                                        return (T) syncAttribute;
+                                    }
+                                }
+                            }else {
+                                return (T) attribute;
+                            }
+                        case 4:
+                            //session
+                            final HttpSession session = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest().getSession(true);
+                            final String sessionBeanKey = requestBeanKey(clazz);
+                            final Object sessionAttribute = session.getAttribute(sessionBeanKey);
+                            if (sessionAttribute == null){
+                                synchronized (session){
+                                    if (session.getAttribute(sessionBeanKey) == null){
+                                        final T objInstance = clazz.getConstructor().newInstance();
+                                        session.setAttribute(sessionBeanKey, objInstance);
+                                        return objInstance;
+                                    }
+                                }
+                            }else {
+                                return (T) sessionAttribute;
+                            }
+
+                    }
+
+
                 }
                 return clazz.getConstructor().newInstance();
 
@@ -126,6 +189,30 @@ public class AuthHandlerUtil {
                 throw new NullPointerException("Required a parameterless constructor");
             }
         }
+    }
+
+    public static Object getSingletonMutex() {
+        return beanMap;
+    }
+
+    public static BeanDefinition initBeanDefinition(Class<?> clazz){
+        final SimpleCache simpleCache = clazz.getAnnotation(SimpleCache.class);
+        final BeanDefinition beanDefinition;
+        if (simpleCache != null){
+            beanDefinition = new BeanDefinition(simpleCache.type());
+        }else {
+            //默认缓存类型
+            beanDefinition = new BeanDefinition("singleton");
+        }
+        beanDefinitionMap.put(clazz.getName(), beanDefinition);
+        return beanDefinition;
+    }
+
+    public static String requestBeanKey(Class<?> clazz){
+        return "SIMPLEAUTH$" + clazz.getName();
+    }
+    public static String beanKey(Class<?> clazz){
+        return clazz.getName();
     }
 
 }
