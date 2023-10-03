@@ -5,6 +5,7 @@ import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 public class CompleteLimit implements TokenLimit{
@@ -45,6 +46,29 @@ public class CompleteLimit implements TokenLimit{
     @Override
     public int size() {
         return optList.size();
+    }
+
+    @Override
+    public int optSize() {
+        return this.limit - size();
+    }
+
+    @Override
+    public int maxOptSize() {
+        return this.limit;
+    }
+
+    @Override
+    public void sync() {
+        Date currentDate = new Date();
+        while (optList.size()>0 &&(currentDate.getTime() - optList.getLast().getTime())/1000 > seconds){
+            optList.removeLast();
+        }
+    }
+
+    @Override
+    public Object getSyncMutex() {
+        return semaphore;
     }
 
     @Override

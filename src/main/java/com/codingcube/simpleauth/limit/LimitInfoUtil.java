@@ -3,7 +3,6 @@ package com.codingcube.simpleauth.limit;
 import com.codingcube.simpleauth.limit.strategic.BanKeyStratagem;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
-import org.apache.el.parser.Token;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -158,23 +157,19 @@ public class LimitInfoUtil {
         );
     }
     private static void removeRecordItemOutDateRecord(String sign){
-        //TODO
-//        final Map<String, TokenLimit> operationQueue = limitInfo.get(sign);
-//        final Integer recordSeconds = secondsRecord.get(sign);
-//        operationQueue.keySet().forEach(
-//                key->{
-//                    final Deque<Date> deque = operationQueue.get(key);
-//                    Date currentDate = new Date();
-//                    while (deque.size()>0 &&(currentDate.getTime() - deque.getLast().getTime())/1000 > recordSeconds){
-//                        deque.removeLast();
-//                    }
-//                    //remove userRecord
-//                    if (deque.size()==0){
-//                        synchronized (key.intern()){
-//                            operationQueue.remove(key);
-//                        }
-//                    }
-//                }
-//        );
+        final Map<String, TokenLimit> operationQueue = limitInfo.get(sign);
+        operationQueue.keySet().forEach(
+                key->{
+                    final TokenLimit tokenLimit = operationQueue.get(key);
+                    tokenLimit.sync();
+                    final Object syncMutex = tokenLimit.getSyncMutex();
+                    synchronized (syncMutex){
+                        if (tokenLimit.maxOptSize() == tokenLimit.optSize()){
+                            operationQueue.remove(key);
+                        }
+                    }
+
+                }
+        );
     }
 }

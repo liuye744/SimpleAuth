@@ -51,19 +51,34 @@ public class TokenBucket implements TokenLimit{
 
     @Override
     public void removeFirst() {
-        try {
-            semaphore.acquire();
+        synchronized (semaphore){
             tokens++;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }finally {
-            semaphore.release();
         }
     }
 
     @Override
     public int size() {
         return (int) Math.round(capacity - tokens);
+    }
+
+    @Override
+    public int optSize() {
+        return (int)tokens;
+    }
+
+    @Override
+    public int maxOptSize() {
+        return capacity;
+    }
+
+    @Override
+    public void sync() {
+        refill();
+    }
+
+    @Override
+    public Object getSyncMutex() {
+        return semaphore;
     }
 
     private void refill() {
@@ -86,19 +101,14 @@ public class TokenBucket implements TokenLimit{
     @Override
     public boolean tryAcquire() {
         refill();
-        try {
-            semaphore.acquire(); // 获取许可证，互斥访问
+        synchronized (semaphore){
+            // 获取许可证，互斥访问
             if (tokens >= 1) {
                 tokens--;
                 return true; // 有足够的令牌，允许处理请求
             } else {
                 return false; // 令牌不足，拒绝请求
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return false;
-        } finally {
-            semaphore.release(); // 释放许可证
         }
     }
 }
