@@ -7,6 +7,7 @@ import com.codingcube.simpleauth.limit.dynamic.RequestLimitItemProvider;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
+import com.codingcube.simpleauth.properties.FunctionProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
@@ -70,7 +71,7 @@ public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
                         log.debug(limitFormat.toString());
                         return o;
                     }
-                    final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, times, seconds, ban);
+                    final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, times, seconds, ban, FunctionProper.getTokenLimitClass());
                     LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
                             limitItem.getSignStrategic(),sign,"dynamic limit",true,
                             limitItem.getEffectiveStrategic(),true, addRecord);

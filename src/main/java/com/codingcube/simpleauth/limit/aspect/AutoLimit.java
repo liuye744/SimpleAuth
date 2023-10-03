@@ -10,6 +10,7 @@ import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.properties.FunctionProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -121,7 +122,7 @@ public class AutoLimit {
             }
         }
 
-        final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban);
+        final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban, FunctionProper.getTokenLimitClass());
         if (!addRecord){
             LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
                     "annotation limit", judgeAfterReturn,effectiveStrategic,true, false);

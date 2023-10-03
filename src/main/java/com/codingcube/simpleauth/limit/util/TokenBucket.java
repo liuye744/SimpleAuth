@@ -3,8 +3,8 @@ package com.codingcube.simpleauth.limit.util;
 import java.util.concurrent.Semaphore;
 
 public class TokenBucket implements TokenLimit{
-    private final int capacity; // 令牌桶容量
-    private final double fillRate; // 令牌生成速率 (令牌/毫秒)
+    private int capacity; // 令牌桶容量
+    private double fillRate; // 令牌生成速率 (令牌/秒)
     private long lastRefillTimestamp; // 上次令牌生成时间戳
     private double tokens; // 当前令牌数量
     private final Semaphore semaphore; // 信号量用于控制令牌的发放
@@ -17,9 +17,58 @@ public class TokenBucket implements TokenLimit{
         this.semaphore = new Semaphore(1);
     }
 
+    public TokenBucket(int seconds, int limit) {
+        this.capacity = limit;
+        this.fillRate = (double) seconds/limit;
+        this.tokens = limit;
+        this.semaphore = new Semaphore(1);
+        this.lastRefillTimestamp = System.currentTimeMillis();
+    }
+
+    public TokenBucket() {
+        this.semaphore = new Semaphore(1);
+    }
+
+    public TokenBucket(Semaphore semaphore) {
+        this.semaphore = semaphore;
+    }
+
+    @Override
+    public void init(Integer limit, Integer seconds) {
+        this.capacity = limit;
+        this.fillRate = (double) limit/seconds;
+        this.tokens = limit;
+        this.lastRefillTimestamp = System.currentTimeMillis();
+    }
+
+    @Override
+    public void init(int capacity, double fillRate) {
+        this.capacity = capacity;
+        this.fillRate = fillRate;
+        this.tokens = capacity;
+        this.lastRefillTimestamp = System.currentTimeMillis();
+    }
+
+    @Override
+    public void removeFirst() {
+        try {
+            semaphore.acquire();
+            tokens++;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            semaphore.release();
+        }
+    }
+
+    @Override
+    public int size() {
+        return (int) Math.round(capacity - tokens);
+    }
+
     private void refill() {
         long currentTime = System.currentTimeMillis();
-        double elapsedTime = currentTime - lastRefillTimestamp;
+        double elapsedTime = (double) (currentTime - lastRefillTimestamp)/1000;
         double newTokens = elapsedTime * fillRate;
 
         if (newTokens > 0) {
@@ -28,6 +77,13 @@ public class TokenBucket implements TokenLimit{
         }
     }
 
+    @Override
+    public String toString() {
+        return "TokenBucket{" + "tokens=" + tokens +
+                '}';
+    }
+
+    @Override
     public boolean tryAcquire() {
         refill();
         try {

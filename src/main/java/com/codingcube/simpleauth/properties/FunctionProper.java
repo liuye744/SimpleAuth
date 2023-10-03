@@ -1,9 +1,8 @@
 package com.codingcube.simpleauth.properties;
 
+import com.codingcube.simpleauth.limit.util.CompleteLimit;
+import com.codingcube.simpleauth.limit.util.TokenLimit;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @ConfigurationProperties(prefix = "simple-auth.func")
 public class FunctionProper {
@@ -13,6 +12,25 @@ public class FunctionProper {
 
     private boolean handlerCache = true;
     private static boolean handlerCacheStatic = true;
+
+    private String limitPlan = "default";
+    private static Class<? extends TokenLimit> tokenLimitClass = CompleteLimit.class;
+
+    public String getLimitPlan() {
+        return limitPlan;
+    }
+
+    public void setLimitPlan(String limitPlan) {
+        this.limitPlan = limitPlan;
+    }
+
+    public static Class<? extends TokenLimit> getTokenLimitClass() {
+        return tokenLimitClass;
+    }
+
+    public static void setTokenLimitClass(Class<? extends TokenLimit> tokenLimitClass) {
+        FunctionProper.tokenLimitClass = tokenLimitClass;
+    }
 
     public boolean isHandlerCache() {
         return handlerCache;

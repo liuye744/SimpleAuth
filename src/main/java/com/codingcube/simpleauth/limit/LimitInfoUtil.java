@@ -1,6 +1,9 @@
 package com.codingcube.simpleauth.limit;
 
 import com.codingcube.simpleauth.limit.strategic.BanKeyStratagem;
+import com.codingcube.simpleauth.limit.util.TokenLimit;
+import com.codingcube.simpleauth.util.AuthHandlerUtil;
+import org.apache.el.parser.Token;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Core Utility Class for Access Limitation Feature*
  */
 public class LimitInfoUtil {
-    private static final Map<String, Map<String, Deque<Date>>> limitInfo = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, TokenLimit>> limitInfo = new ConcurrentHashMap<>();
     private static final Map<String, Date> ban = new ConcurrentHashMap<>();
     private static final Map<String, Integer> secondsRecord = new ConcurrentHashMap<>();
 
@@ -20,8 +23,9 @@ public class LimitInfoUtil {
      * @param sign  record sign
      * @return Whether it overflows
      */
-    public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds, Integer banTime){
+    public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds, Integer banTime, Class<? extends TokenLimit> tokenLimitClass){
         final String banKey = BanKeyStratagem.getBanKey(recordItem, sign);
+        //移除ban
         if (LimitInfoUtil.ban.get(banKey) != null && banTime!=0){
             synchronized (sign.intern()){
                 final Date banData = LimitInfoUtil.ban.get(banKey);
@@ -30,93 +34,59 @@ public class LimitInfoUtil {
                         return false;
                     }else {
                         ban.remove(banKey);
-                        final Deque<Date> optionList = limitInfo.get(recordItem).get(sign);
-                        while (optionList.size()!=0){
-                            optionList.removeLast();
-                        }
+                        limitInfo.get(recordItem).remove(sign);
                     }
 
                 }
-
             }
         }
         if (limitInfo.get(recordItem) == null){
             synchronized (recordItem.intern()){
                 if (limitInfo.get(recordItem) == null){
                     //No record exists.
-                    Map<String,Deque<Date>> item =  new ConcurrentHashMap<>();
+                    Map<String, TokenLimit> item =  new ConcurrentHashMap<>();
 
-                    Deque<Date> deque = new LinkedList<>();
-                    deque.add(new Date());
+                    final TokenLimit tokenLimit = AuthHandlerUtil.getParameterlessObject(tokenLimitClass);
+                    tokenLimit.init(limit, seconds);
 
-                    item.put(sign, deque);
+
+                    item.put(sign, tokenLimit);
                     limitInfo.put(recordItem,item);
                     secondsRecord.put(recordItem, seconds);
-                    return true;
+                    return tokenLimit.tryAcquire();
                 }
             }
         }
-        final Map<String, Deque<Date>> stringListMap = limitInfo.get(recordItem);
+        final Map<String, TokenLimit> stringListMap = limitInfo.get(recordItem);
 
         if (stringListMap.get(sign) == null){
             synchronized (sign.intern()){
                 if (stringListMap.get(sign) == null){
                     //Personal record does not exist.
-                    Deque<Date> deque = new LinkedList<>();
-                    deque.addFirst(new Date());
-                    stringListMap.put(sign, deque);
-                    return true;
+                    final TokenLimit tokenLimit = AuthHandlerUtil.getParameterlessObject(tokenLimitClass);
+                    tokenLimit.init(limit, seconds);
+
+                    stringListMap.put(sign, tokenLimit);
+                    return tokenLimit.tryAcquire();
                 }
             }
         }
         //All records exist.
-        Deque<Date> personalRecord = stringListMap.get(sign);
-        synchronized (sign.intern()){
-            if (personalRecord.size()>=limit){
-                //Remove expired data before judging, and return false if it still overflows.
-                while (personalRecord.size() > 0){
-                    final Date last = personalRecord.getLast();
-                    final Date current = new Date();
-                    if ((current.getTime() - last.getTime())/1000 > seconds){
-                        //expired
-                        personalRecord.removeLast();
-                    }else {
-                        break;
-                    }
-                }
-                //After deleting expired records, the number of times the limit is met.
-                if (personalRecord.size()<limit){
-                    personalRecord.addFirst(new Date());
-                    return true;
-                }
-                LimitInfoUtil.ban.put(banKey, new Date());
-                return false;
-            }else {
-                //Judge whether the top level has expired and add records.
-                if (personalRecord.size()==0){
-                    personalRecord.add(new Date());
-                    return true;
-                }
-                final Date last = personalRecord.getLast();
-                final Date current = new Date();
-                if ((current.getTime() - last.getTime())/1000 > seconds){
-                    //expired
-                    personalRecord.removeLast();
-                }else {
-                    personalRecord.addFirst(new Date());
-
-                }
-                return true;
-            }
+        final TokenLimit tokenLimit = stringListMap.get(sign);
+        final boolean valid = tokenLimit.tryAcquire();
+        if (!valid){
+            //被禁止
+            LimitInfoUtil.ban.put(banKey, new Date());
         }
+        return valid;
     }
 
     public static Boolean delRecord(String recordItem, String sign){
-        final Map<String, Deque<Date>> stringDequeMap = limitInfo.get(recordItem);
+        final Map<String, TokenLimit> stringDequeMap = limitInfo.get(recordItem);
         if (stringDequeMap == null){
             return false;
         }
-        final Deque<Date> deque = stringDequeMap.get(sign);
+        final TokenLimit deque = stringDequeMap.get(sign);
         if (deque == null){
             return false;
         }
@@ -141,7 +111,7 @@ public class LimitInfoUtil {
      * *
      * @return Map<recordItem, Map<sign, Deque<Option Time>>>
      */
-    public static Map<String,Map<String, Deque<Date>>> getLimitInfo(){
+    public static Map<String,Map<String, TokenLimit>> getLimitInfo(){
         return limitInfo;
     }
 
@@ -157,16 +127,12 @@ public class LimitInfoUtil {
      * Get sign's option List*
      * @return Deque<Option Date></>
      */
-    public static Deque<Date> getSignOptionList(String recordItem, String sign){
-        final Map<String, Deque<Date>> itemDeque = limitInfo.get(recordItem);
+    public static TokenLimit getSignOptionList(String recordItem, String sign){
+        final Map<String, TokenLimit> itemDeque = limitInfo.get(recordItem);
         if (itemDeque != null){
-            final Deque<Date> deque = itemDeque.get(sign);
-            if (deque != null){
-                return deque;
-            }
-            return new ArrayDeque<>();
+            return itemDeque.get(sign);
         }
-        return new ArrayDeque<>();
+        return null;
     }
 
     public static void setBan(String recordItem, String sign, Date date){
@@ -178,7 +144,7 @@ public class LimitInfoUtil {
         ban.put(banKey, new Date());
     }
 
-    public static Map<String, Deque<Date>> getRecordItem(String recordItem){
+    public static Map<String, TokenLimit> getRecordItem(String recordItem){
         return limitInfo.get(recordItem);
     }
 
@@ -192,22 +158,23 @@ public class LimitInfoUtil {
         );
     }
     private static void removeRecordItemOutDateRecord(String sign){
-        final Map<String, Deque<Date>> operationQueue = limitInfo.get(sign);
-        final Integer recordSeconds = secondsRecord.get(sign);
-        operationQueue.keySet().forEach(
-                key->{
-                    final Deque<Date> deque = operationQueue.get(key);
-                    Date currentDate = new Date();
-                    while (deque.size()>0 &&(currentDate.getTime() - deque.getLast().getTime())/1000 > recordSeconds){
-                        deque.removeLast();
-                    }
-                    //remove userRecord
-                    if (deque.size()==0){
-                        synchronized (key.intern()){
-                            operationQueue.remove(key);
-                        }
-                    }
-                }
-        );
+        //TODO
+//        final Map<String, TokenLimit> operationQueue = limitInfo.get(sign);
+//        final Integer recordSeconds = secondsRecord.get(sign);
+//        operationQueue.keySet().forEach(
+//                key->{
+//                    final Deque<Date> deque = operationQueue.get(key);
+//                    Date currentDate = new Date();
+//                    while (deque.size()>0 &&(currentDate.getTime() - deque.getLast().getTime())/1000 > recordSeconds){
+//                        deque.removeLast();
+//                    }
+//                    //remove userRecord
+//                    if (deque.size()==0){
+//                        synchronized (key.intern()){
+//                            operationQueue.remove(key);
+//                        }
+//                    }
+//                }
+//        );
     }
 }

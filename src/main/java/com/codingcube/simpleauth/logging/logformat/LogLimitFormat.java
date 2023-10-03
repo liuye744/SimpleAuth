@@ -1,6 +1,8 @@
 package com.codingcube.simpleauth.logging.logformat;
 
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
+import com.codingcube.simpleauth.limit.util.CompleteLimit;
+import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.properties.LogProper;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
@@ -38,7 +40,10 @@ public class LogLimitFormat {
 
     @Override
     public String toString() {
-        final Deque<Date> optionList = LimitInfoUtil.getSignOptionList(item, sign);
+        TokenLimit optionList = LimitInfoUtil.getSignOptionList(item, sign);
+        if (optionList == null){
+            optionList = new CompleteLimit();
+        }
         StringBuilder sb = new StringBuilder("SimpleAuth limit => \r\n" + "\tmax-times: " + times + "\r\n" +
                 "\ttime: " + optionList.size() + "\r\n" +
                 "\tseconds: " + seconds + "\r\n" +

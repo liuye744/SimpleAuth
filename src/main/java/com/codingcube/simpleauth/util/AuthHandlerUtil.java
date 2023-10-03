@@ -21,7 +21,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
@@ -213,6 +212,15 @@ public class AuthHandlerUtil {
     }
     public static String beanKey(Class<?> clazz){
         return clazz.getName();
+    }
+
+
+    public static <T> T getParameterlessObject(Class<? extends T> clazz){
+        try {
+            return (T)clazz.getConstructor().newInstance();
+        }catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+            throw new NullPointerException("Required a parameterless constructor");
+        }
     }
 
 }
