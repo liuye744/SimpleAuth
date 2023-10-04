@@ -4,6 +4,8 @@ import com.codingcube.simpleauth.exception.AccessIsRestrictedException;
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import com.codingcube.simpleauth.limit.dynamic.RequestLimitItem;
 import com.codingcube.simpleauth.limit.dynamic.RequestLimitItemProvider;
+import com.codingcube.simpleauth.limit.util.CompleteLimit;
+import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
@@ -63,6 +65,10 @@ public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
                     final Integer times = limitItem.getTimes();
                     final Integer ban = limitItem.getBan();
                     final Integer seconds = limitItem.getSeconds();
+                    Class<? extends TokenLimit> tokenLimit = limitItem.getTokenLimit();
+                    if (tokenLimit == CompleteLimit.class){
+                        tokenLimit = FunctionProper.getTokenLimitClass();
+                    }
                     final Boolean effective = AuthHandlerUtil.getEffectiveStrategic(limitItem.getEffectiveStrategic(), request, null, o, applicationContext);
                     if (!effective){
                         LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
@@ -71,7 +77,7 @@ public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
                         log.debug(limitFormat.toString());
                         return o;
                     }
-                    final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, times, seconds, ban, FunctionProper.getTokenLimitClass());
+                    final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, times, seconds, ban, tokenLimit);
                     LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
                             limitItem.getSignStrategic(),sign,"dynamic limit",true,
                             limitItem.getEffectiveStrategic(),true, addRecord);

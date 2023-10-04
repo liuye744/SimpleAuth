@@ -22,7 +22,12 @@ public class LimitInfoUtil {
      * @param sign  record sign
      * @return Whether it overflows
      */
-    public static Boolean addRecord(String recordItem, String sign, Integer limit, Integer seconds, Integer banTime, Class<? extends TokenLimit> tokenLimitClass){
+    public static Boolean addRecord(String recordItem,
+                                    String sign,
+                                    Integer limit,
+                                    Integer seconds,
+                                    Integer banTime,
+                                    Class<? extends TokenLimit> tokenLimitClass){
         final String banKey = BanKeyStratagem.getBanKey(recordItem, sign);
         //移除ban
         if (LimitInfoUtil.ban.get(banKey) != null && banTime!=0){

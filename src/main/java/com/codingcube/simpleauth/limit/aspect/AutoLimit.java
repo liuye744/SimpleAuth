@@ -4,6 +4,8 @@ import com.codingcube.simpleauth.limit.annotation.IsLimit;
 import com.codingcube.simpleauth.exception.AccessIsRestrictedException;
 import com.codingcube.simpleauth.limit.annotation.SimpleLimit;
 import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
+import com.codingcube.simpleauth.limit.util.CompleteLimit;
+import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
@@ -73,7 +75,11 @@ public class AutoLimit {
         final String annotationItem = isLimit.item();
         final Class<? extends SignStrategic> signStrategicClazz = isLimit.signStrategic();
         final Class<? extends EffectiveStrategic> effectiveStrategic = isLimit.effectiveStrategic();
-        return addRecord(joinPoint, recordItem, limit, seconds, ban, judgeAfterReturn, annotationItem, signStrategicClazz, effectiveStrategic);
+        Class<? extends TokenLimit> tokenLimit = isLimit.tokenLimit();
+        if (tokenLimit == CompleteLimit.class){
+            tokenLimit = FunctionProper.getTokenLimitClass();
+        }
+        return addRecord(joinPoint, recordItem, limit, seconds, ban, judgeAfterReturn, annotationItem, signStrategicClazz, effectiveStrategic, tokenLimit);
     }
 
     public Object addRecord(String recordItem, SimpleLimit simpleLimit, ProceedingJoinPoint joinPoint) throws Throwable{
@@ -85,7 +91,11 @@ public class AutoLimit {
         final int ban = simpleLimit.ban();
         final boolean judgeAfterReturn = simpleLimit.judgeAfterReturn();
         final String annotationItem = simpleLimit.item();
-        return addRecord(joinPoint, recordItem, limit, seconds, ban, judgeAfterReturn, annotationItem, signStrategicClazz, effectiveStrategic);
+        Class<? extends TokenLimit> tokenLimit = simpleLimit.tokenLimit();
+        if (tokenLimit == CompleteLimit.class){
+            tokenLimit = FunctionProper.getTokenLimitClass();
+        }
+        return addRecord(joinPoint, recordItem, limit, seconds, ban, judgeAfterReturn, annotationItem, signStrategicClazz, effectiveStrategic, tokenLimit);
     }
 
     public Object addRecord(ProceedingJoinPoint joinPoint,
@@ -96,7 +106,8 @@ public class AutoLimit {
                             boolean judgeAfterReturn,
                             String annotationItem,
                             Class<? extends SignStrategic> signStrategicClazz,
-                            Class<? extends EffectiveStrategic> effectiveStrategic
+                            Class<? extends EffectiveStrategic> effectiveStrategic,
+                            Class<? extends TokenLimit> tokenLimitClazz
     )throws Throwable {
         if (!"".equals(annotationItem)){
             //Analytic SpEL
@@ -122,7 +133,7 @@ public class AutoLimit {
             }
         }
 
-        final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban, FunctionProper.getTokenLimitClass());
+        final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban, tokenLimitClazz);
         if (!addRecord){
             LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
                     "annotation limit", judgeAfterReturn,effectiveStrategic,true, false);

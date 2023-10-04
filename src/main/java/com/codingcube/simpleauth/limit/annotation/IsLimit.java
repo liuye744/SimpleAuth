@@ -4,6 +4,8 @@ import com.codingcube.simpleauth.limit.strategic.DefaultEffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.DefaultSignStrategic;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.limit.util.CompleteLimit;
+import com.codingcube.simpleauth.limit.util.TokenLimit;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -31,4 +33,6 @@ public @interface IsLimit {
     Class<? extends EffectiveStrategic> effectiveStrategic() default DefaultEffectiveStrategic.class;
     //Whether effectiveStrategic judges after returning.
     boolean judgeAfterReturn() default true;
+    //Current limiting algorithm
+    Class<? extends TokenLimit> tokenLimit() default CompleteLimit.class;
 }
