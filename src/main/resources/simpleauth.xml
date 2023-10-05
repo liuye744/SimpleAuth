@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--示例配置-->
+<!--static中分析，Spring启动后注册-->
+<!--分配置文件-->
+<simpleauth>
+	<configs>
+		<config>simpleHandler</config>
+		<config>simpleLimit</config>
+		<config>path</config>
+	</configs>
+	<!--注册Handler，名称可为id或name,path可通过ID引用Paths标签或为空（paths标签中也可存储paths标签）-->
+	<handler name="myHandler" id="myHandler">
+		<class>com.codingcube.handler.MyHandler</class>
+		<scope>singleton</scope>
+<!--		<paths id="myHandlerPath"/>-->
+	</handler>
+
+	<handler name="myHandler2" id="myHandler2">
+		<class>com.codingcube.handler.MyHandler</class>
+		<scope>singleton</scope>
+		<paths id="myHandlerPath2">
+			<path>/say/*</path>
+			<path>/eat</path>
+		</paths>
+	</handler>
+	<!--注册Limit-->
+	<limit name="MyLimit" id="MyLimit">
+		<class>com.codingcube.limit.MyLimit</class>
+		<scope>false</scope>
+		<paths id="myLimitPath">
+			<path>/say</path>
+			<path>/eat</path>
+		</paths>
+	</limit>
+	<!--注册Path-->
+	<paths id="myHandlerPath">
+		<path>/say/*</path>
+		<path>/eat</path>
+	</paths>
+<!--	<paths id="myHandlerPath2">-->
+<!--		<path>/say/*</path>-->
+<!--		<path>/eat</path>-->
+<!--	</paths>-->
+	<!--注册handlerChain 可以写做<handler>MyHandler1</handler>-->
+	<handlerChain>
+		<handler id="MyHandler1"/>
+		<handler id="MyHandler2"/>
+		<handler id="MyHandler3"/>
+		<paths>
+			<paths id="myLimitPath"/>
+			<paths id="myHandlerPath"/>
+		</paths>
+	</handlerChain>
+</simpleauth>
