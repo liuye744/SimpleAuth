@@ -2,6 +2,11 @@ package com.codingcube.simpleauth.util;
 
 import com.codingcube.simpleauth.SimpleAuthApplication;
 import com.codingcube.simpleauth.annotation.SimpleCache;
+import com.codingcube.simpleauth.autoconfig.domain.Handler;
+import com.codingcube.simpleauth.autoconfig.domain.Limit;
+import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
+import com.codingcube.simpleauth.autoconfig.factory.ConfigFactory;
+import com.codingcube.simpleauth.autoconfig.xml.XML2SimpleAuthObject;
 import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
@@ -22,7 +27,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 /**
@@ -33,7 +40,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthHandlerUtil {
     public static final ConcurrentHashMap<String, Object> beanMap = new ConcurrentHashMap<>(16);
     public static final ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(16);
+    public static final Map<Class<?>, String> clazz2Id = new HashMap<>();
+    public static final SimpleAuthConfig simpleAuthConfig;
 
+    static {
+        //初始化SimpleAuthBean
+        ConfigFactory factory = new ConfigFactory(XML2SimpleAuthObject.class);
+        simpleAuthConfig = factory.getConfig("simpleauth.xml");
+
+        //初始化handler Limit Clazz2Id
+        //handler
+        {
+            final Map<String, Handler> handlerMap = simpleAuthConfig.getHandlerMap();
+            handlerMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getClazz(), initBeanDefinition(value)));
+        }
+        //Limit
+        {
+            final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();
+            limitMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getClazz(), initBeanDefinition(value)));
+        }
+    }
     /**
      * * 处理HandlerChain
      * @param autoAuthHandlerChain HandlerChain
@@ -205,6 +231,37 @@ public class AuthHandlerUtil {
         }
         beanDefinitionMap.put(clazz.getName(), beanDefinition);
         return beanDefinition;
+    }
+
+    public static void cacheSingleton(String id,String scope, String clazzString , BeanDefinition beanDefinition){
+        //初始化BeanDefinition
+        beanDefinitionMap.put(id, beanDefinition);
+        //初始化singleton模式
+        if ("singleton".equals(scope)){
+            final Class<?> clazz;
+            try {
+                clazz = Class.forName(clazzString);
+                final Object obj = beanMap.get(clazz.getName());
+                if (obj == null){
+                    final Object objInstance = clazz.getConstructor().newInstance();
+                    beanMap.put(clazz.getName(), objInstance);
+                }
+            } catch (ClassNotFoundException
+                    | NoSuchMethodException
+                    | InstantiationException
+                    | IllegalAccessException
+                    | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public static BeanDefinition initBeanDefinition(Handler handler){
+        return new BeanDefinition(handler.getScope());
+    }
+    public static BeanDefinition initBeanDefinition(Limit limit){
+        return new BeanDefinition(limit.getScope());
     }
 
     public static String requestBeanKey(Class<?> clazz){

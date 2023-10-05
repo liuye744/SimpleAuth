@@ -29,7 +29,7 @@ public class ConfigFactory {
         this.simpleAuthConfig = simpleAuthConfig;
     }
 
-    SimpleAuthConfig getConfig(String path){
+    public SimpleAuthConfig getConfig(String path){
         //初始化一级缓存，缓存到 simpleAuthConfig
         List<String> configPathList = new ArrayList<>();
         configPathList.add(path);
