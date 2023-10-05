@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simpleauth>
+    <!--注册Handler，名称可为id或name,path可通过ID引用Paths标签或为空（paths标签中也可存储paths标签）-->
+    <handler name="myHandler" id="myHandler">
+        <class>com.codingcube.handler.MyHandler</class>
+        <scope>singleton</scope>
+        <paths id="myHandlerPath"/>
+    </handler>
+
+    <handler name="myHandler2" id="myHandler2">
+        <class>com.codingcube.handler.MyHandler</class>
+        <scope>singleton</scope>
+        <paths id="myHandlerPath3">
+            <path>/say/*</path>
+            <path>/eat</path>
+        </paths>
+    </handler>
+</simpleauth>

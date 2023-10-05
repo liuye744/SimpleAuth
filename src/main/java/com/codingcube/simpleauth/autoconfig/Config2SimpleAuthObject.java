@@ -1,15 +1,22 @@
 package com.codingcube.simpleauth.autoconfig;
 
-import com.codingcube.simpleauth.autoconfig.domain.Handler;
-import com.codingcube.simpleauth.autoconfig.domain.Limit;
-import com.codingcube.simpleauth.autoconfig.domain.Paths;
+import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
 
 import java.util.List;
-import java.util.Map;
+
 
 public interface Config2SimpleAuthObject {
-    List<String> initConfig();
-    Map<String, Paths> initPaths();
-    Map<String, Handler> initHandler();
-    Map<String, Limit> initLimit();
+    void initAttr(SimpleAuthConfig simpleAuthConfig);
+    void initConfig();
+    List<String> getConfig();
+    void initPaths();
+    void initHandler();
+    void initLimit();
+
+    default void init(){
+        initConfig();
+        initPaths();
+        initHandler();
+        initLimit();
+    }
 }

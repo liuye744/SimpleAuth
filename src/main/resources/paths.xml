@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simpleauth>
+    <paths id="myHandlerPath">
+        <path>/say/*</path>
+        <path>/eat</path>
+    </paths>
+    <paths id="myHandlerPath2">
+        <path>/say/*</path>
+        <path>/eat</path>
+    </paths>
+</simpleauth>

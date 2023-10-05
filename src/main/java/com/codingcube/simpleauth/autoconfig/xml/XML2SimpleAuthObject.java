@@ -4,6 +4,7 @@ import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.autoconfig.domain.Limit;
 import com.codingcube.simpleauth.autoconfig.domain.Paths;
+import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
 import com.codingcube.simpleauth.autoconfig.execption.XMLParseException;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -11,32 +12,35 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import javax.xml.crypto.dsig.XMLSignatureException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
-    Element rootElement;
-    List<String> configList;
-    Map<String, Paths> pathsMap;
-    Map<String, Handler> handlerMap;
-    Map<String, Limit> limitMap;
+    private final Element rootElement;
+    private List<String> configList;
+    private Map<String, Paths> pathsMap;
+    private Map<String, Handler> handlerMap;
+    private Map<String, Limit> limitMap;
 
 
-    public XML2SimpleAuthObject(String path) throws IOException, JDOMException {
+    public XML2SimpleAuthObject(String path) {
         SAXBuilder saxBuilder = new SAXBuilder();
 
-        final ClassLoader classLoader = this.getClass().getClassLoader();
+        final ClassLoader classLoader = XML2SimpleAuthObject.class.getClassLoader();
         final InputStream resourceAsStream = classLoader.getResourceAsStream(path);
-        rootElement = saxBuilder.build(resourceAsStream).getRootElement();
+        try {
+            final Document build = saxBuilder.build(resourceAsStream);
+            rootElement = build.getRootElement();
+        } catch (JDOMException | IOException e) {
+            throw new XMLParseException("Configuration file '"+path+"' initialization error");
+        }
         initAttr();
     }
 
@@ -47,18 +51,17 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         this.limitMap = new HashMap<>();
     }
 
-    public void initAttr(List<String> configList, Map<String, Paths> pathsMap, Map<String, Handler> handlerMap, Map<String, Limit> limitMap) {
-        this.configList = configList;
-        this.pathsMap = pathsMap;
-        this.handlerMap = handlerMap;
-        this.limitMap = limitMap;
+    public void initAttr(SimpleAuthConfig simpleAuthConfig) {
+        this.pathsMap = simpleAuthConfig.getPathsMap();
+        this.handlerMap = simpleAuthConfig.getHandlerMap();
+        this.limitMap = simpleAuthConfig.getLimitMap();
     }
 
     @Override
-    public List<String> initConfig() {
+    public void initConfig() {
         final Element configs = rootElement.getChild("configs");
         if (configs == null){
-            return null;
+            return;
         }
         final List<Element> config = configs.getChildren("config");
         config.forEach(item->{
@@ -67,15 +70,19 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                 configList.add(value);
             }
         });
-        return configList;
 
     }
 
     @Override
-    public Map<String, Paths> initPaths() {
+    public List<String> getConfig() {
+        return configList;
+    }
+
+    @Override
+    public void initPaths() {
         final List<Element> pathsElementList = rootElement.getChildren("paths");
         if (pathsElementList == null){
-            return null;
+            return;
         }
         //遍历所有的Paths
         pathsElementList.forEach(pathsElement -> {
@@ -85,11 +92,10 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
             }
             pathsMap.put(path.getId(), path);
         });
-        return pathsMap;
     }
 
     @Override
-    public Map<String, Handler> initHandler() {
+    public void initHandler() {
         final List<Element> handlerElementList = rootElement.getChildren("handler");
 
         handlerElementList.forEach(handlerElement -> {
@@ -103,11 +109,10 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                 e.printStackTrace();
             }
         });
-        return this.handlerMap;
     }
 
     @Override
-    public Map<String, Limit> initLimit() {
+    public void initLimit() {
         final List<Element> limitElementList = rootElement.getChildren("limit");
 
         limitElementList.forEach(limitElement -> {
@@ -121,7 +126,15 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                 e.printStackTrace();
             }
         });
-        return this.limitMap;
+    }
+
+    @Override
+    public void init() {
+        Config2SimpleAuthObject.super.init();
+    }
+
+    public List<String> getConfigList() {
+        return configList;
     }
 
     public <T> T assemble(Element element, Class<? extends T> t) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
