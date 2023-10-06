@@ -2,6 +2,7 @@ package com.codingcube.simpleauth.util;
 
 import com.codingcube.simpleauth.SimpleAuthApplication;
 import com.codingcube.simpleauth.annotation.SimpleCache;
+import com.codingcube.simpleauth.auth.dynamic.RequestAuthItem;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.autoconfig.domain.Limit;
 import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
@@ -21,12 +22,14 @@ import com.codingcube.simpleauth.util.support.BeanDefinition;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -216,9 +219,48 @@ public class AuthHandlerUtil {
         }
     }
 
+    /**
+     * 获取BeanMap互斥锁对象*
+     */
     public static Object getSingletonMutex() {
         return beanMap;
     }
+
+    public static void doRequestAuthItemList(List<RequestAuthItem> requestAuthItem,
+                                             AntPathMatcher antPathMatcher,
+                                             HttpServletRequest request,
+                                             ApplicationContext applicationContext,
+                                             Log log,
+                                             String source){
+        for (RequestAuthItem authItem : requestAuthItem) {
+            final List<String> paths = authItem.getPath();
+            for (String path: paths){
+                if (antPathMatcher.match(path, request.getRequestURI())){
+                    final String permission = authItem.getPermission();
+                    final Class<? extends AutoAuthHandler> handlerClass = authItem.getHandlerClass();
+                    final Class<? extends AutoAuthHandlerChain> handlerChainClass = authItem.getHandlerChainClass();
+
+                    if (handlerClass != null){
+                        //deal with Handler
+                        AuthHandlerUtil.handler(request, permission, handlerClass, applicationContext, log, source);
+                    }else if (handlerChainClass != null){
+                        //deal with handlerChain
+                        final AutoAuthHandlerChain authHandlerChain = AuthHandlerUtil.getBean(applicationContext, handlerChainClass);
+                        AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission, log, source);
+                    }else {
+                        //parameter error
+                        throw new InvalidParameterException("Requires either AutoAuthHandler or AutoAuthHandlerChain");
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    /**
+     * * 初始化BeanDefinition
+     */
 
     public static BeanDefinition initBeanDefinition(Class<?> clazz){
         final SimpleCache simpleCache = clazz.getAnnotation(SimpleCache.class);
@@ -233,6 +275,9 @@ public class AuthHandlerUtil {
         return beanDefinition;
     }
 
+    /**
+     * 缓存singleton*
+     */
     public static void cacheSingleton(String id,String scope, String clazzString , BeanDefinition beanDefinition){
         //初始化BeanDefinition
         beanDefinitionMap.put(id, beanDefinition);
@@ -260,10 +305,17 @@ public class AuthHandlerUtil {
     public static BeanDefinition initBeanDefinition(Handler handler){
         return new BeanDefinition(handler.getScope());
     }
+
+    /**
+     * * 初始化BeanDefinition
+     */
     public static BeanDefinition initBeanDefinition(Limit limit){
         return new BeanDefinition(limit.getScope());
     }
 
+    /**
+     * request和session作用域的key生成策略*
+     */
     public static String requestBeanKey(Class<?> clazz){
         return "SIMPLEAUTH$" + clazz.getName();
     }
@@ -271,10 +323,12 @@ public class AuthHandlerUtil {
         return clazz.getName();
     }
 
-
+    /**
+     * 获取无参构造方法*
+     */
     public static <T> T getParameterlessObject(Class<? extends T> clazz){
         try {
-            return (T)clazz.getConstructor().newInstance();
+            return clazz.getConstructor().newInstance();
         }catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
             throw new NullPointerException("Required a parameterless constructor");
         }
