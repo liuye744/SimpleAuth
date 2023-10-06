@@ -55,12 +55,12 @@ public class AuthHandlerUtil {
         //handler
         {
             final Map<String, Handler> handlerMap = simpleAuthConfig.getHandlerMap();
-            handlerMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getClazz(), initBeanDefinition(value)));
+            handlerMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getHandlerClass(), initBeanDefinition(value)));
         }
         //Limit
         {
-            final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();
-            limitMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getClazz(), initBeanDefinition(value)));
+//            final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();
+//            limitMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getClazz(), initBeanDefinition(value)));
         }
     }
     /**
@@ -278,21 +278,18 @@ public class AuthHandlerUtil {
     /**
      * 缓存singleton*
      */
-    public static void cacheSingleton(String id,String scope, String clazzString , BeanDefinition beanDefinition){
+    public static void cacheSingleton(String id,String scope, Class<?> clazz , BeanDefinition beanDefinition){
         //初始化BeanDefinition
         beanDefinitionMap.put(id, beanDefinition);
         //初始化singleton模式
         if ("singleton".equals(scope)){
-            final Class<?> clazz;
             try {
-                clazz = Class.forName(clazzString);
                 final Object obj = beanMap.get(clazz.getName());
                 if (obj == null){
                     final Object objInstance = clazz.getConstructor().newInstance();
                     beanMap.put(clazz.getName(), objInstance);
                 }
-            } catch (ClassNotFoundException
-                    | NoSuchMethodException
+            } catch ( NoSuchMethodException
                     | InstantiationException
                     | IllegalAccessException
                     | InvocationTargetException e) {

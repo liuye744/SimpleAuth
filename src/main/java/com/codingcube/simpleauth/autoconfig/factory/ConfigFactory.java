@@ -1,12 +1,12 @@
 package com.codingcube.simpleauth.autoconfig.factory;
 
+import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.autoconfig.domain.Limit;
 import com.codingcube.simpleauth.autoconfig.domain.Paths;
 import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
 import com.codingcube.simpleauth.autoconfig.execption.XMLParseException;
-import com.codingcube.simpleauth.autoconfig.xml.XML2SimpleAuthObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -80,9 +80,17 @@ public class ConfigFactory {
         final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();
         final Map<String, Paths> pathsMap = simpleAuthConfig.getPathsMap();
         handlerMap.forEach((key, value) ->{
+            //装配Paths
             final String pathId = value.getPathId();
             if (pathId != null){
                 value.setPaths(pathsMap.get(pathId));
+            }
+            //装配Clazz
+            try {
+                final Class<? extends AutoAuthHandler> handlerClass = (Class<? extends AutoAuthHandler>) Class.forName(value.getClazz());
+                value.setHandlerClass(handlerClass);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
         });
         limitMap.forEach((key, value) ->{

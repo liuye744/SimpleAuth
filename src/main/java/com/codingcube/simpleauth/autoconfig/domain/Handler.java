@@ -1,9 +1,12 @@
 package com.codingcube.simpleauth.autoconfig.domain;
 
 
+import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
+
 public class Handler {
     final private String id;
     private String clazz;
+    private Class<? extends AutoAuthHandler> handlerClass;
     private String scope;
     private String pathId;
     private Paths paths;
@@ -13,6 +16,14 @@ public class Handler {
         this.clazz = clazz;
         this.scope = scope;
         this.pathId = pathId;
+    }
+
+    public Class<? extends AutoAuthHandler> getHandlerClass() {
+        return handlerClass;
+    }
+
+    public void setHandlerClass(Class<? extends AutoAuthHandler> handlerClass) {
+        this.handlerClass = handlerClass;
     }
 
     public Handler(String id, String pathId) {

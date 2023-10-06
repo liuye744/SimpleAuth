@@ -24,15 +24,7 @@ public class AutoConfigAuthInterceptor implements HandlerInterceptor{
         this.applicationContext = applicationContext;
         this.log = logFactory.getLog(this.getClass());
         AuthHandlerUtil.simpleAuthConfig.getHandlerMap().forEach(
-                (key, value)->{
-                    //TODO permission
-                    //TODO Handler初始化Class
-                    try {
-                        requestAuthItem.add(new RequestAuthItem(value.getPaths().getPath(), "", (Class<? extends AutoAuthHandler>) Class.forName(value.getClazz())));
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
+                (key, value)-> requestAuthItem.add(new RequestAuthItem(value.getPaths().getPath(), value.getPaths().getPermission(), value.getHandlerClass()))
         );
         //TODO handlerChain
     }

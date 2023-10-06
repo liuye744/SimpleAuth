@@ -223,10 +223,17 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         if (idAttribute != null){
             id = pathsElement.getAttribute("id").getValue();
         }
+        final Paths paths = new Paths(id);
+
+        final Element permissionElement = pathsElement.getChild("permission");
+        if (permissionElement != null){
+            paths.setPermission(permissionElement.getValue().trim());
+        }
 
         final List<Element> pathElementList = pathsElement.getChildren("path");
         List<String> pathList = new ArrayList<>();
         pathElementList.forEach(path -> pathList.add(path.getValue().trim()));
-        return new Paths(id, pathList);
+        paths.setPath(pathList);
+        return paths;
     }
 }
