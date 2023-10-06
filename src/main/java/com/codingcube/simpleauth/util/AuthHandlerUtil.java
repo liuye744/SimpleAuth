@@ -1,22 +1,20 @@
 package com.codingcube.simpleauth.util;
 
-import com.codingcube.simpleauth.SimpleAuthApplication;
 import com.codingcube.simpleauth.annotation.SimpleCache;
 import com.codingcube.simpleauth.auth.dynamic.RequestAuthItem;
+import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
+import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
+import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
-import com.codingcube.simpleauth.autoconfig.domain.Limit;
 import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
 import com.codingcube.simpleauth.autoconfig.factory.ConfigFactory;
 import com.codingcube.simpleauth.autoconfig.xml.XML2SimpleAuthObject;
 import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
-import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
-import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
+import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
-import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
-import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.properties.FunctionProper;
 import com.codingcube.simpleauth.util.support.BeanDefinition;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,6 +26,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -44,24 +43,28 @@ public class AuthHandlerUtil {
     public static final ConcurrentHashMap<String, Object> beanMap = new ConcurrentHashMap<>(16);
     public static final ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(16);
     public static final Map<Class<?>, String> clazz2Id = new HashMap<>();
-    public static final SimpleAuthConfig simpleAuthConfig;
+    public static SimpleAuthConfig simpleAuthConfig;
 
     static {
-        //初始化SimpleAuthBean
-        ConfigFactory factory = new ConfigFactory(XML2SimpleAuthObject.class);
-        simpleAuthConfig = factory.getConfig("simpleauth.xml");
+        final InputStream simpleauthXml = AuthHandlerUtil.class.getClassLoader().getResourceAsStream("simpleauth.xml");
+        if (simpleauthXml != null){
+            //初始化SimpleAuthBean
+            ConfigFactory factory = new ConfigFactory(XML2SimpleAuthObject.class);
+            simpleAuthConfig = factory.getConfig("simpleauth.xml");
 
-        //初始化handler Limit Clazz2Id
-        //handler
-        {
-            final Map<String, Handler> handlerMap = simpleAuthConfig.getHandlerMap();
-            handlerMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getHandlerClass(), initBeanDefinition(value)));
+            //初始化handler Limit Clazz2Id
+            //handler
+            {
+                final Map<String, Handler> handlerMap = simpleAuthConfig.getHandlerMap();
+                handlerMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getHandlerClass(), initBeanDefinition(value)));
+            }
+            //Limit
+            {
+            //final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();
+            //limitMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getClazz(), initBeanDefinition(value)));
+            }
         }
-        //Limit
-        {
-//            final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();
-//            limitMap.forEach((key,value)-> cacheSingleton(value.getClazz(), value.getScope(), value.getClazz(), initBeanDefinition(value)));
-        }
+
     }
     /**
      * * 处理HandlerChain
@@ -301,13 +304,6 @@ public class AuthHandlerUtil {
 
     public static BeanDefinition initBeanDefinition(Handler handler){
         return new BeanDefinition(handler.getScope());
-    }
-
-    /**
-     * * 初始化BeanDefinition
-     */
-    public static BeanDefinition initBeanDefinition(Limit limit){
-        return new BeanDefinition(limit.getScope());
     }
 
     /**

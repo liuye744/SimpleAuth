@@ -59,7 +59,7 @@ public class ConfigFactory {
             config2SimpleAuthObject.init();
             currentConfigList = config2SimpleAuthObject.getConfig();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new XMLParseException("Requires a constructor with only a String path.");
+            throw new XMLParseException("Parser initialization error. Requires a constructor with only a String path.", e);
         }
     }
 
@@ -86,18 +86,34 @@ public class ConfigFactory {
                 value.setPaths(pathsMap.get(pathId));
             }
             //装配Clazz
-            try {
-                final Class<? extends AutoAuthHandler> handlerClass = (Class<? extends AutoAuthHandler>) Class.forName(value.getClazz());
-                value.setHandlerClass(handlerClass);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            value.setHandlerClass(this.getClassForName (value.getClazz()));
         });
         limitMap.forEach((key, value) ->{
+            //装配Paths
             final String pathId = value.getPathId();
             if (pathId != null){
                 value.setPaths(pathsMap.get(pathId));
             }
+            //装配signStrategicClass
+            if (value.getSignStrategicClass() == null){
+                value.setSignStrategicClass(getClassForName(value.getSignStrategic()));
+            }
+            //装配EffectiveStrategicClass
+            if (value.getEffectiveStrategicClass() == null){
+                value.setEffectiveStrategicClass(getClassForName(value.getEffectiveStrategic()));
+            }
+            //装配TokenLimitClass
+            if (value.getTokenLimitClass() == null){
+                value.setTokenLimitClass(getClassForName(value.getTokenLimit()));
+            }
         });
+    }
+
+    private <T> T getClassForName(String className){
+        try {
+            return (T)Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new XMLParseException(className+" not find", e);
+        }
     }
 }

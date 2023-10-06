@@ -1,9 +1,12 @@
 package com.codingcube.simpleauth.limit.dynamic.advice;
 
+import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.exception.AccessIsRestrictedException;
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import com.codingcube.simpleauth.limit.dynamic.RequestLimitItem;
 import com.codingcube.simpleauth.limit.dynamic.RequestLimitItemProvider;
+import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
+import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.logging.Log;
@@ -59,33 +62,20 @@ public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
             final List<String> pathList = limitItem.getPath();
             for (String path : pathList) {
                 if (antPathMatcher.match(path, requestURI)){
-                    //初始化参数
-                    final String item = AuthHandlerUtil.getSignStrategic(limitItem.getItemStrategic(), request, null, applicationContext);
-                    final String sign = AuthHandlerUtil.getSignStrategic(limitItem.getSignStrategic(), request, null, applicationContext);
-                    final Integer times = limitItem.getTimes();
-                    final Integer ban = limitItem.getBan();
-                    final Integer seconds = limitItem.getSeconds();
-                    Class<? extends TokenLimit> tokenLimit = limitItem.getTokenLimit();
-                    if (tokenLimit == CompleteLimit.class){
-                        tokenLimit = FunctionProper.getTokenLimitClass();
-                    }
-                    final Boolean effective = AuthHandlerUtil.getEffectiveStrategic(limitItem.getEffectiveStrategic(), request, null, o, applicationContext);
-                    if (!effective){
-                        LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
-                                limitItem.getSignStrategic(),sign,"dynamic limit",true,
-                                limitItem.getEffectiveStrategic(),false, true);
-                        log.debug(limitFormat.toString());
-                        return o;
-                    }
-                    final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, times, seconds, ban, tokenLimit);
-                    LogLimitFormat limitFormat = new LogLimitFormat(times, seconds, ban, item,
-                            limitItem.getSignStrategic(),sign,"dynamic limit",true,
-                            limitItem.getEffectiveStrategic(),true, addRecord);
+                    SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getSignStrategic());
+                    final String sign = signStrategic.sign(request, null);
+
+                    //Verify that this request is recorded.
+                    final SignStrategic itemStrategic= AuthHandlerUtil.getBean(applicationContext, limitItem.getItemStrategic());
+                    final String item = itemStrategic.sign(request, null);
+
+                    EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, limitItem.getEffectiveStrategic());
+                    final Boolean isEffective = effectiveStrategicInstance.effective(request,null, o);
+                    LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
+                            "annotation limit", true, limitItem.getEffectiveStrategic(), isEffective, true);
                     log.debug(limitFormat.toString());
-                    if (!addRecord){
-                        throw new AccessIsRestrictedException();
-                    }else {
-                        return o;
+                    if (!isEffective){
+                        LimitInfoUtil.delRecord(item, sign);
                     }
                 }
             }

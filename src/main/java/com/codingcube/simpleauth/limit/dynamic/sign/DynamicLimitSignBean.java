@@ -1,5 +1,6 @@
 package com.codingcube.simpleauth.limit.dynamic.sign;
 
+import com.codingcube.simpleauth.limit.dynamic.FilterLimitWebConfig;
 import com.codingcube.simpleauth.limit.dynamic.advice.DynamicLimitAdvice;
 import com.codingcube.simpleauth.logging.LogFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -11,5 +12,11 @@ public class DynamicLimitSignBean {
     @ConditionalOnMissingBean(DynamicLimitAdvice.class)
     public DynamicLimitAdvice filterAuthWebConfig(LogFactory logFactory){
         return new DynamicLimitAdvice(logFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FilterLimitWebConfig.class)
+    public FilterLimitWebConfig filterLimitWebConfig(LogFactory logFactory){
+        return new FilterLimitWebConfig();
     }
 }

@@ -28,7 +28,7 @@ public class Bean2Static {
                     FunctionProper.setTokenLimitClass((Class<? extends TokenLimit>) Class.forName(limitPlan));
                 } catch (ClassNotFoundException e) {
                     FunctionProper.setTokenLimitClass(CompleteLimit.class);
-                    throw new TargetNotFoundException("Initialization error, CompleteLimit has been assembled.");
+                    throw new TargetNotFoundException("Initialization error, CompleteLimit has been assembled.", e);
                 }
         }
     }

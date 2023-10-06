@@ -1,11 +1,13 @@
 package com.codingcube.simpleauth.autoconfig.xml;
 
+import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.autoconfig.domain.Limit;
 import com.codingcube.simpleauth.autoconfig.domain.Paths;
 import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
 import com.codingcube.simpleauth.autoconfig.execption.XMLParseException;
+import com.codingcube.simpleauth.limit.util.TokenLimit;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -14,7 +16,6 @@ import org.jdom2.input.SAXBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
             final Document build = saxBuilder.build(resourceAsStream);
             rootElement = build.getRootElement();
         } catch (JDOMException | IOException e) {
-            throw new XMLParseException("Configuration file '"+path+"' initialization error");
+            throw new XMLParseException("Configuration file '"+path+"' initialization error", e);
         }
         initAttr();
     }
@@ -100,7 +101,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
 
         handlerElementList.forEach(handlerElement -> {
             try {
-                final Handler handler = assemble(handlerElement, Handler.class);
+                final Handler handler = assembleHandler(handlerElement);
                 if (this.handlerMap.get(handler.getId()) != null){
                     throw new XMLParseException("The 'id' or 'name' ("+ handler.getId() +") attribute of the 'handler' tag is duplicated.");
                 }
@@ -116,15 +117,11 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         final List<Element> limitElementList = rootElement.getChildren("limit");
 
         limitElementList.forEach(limitElement -> {
-            try {
-                final Limit limit = assemble(limitElement, Limit.class);
-                if (this.limitMap.get(limit.getId()) != null){
-                    throw new XMLParseException("The 'id' or 'name' ("+ limit.getId() +") attribute of the 'handler' tag is duplicated.");
-                }
-                this.limitMap.put(limit.getId(), limit);
-            } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+            final Limit limit = assembleLimit(limitElement);
+            if (this.limitMap.get(limit.getId()) != null){
+                throw new XMLParseException("The 'id' or 'name' ("+ limit.getId() +") attribute of the 'handler' tag is duplicated.");
             }
+            this.limitMap.put(limit.getId(), limit);
         });
     }
 
@@ -137,26 +134,23 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         return configList;
     }
 
-    public <T> T assemble(Element element, Class<? extends T> t) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private Handler assembleHandler(Element element) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         final String clazz = this.getClazz(element);
         //初始化Id
         final String id = this.getId(element, clazz);
 
         //装配id 和class标签
-        final Constructor<?> constructor = t.getConstructor(String.class);
-        final Object o = constructor.newInstance(id);
-
-        final Method setClazz = t.getMethod("setClazz", String.class);
-        setClazz.invoke(o, clazz);
-
+        Handler handler = new Handler(id);
+        handler.setClazz(clazz);
 
         //装配scope标签
-        final Element scopeElement = element.getChild("scope");
-        if (scopeElement != null){
-            final Method setScope = t.getMethod("setScope", String.class);
-            setScope.invoke(o, scopeElement.getValue());
-        }
-
+        handler.setScope(this.parseStringValue(element.getChild("scope")));
+        //装配path
+        assemblePath(element, handler);
+        return handler;
+    }
+    private void assemblePath(Element element, Object obj){
+        final Class<?> objClazz = obj.getClass();
         //装配path标签
         final Element pathsElement = element.getChild("paths");
         if (pathsElement != null){
@@ -167,27 +161,58 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                 if (pathIdAttribute == null || "".equals(pathIdAttribute.getValue().trim())){
                     throw new XMLParseException("An empty 'paths' tag requires an 'id' attribute.");
                 }
-
-                final Method setPathId = t.getMethod("setPathId", String.class);
-                setPathId.invoke(o, pathIdAttribute.getValue().trim());
+                try {
+                    final Method setPathId = objClazz.getMethod("setPathId", String.class);
+                    setPathId.invoke(obj, pathIdAttribute.getValue().trim());
+                } catch (NoSuchMethodException| InvocationTargetException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }else {
                 //装配Path
                 final Paths paths = parsePathNoId(pathsElement);
 
-                final Method setPaths = t.getMethod("setPaths", Paths.class);
-                setPaths.invoke(o, paths);
+                try {
+                    final Method setPaths = objClazz.getMethod("setPaths", Paths.class);
+                    setPaths.invoke(obj, paths);
+                } catch (NoSuchMethodException| InvocationTargetException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
 
                 //查询是否注册Paths
                 if (paths.getId() != null){
-                    final Method setPathId = t.getMethod("setPathId", String.class);
-                    setPathId.invoke(o, paths.getId());
                     this.pathsMap.put(paths.getId(), paths);
                 }
             }
         }
-        return (T) o;
     }
 
+    private Limit assembleLimit(Element element){
+        //初始化Id
+        final String id = this.getId(element, "");
+        Limit limit = new Limit(id);
+
+        //Integer times;
+        limit.setTimes(this.parseIntegerValue(element.getChild("times")));
+        //Integer seconds;
+        limit.setSeconds(this.parseIntegerValue(element.getChild("seconds")));
+        //Integer ban;
+        limit.setBan(this.parseIntegerValue(element.getChild("ban")));
+        //String item;
+        limit.setItemStrategic(this.parseStringValue(element.getChild("itemStrategic")));
+        //String signStrategic;
+        limit.setSignStrategic(this.parseStringValue(element.getChild("signStrategic")));
+        //String effectiveStrategic;
+        limit.setEffectiveStrategic(this.parseStringValue(element.getChild("effectiveStrategic")));
+        //String tokenLimit;
+        limit.setTokenLimit(this.parseStringValue(element.getChild("tokenLimit")));
+        //Paths
+        assemblePath(element, limit);
+        return limit;
+    }
+
+    /**
+     * * 获取id(属性可以为id或者name)，都没有则默认为class标签内容
+     */
     private String getId(Element element, String defaultValue) {
         Attribute idAttribute = element.getAttribute("id");
         if (idAttribute == null){
@@ -200,15 +225,41 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         }
     }
 
+    /**
+     * * parse整数值
+     */
+    private Integer parseIntegerValue(Element element){
+        if (element == null){
+            return null;
+        }
+        return Integer.parseInt(element.getValue().trim());
+    }
+
+    /**
+     * * parse String值
+     */
+    private String parseStringValue(Element element){
+        if (element == null){
+            return null;
+        }
+        return element.getValue().trim();
+    }
+
+    /**
+     * 获取Class标签*
+     */
     private String getClazz(Element element){
         //检查&初始化 必要的标签
         final Element clazzElement = element.getChild("class");
         if (clazzElement == null || "".equals(clazzElement.getValue().trim())){
-            throw new XMLParseException("The 'paths' tag requires an 'class' tag.");
+            throw new XMLParseException("The 'handler' tag requires an 'class' tag.");
         }
         return clazzElement.getValue().trim();
     }
 
+    /**
+     * parsePaths标签（必须带有id属性）*
+     */
     private Paths parsePaths(Element pathsElement){
         final Paths paths = parsePathNoId(pathsElement);
         if (paths.getId() == null){
@@ -217,6 +268,9 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         return paths;
     }
 
+    /**
+     * parse可以没有id的Paths标签*
+     */
     private Paths parsePathNoId(Element pathsElement){
         final Attribute idAttribute = pathsElement.getAttribute("id");
         String id = null;
