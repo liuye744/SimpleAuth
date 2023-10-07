@@ -2,12 +2,10 @@ package com.codingcube.simpleauth.autoconfig.xml;
 
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
-import com.codingcube.simpleauth.autoconfig.domain.Handler;
-import com.codingcube.simpleauth.autoconfig.domain.Limit;
-import com.codingcube.simpleauth.autoconfig.domain.Paths;
-import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
+import com.codingcube.simpleauth.autoconfig.domain.*;
 import com.codingcube.simpleauth.autoconfig.execption.XMLParseException;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
+import org.apache.tomcat.util.security.MD5Encoder;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -18,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
     private List<String> configList;
     private Map<String, Paths> pathsMap;
     private Map<String, Handler> handlerMap;
+    private Map<String, HandlerChain> handlerChainMap;
     private Map<String, Limit> limitMap;
 
 
@@ -50,12 +50,14 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         this.pathsMap = new HashMap<>();
         this.handlerMap = new HashMap<>();
         this.limitMap = new HashMap<>();
+        this.handlerChainMap = new HashMap<>();
     }
 
     public void initAttr(SimpleAuthConfig simpleAuthConfig) {
         this.pathsMap = simpleAuthConfig.getPathsMap();
         this.handlerMap = simpleAuthConfig.getHandlerMap();
         this.limitMap = simpleAuthConfig.getLimitMap();
+        this.handlerChainMap = simpleAuthConfig.getHandlerChainMap();
     }
 
     @Override
@@ -100,16 +102,70 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         final List<Element> handlerElementList = rootElement.getChildren("handler");
 
         handlerElementList.forEach(handlerElement -> {
-            try {
-                final Handler handler = assembleHandler(handlerElement);
-                if (this.handlerMap.get(handler.getId()) != null){
-                    throw new XMLParseException("The 'id' or 'name' ("+ handler.getId() +") attribute of the 'handler' tag is duplicated.");
-                }
-                this.handlerMap.put(handler.getId(), handler);
-            } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+            final Handler handler = assembleHandler(handlerElement);
+            if (this.handlerMap.get(handler.getId()) != null){
+                throw new XMLParseException("The 'id' or 'name' ("+ handler.getId() +") attribute of the 'handler' tag is duplicated.");
             }
+            this.handlerMap.put(handler.getId(), handler);
         });
+    }
+
+    @Override
+    public void initHandlerChain() {
+        final List<Element> handlerChainElementList = rootElement.getChildren("handlerChain");
+        handlerChainElementList.forEach(handlerChainElement -> {
+            final Element list = handlerChainElement.getChild("list");
+            if (list == null){
+                throw new XMLParseException("Missing 'list' tag");
+            }
+            final List<Element> handlerElementList = list.getChildren("handler");
+            if (handlerElementList.size() == 0){
+                throw new XMLParseException("Missing 'handler' tag");
+            }
+            List<Handler> handlerList = new ArrayList<>();
+            handlerElementList.forEach(
+                    handlerElement -> handlerList.add(assembleHandlerChainHandler(handlerElement))
+            );
+            //初始化HandlerChain ID
+            String id = handlerChainElement.getAttributeValue("id");
+            if (id == null || "".equals(id)){
+                id = handlerChainElement.getAttributeValue("name");
+            }
+            if (id == null || "".equals(id)){
+                //HandlerChain的默认策略为 所有其内部注册的HandlerId相加的MD5值
+                StringBuilder sb = new StringBuilder();
+                handlerList.forEach(handler -> sb.append(handler).append("$"));
+                id = MD5Encoder.encode(sb.toString().getBytes(StandardCharsets.UTF_8));
+            }
+            final HandlerChain handlerChain = new HandlerChain(id, handlerList);
+            assemblePath(handlerChainElement, handlerChain);
+
+            if (this.handlerChainMap.get(handlerChain.getId()) != null){
+                throw new XMLParseException("handlerChain id is duplicated, or handlers in unnamed different handlerChain are all identical");
+            }
+            this.handlerChainMap.put(handlerChain.getId(), handlerChain);
+        });
+    }
+
+    private Handler assembleHandlerChainHandler(Element element){
+        final String id = getId(element);
+        if (id == null){
+            //ID为Class 缓存到handlerMap 查重报错
+            final Handler handler = assembleHandler(element);
+            this.handlerMap.putIfAbsent(handler.getId(), handler);
+            return handler;
+        }
+        final Element clazz = element.getChild("class");
+        if (clazz == null){
+            return new Handler(id);
+        }
+        final Handler handler = assembleHandler(element);
+        if (this.handlerMap.get(handler.getId()) != null) {
+            throw new XMLParseException("The handler in handlerChain id '"+handler.getId()+"' duplicated");
+        }else {
+            this.handlerMap.put(handler.getId(), handler);
+        }
+        return handler;
     }
 
     @Override
@@ -134,7 +190,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         return configList;
     }
 
-    private Handler assembleHandler(Element element) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private Handler assembleHandler(Element element){
         final String clazz = this.getClazz(element);
         //初始化Id
         final String id = this.getId(element, clazz);
@@ -149,6 +205,12 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         assemblePath(element, handler);
         return handler;
     }
+
+    /**
+     * 装配Paths*
+     * @param element paths的父标签
+     * @param obj 需要装配的对象
+     */
     private void assemblePath(Element element, Object obj){
         final Class<?> objClazz = obj.getClass();
         //装配path标签
@@ -223,6 +285,13 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         }else {
             return idAttribute.getValue();
         }
+    }
+    private String getId(Element element) {
+        Attribute idAttribute = element.getAttribute("id");
+        if (idAttribute == null){
+            idAttribute = element.getAttribute("name");
+        }
+        return idAttribute == null ? null:idAttribute.getValue();
     }
 
     /**

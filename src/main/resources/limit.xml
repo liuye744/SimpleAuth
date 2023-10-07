@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simpleauth>
+    <!--注册Limit-->
+    <limit name="MyLimit" id="MyLimit">
+        <times>1</times>
+		<seconds>2</seconds>
+		<ban>3</ban>
+<!--		<signStrategic>4</signStrategic>-->
+<!--		<item>5</item>-->
+<!--		<effectiveStrategic>6</effectiveStrategic>-->
+<!--		<tokenLimit>7</tokenLimit>-->
+        <paths id="myLimitPath">
+            <path>/say</path>
+            <path>/eat</path>
+        </paths>
+    </limit>
+</simpleauth>

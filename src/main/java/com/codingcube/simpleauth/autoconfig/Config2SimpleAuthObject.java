@@ -11,6 +11,7 @@ public interface Config2SimpleAuthObject {
     List<String> getConfig();
     void initPaths();
     void initHandler();
+    void initHandlerChain();
     void initLimit();
 
     default void init(){
@@ -18,5 +19,6 @@ public interface Config2SimpleAuthObject {
         initPaths();
         initHandler();
         initLimit();
+        initHandlerChain();
     }
 }

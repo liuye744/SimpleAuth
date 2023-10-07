@@ -2,10 +2,7 @@ package com.codingcube.simpleauth.autoconfig.factory;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
-import com.codingcube.simpleauth.autoconfig.domain.Handler;
-import com.codingcube.simpleauth.autoconfig.domain.Limit;
-import com.codingcube.simpleauth.autoconfig.domain.Paths;
-import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
+import com.codingcube.simpleauth.autoconfig.domain.*;
 import com.codingcube.simpleauth.autoconfig.execption.XMLParseException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -21,7 +18,7 @@ public class ConfigFactory {
 
     public ConfigFactory(Class<? extends Config2SimpleAuthObject> config2SimpleAuthObjectClazz) {
         this.config2SimpleAuthObjectClazz = config2SimpleAuthObjectClazz;
-        simpleAuthConfig = new SimpleAuthConfig(new HashMap<>(),new HashMap<>(),new HashMap<>());
+        simpleAuthConfig = new SimpleAuthConfig(new HashMap<>(),new HashMap<>(),new HashMap<>(), new HashMap<>());
     }
 
     public ConfigFactory(Class<? extends Config2SimpleAuthObject> config2SimpleAuthObjectClazz, SimpleAuthConfig simpleAuthConfig) {
@@ -79,6 +76,7 @@ public class ConfigFactory {
         final Map<String, Handler> handlerMap = simpleAuthConfig.getHandlerMap();
         final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();
         final Map<String, Paths> pathsMap = simpleAuthConfig.getPathsMap();
+        final Map<String, HandlerChain> handlerChainMap = simpleAuthConfig.getHandlerChainMap();
         handlerMap.forEach((key, value) ->{
             //装配Paths
             final String pathId = value.getPathId();
@@ -87,6 +85,10 @@ public class ConfigFactory {
             }
             //装配Clazz
             value.setHandlerClass(this.getClassForName (value.getClazz()));
+            //检查scope
+            if (value.getScope() == null){
+                value.setScope("singleton");
+            }
         });
         limitMap.forEach((key, value) ->{
             //装配Paths
@@ -107,13 +109,36 @@ public class ConfigFactory {
                 value.setTokenLimitClass(getClassForName(value.getTokenLimit()));
             }
         });
+        handlerChainMap.forEach(
+            (key, value) -> {
+                //装配Handler
+                final List<Handler> handlerList = value.getHandlerList();
+                for (int i = 0; i < handlerList.size(); i++) {
+                    Handler handler  =  handlerList.get(i);
+                    final String clazz = handler.getClazz();
+                    if (clazz == null || "".equals(clazz)){
+                        final Handler findHandler = handlerMap.get(handler.getId());
+                        if (findHandler == null){
+                            throw new XMLParseException();
+                        }
+                        handlerList.set(i, findHandler);
+                    }
+                }
+                //装配Paths
+                final String pathId = value.getPathId();
+                if (pathId != null){
+                    value.setPaths(pathsMap.get(pathId));
+                }
+            }
+        );
+
     }
 
     private <T> T getClassForName(String className){
         try {
             return (T)Class.forName(className);
         } catch (ClassNotFoundException e) {
-            throw new XMLParseException(className+" not find", e);
+            throw new XMLParseException("class:"+className+" not find", e);
         }
     }
 }
