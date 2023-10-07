@@ -18,7 +18,9 @@ public class FilterAuthWebAutoConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         if (AuthHandlerUtil.simpleAuthConfig != null){
-            registry.addInterceptor(new AutoConfigAuthInterceptor( applicationContext, logFactory)).addPathPatterns("/*").order(Integer.MAX_VALUE);
+            if (AuthHandlerUtil.simpleAuthConfig.getHandlerMap().size() != 0) {
+                registry.addInterceptor(new AutoConfigAuthInterceptor(applicationContext, logFactory)).addPathPatterns("/*").order(Integer.MAX_VALUE);
+            }
         }
     }
 }

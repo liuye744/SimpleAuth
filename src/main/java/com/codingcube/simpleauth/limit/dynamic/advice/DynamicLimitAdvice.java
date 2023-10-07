@@ -8,6 +8,7 @@ import com.codingcube.simpleauth.limit.dynamic.RequestLimitItemProvider;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
+import com.codingcube.simpleauth.limit.util.LimitHandlerUtil;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
@@ -56,30 +57,9 @@ public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
             return o;
         }
         final HttpServletRequest request = requestAttributes.getRequest();
-        final String requestURI = request.getRequestURI();
         final List<RequestLimitItem> requestLimitItem = requestLimitItemProvider.getRequestLimitItem();
-        for (RequestLimitItem limitItem : requestLimitItem) {
-            final List<String> pathList = limitItem.getPath();
-            for (String path : pathList) {
-                if (antPathMatcher.match(path, requestURI)){
-                    SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getSignStrategic());
-                    final String sign = signStrategic.sign(request, null);
-
-                    //Verify that this request is recorded.
-                    final SignStrategic itemStrategic= AuthHandlerUtil.getBean(applicationContext, limitItem.getItemStrategic());
-                    final String item = itemStrategic.sign(request, null);
-
-                    EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, limitItem.getEffectiveStrategic());
-                    final Boolean isEffective = effectiveStrategicInstance.effective(request,null, o);
-                    LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
-                            "annotation limit", true, limitItem.getEffectiveStrategic(), isEffective, true);
-                    log.debug(limitFormat.toString());
-                    if (!isEffective){
-                        LimitInfoUtil.delRecord(item, sign);
-                    }
-                }
-            }
-        }
+        LimitHandlerUtil.postHandlerRequestLimitItem(requestLimitItem, request,
+                antPathMatcher, applicationContext, log, o, "dynamic limit");
         return o;
     }
 }
