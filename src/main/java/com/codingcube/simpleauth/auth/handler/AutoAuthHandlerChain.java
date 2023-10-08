@@ -10,7 +10,7 @@ import java.util.List;
  * Authentication Handler Chain
  */
 public abstract class AutoAuthHandlerChain {
-    private final List<Object> autoAuthServiceList = new ArrayList<>();
+     protected List<Object> autoAuthServiceList = new ArrayList<>();
 
     public AutoAuthHandlerChain() {
         addChain();

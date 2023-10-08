@@ -1,5 +1,6 @@
 package com.codingcube.simpleauth.auth.autoconfig;
 
+import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.springframework.context.ApplicationContext;
@@ -17,8 +18,11 @@ public class FilterAuthWebAutoConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        if (AuthHandlerUtil.simpleAuthConfig != null){
-            if (AuthHandlerUtil.simpleAuthConfig.getHandlerMap().size() != 0) {
+        final SimpleAuthConfig simpleAuthConfig = AuthHandlerUtil.simpleAuthConfig;
+        if (simpleAuthConfig != null){
+            if (simpleAuthConfig.getHandlerMap().size() != 0
+                    ||
+                simpleAuthConfig.getHandlerChainMap().size() != 0) {
                 registry.addInterceptor(new AutoConfigAuthInterceptor(applicationContext, logFactory)).addPathPatterns("/*").order(Integer.MAX_VALUE);
             }
         }
