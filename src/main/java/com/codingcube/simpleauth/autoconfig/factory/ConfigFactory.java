@@ -1,9 +1,8 @@
 package com.codingcube.simpleauth.autoconfig.factory;
 
-import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.domain.*;
-import com.codingcube.simpleauth.autoconfig.execption.XMLParseException;
+import com.codingcube.simpleauth.autoconfig.execption.ConfigurationParseException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class ConfigFactory {
             initConfig(configPathList.get(processedNum));
             processedNum++;
             currentConfigList.forEach(item-> {
-                if (!item.contains(".xml")){
+                if (!item.contains(".xml") || !item.contains(".json")){
                     findAndAdd(configPathList,item+".xml");
                 }else {
                     findAndAdd(configPathList,item);
@@ -56,7 +55,7 @@ public class ConfigFactory {
             config2SimpleAuthObject.init();
             currentConfigList = config2SimpleAuthObject.getConfig();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new XMLParseException("Parser initialization error. Requires a constructor with only a String path.", e);
+            throw new ConfigurationParseException("Parser initialization error. Requires a constructor with only a String path.", e);
         }
     }
 
@@ -79,7 +78,7 @@ public class ConfigFactory {
         final Map<String, HandlerChain> handlerChainMap = simpleAuthConfig.getHandlerChainMap();
         handlerMap.forEach((key, value) ->{
             //装配Paths
-            final String pathId = value.getPathId();
+            final String pathId = value.getPathsId();
             if (pathId != null){
                 value.setPaths(pathsMap.get(pathId));
             }
@@ -119,7 +118,7 @@ public class ConfigFactory {
                     if (clazz == null || "".equals(clazz)){
                         final Handler findHandler = handlerMap.get(handler.getId());
                         if (findHandler == null){
-                            throw new XMLParseException();
+                            throw new ConfigurationParseException("Handler with id '"+handler.getId()+"'not found in the handlerChain configuration");
                         }
                         handlerList.set(i, findHandler);
                     }
@@ -138,7 +137,7 @@ public class ConfigFactory {
         try {
             return (T)Class.forName(className);
         } catch (ClassNotFoundException e) {
-            throw new XMLParseException("class:"+className+" not find", e);
+            throw new ConfigurationParseException("class:"+className+" not find", e);
         }
     }
 }

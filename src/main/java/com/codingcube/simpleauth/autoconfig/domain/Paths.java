@@ -1,10 +1,15 @@
 package com.codingcube.simpleauth.autoconfig.domain;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.util.List;
 
 public class Paths {
-    final private String id;
+    @JSONField(name = "id")
+    private String id;
+    @JSONField(name = "permission")
     private String permission;
+    @JSONField(name = "path")
     private List<String> path;
 
     public Paths(String id, List<String> path) {
@@ -16,6 +21,10 @@ public class Paths {
         this.id = id;
         this.permission = permission;
         this.path = path;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getPermission() {

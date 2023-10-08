@@ -1,11 +1,17 @@
 package com.codingcube.simpleauth.autoconfig.domain;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.util.List;
 
 public class HandlerChain {
+    @JSONField(name = "tokenLimit")
     String id;
+    @JSONField(name = "list")
     List<Handler> handlerList;
+    @JSONField(name = "pathId")
     String pathId;
+    @JSONField(name = "paths")
     Paths paths;
 
     public HandlerChain(String id) {
@@ -25,6 +31,10 @@ public class HandlerChain {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public List<Handler> getHandlerList() {

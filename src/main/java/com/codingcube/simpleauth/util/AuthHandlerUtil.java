@@ -8,6 +8,7 @@ import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
 import com.codingcube.simpleauth.autoconfig.factory.ConfigFactory;
+import com.codingcube.simpleauth.autoconfig.json.JSON2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.xml.XML2SimpleAuthObject;
 import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
@@ -46,11 +47,19 @@ public class AuthHandlerUtil {
     public static SimpleAuthConfig simpleAuthConfig;
 
     static {
-        final InputStream simpleauthXml = AuthHandlerUtil.class.getClassLoader().getResourceAsStream("simpleauth.xml");
-        if (simpleauthXml != null){
-            //初始化SimpleAuthBean
+        InputStream simpleauthFile = AuthHandlerUtil.class.getClassLoader().getResourceAsStream("simpleauth.xml");
+        if (simpleauthFile != null){
             ConfigFactory factory = new ConfigFactory(XML2SimpleAuthObject.class);
             simpleAuthConfig = factory.getConfig("simpleauth.xml");
+        }else {
+            simpleauthFile = AuthHandlerUtil.class.getClassLoader().getResourceAsStream("simpleauth.json");
+            ConfigFactory factory = new ConfigFactory(JSON2SimpleAuthObject.class);
+            simpleAuthConfig = factory.getConfig("simpleauth.json");
+        }
+
+        if (simpleAuthConfig != null){
+            //初始化SimpleAuthBean
+
 
             //初始化handler Limit Clazz2Id
             //handler

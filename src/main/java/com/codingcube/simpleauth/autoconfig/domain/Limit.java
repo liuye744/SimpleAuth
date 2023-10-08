@@ -1,5 +1,6 @@
 package com.codingcube.simpleauth.autoconfig.domain;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.codingcube.simpleauth.auth.strategic.DefaultItemStrategic;
 import com.codingcube.simpleauth.auth.strategic.DefaultSignStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
@@ -9,19 +10,29 @@ import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 
 public class Limit {
+    @JSONField(name = "id")
     private String id;
+    @JSONField(name = "times")
     private Integer times;
+    @JSONField(name = "seconds")
     private Integer seconds;
+    @JSONField(name = "ban")
     private Integer ban;
+    @JSONField(name = "itemStrategic")
     private String itemStrategic;
     private Class<? extends SignStrategic> itemStrategicClass;
+    @JSONField(name = "signStrategic")
     private String signStrategic;
     private Class<? extends SignStrategic> signStrategicClass;
+    @JSONField(name = "effectiveStrategic")
     private String effectiveStrategic;
     private Class<? extends EffectiveStrategic> effectiveStrategicClass;
+    @JSONField(name = "tokenLimit")
     private String tokenLimit;
     private Class<? extends TokenLimit> tokenLimitClass;
+    @JSONField(name = "pathsId")
     private String pathId;
+    @JSONField(name = "paths")
     private Paths paths;
 
     public Limit(String id) {
@@ -49,6 +60,10 @@ public class Limit {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Integer getTimes() {

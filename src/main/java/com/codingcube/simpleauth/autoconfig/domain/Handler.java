@@ -1,21 +1,27 @@
 package com.codingcube.simpleauth.autoconfig.domain;
 
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 
 public class Handler {
-    final private String id;
+    @JSONField(name = "id")
+    private String id;
+    @JSONField(name = "class")
     private String clazz;
     private Class<? extends AutoAuthHandler> handlerClass;
+    @JSONField(name = "scope")
     private String scope;
-    private String pathId;
+    @JSONField(name = "pathsId")
+    private String pathsId;
+    @JSONField(name = "paths")
     private Paths paths;
 
-    public Handler(String id, String clazz, String scope, String pathId) {
+    public Handler(String id, String clazz, String scope, String pathsId) {
         this.id = id;
         this.clazz = clazz;
         this.scope = scope;
-        this.pathId = pathId;
+        this.pathsId = pathsId;
     }
 
     public Class<? extends AutoAuthHandler> getHandlerClass() {
@@ -26,16 +32,18 @@ public class Handler {
         this.handlerClass = handlerClass;
     }
 
-    public Handler(String id, String pathId) {
+    public Handler(String id, String pathsId) {
         this.id = id;
-        this.pathId = pathId;
+        this.pathsId = pathsId;
     }
 
     public Handler(String id) {
         this.id = id;
     }
 
-
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getClazz() {
         return clazz;
@@ -53,12 +61,12 @@ public class Handler {
         this.scope = scope;
     }
 
-    public String getPathId() {
-        return pathId;
+    public String getPathsId() {
+        return pathsId;
     }
 
-    public void setPathId(String pathId) {
-        this.pathId = pathId;
+    public void setPathsId(String pathsId) {
+        this.pathsId = pathsId;
     }
 
     public Paths getPaths() {

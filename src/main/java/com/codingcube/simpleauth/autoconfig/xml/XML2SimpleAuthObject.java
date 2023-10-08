@@ -11,16 +11,14 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.springframework.util.DigestUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
     private final Element rootElement;
@@ -135,7 +133,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                 //HandlerChain的默认策略为 所有其内部注册的HandlerId相加的MD5值
                 StringBuilder sb = new StringBuilder();
                 handlerList.forEach(handler -> sb.append(handler).append("$"));
-                id = MD5Encoder.encode(sb.toString().getBytes(StandardCharsets.UTF_8));
+                id = DigestUtils.md5DigestAsHex(sb.toString().getBytes(StandardCharsets.UTF_8));
             }
             final HandlerChain handlerChain = new HandlerChain(id, handlerList);
             assemblePath(handlerChainElement, handlerChain);
@@ -250,7 +248,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
 
     private Limit assembleLimit(Element element){
         //初始化Id
-        final String id = this.getId(element, "");
+        final String id = this.getId(element, UUID.randomUUID().toString());
         Limit limit = new Limit(id);
 
         //Integer times;
