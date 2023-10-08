@@ -4,8 +4,8 @@ import com.codingcube.simpleauth.autoconfig.domain.HandlerChain;
 
 import java.util.List;
 
-public class DynamicHandlerChain extends AutoAuthHandlerChain {
-    public DynamicHandlerChain(List<Object> autoAuthServiceList) {
+public class ProfileConfigurationHandlerChain extends AutoAuthHandlerChain {
+    public ProfileConfigurationHandlerChain(List<Object> autoAuthServiceList) {
         this.autoAuthServiceList = autoAuthServiceList;
     }
 

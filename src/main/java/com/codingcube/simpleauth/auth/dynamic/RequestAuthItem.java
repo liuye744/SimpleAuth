@@ -15,6 +15,8 @@ public class RequestAuthItem {
     private String permission;
     private Class<? extends AutoAuthHandler> handlerClass;
     private Class<? extends AutoAuthHandlerChain> handlerChainClass;
+    private AutoAuthHandlerChain handlerChain;
+    private AutoAuthHandler handler;
 
     public RequestAuthItem(List<String> path, String permission) {
         this.path = path;
@@ -57,6 +59,18 @@ public class RequestAuthItem {
         this.handlerClass = handlerClass;
     }
 
+    public RequestAuthItem(List<String> path, String permission, AutoAuthHandlerChain handlerChain) {
+        this.path = path;
+        this.permission = permission;
+        this.handlerChain = handlerChain;
+    }
+
+    public RequestAuthItem(List<String> path, String permission, AutoAuthHandler handler) {
+        this.path = path;
+        this.permission = permission;
+        this.handler = handler;
+    }
+
     public String getPermission() {
         return permission;
     }
@@ -89,12 +103,30 @@ public class RequestAuthItem {
         this.path = path;
     }
 
+    public AutoAuthHandlerChain getHandlerChain() {
+        return handlerChain;
+    }
+
+    public void setHandlerChain(AutoAuthHandlerChain handlerChain) {
+        this.handlerChain = handlerChain;
+    }
+
+    public AutoAuthHandler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(AutoAuthHandler handler) {
+        this.handler = handler;
+    }
+
     @Override
     public String toString() {
-        return "RequestAuthItem{" + "path='" + path + '\'' +
+        return "RequestAuthItem{" + "path=" + path +
                 ", permission='" + permission + '\'' +
                 ", handlerClass=" + handlerClass +
                 ", handlerChainClass=" + handlerChainClass +
+                ", handlerChain=" + handlerChain +
+                ", handler=" + handler +
                 '}';
     }
 }

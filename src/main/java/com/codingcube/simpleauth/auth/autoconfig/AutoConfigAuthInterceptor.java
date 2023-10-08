@@ -1,6 +1,8 @@
 package com.codingcube.simpleauth.auth.autoconfig;
 
 import com.codingcube.simpleauth.auth.dynamic.RequestAuthItem;
+import com.codingcube.simpleauth.auth.handler.ProfileConfigurationHandlerChain;
+import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
@@ -33,9 +35,14 @@ public class AutoConfigAuthInterceptor implements HandlerInterceptor{
         );
         //handlerChain
         AuthHandlerUtil.simpleAuthConfig.getHandlerChainMap().forEach(
-                (key, value) -> value.getHandlerList().forEach(handler -> requestAuthItem.add(new RequestAuthItem(value.getPaths().getPath(),
-                        value.getPaths().getPermission(),
-                        handler.getHandlerClass())))
+                (key, value) -> {
+                    List<Object> handlerClassList = new ArrayList<>();
+                    final List<Handler> handlerList = value.getHandlerList();
+                    handlerList.forEach(item -> handlerClassList.add(item.getHandlerClass()));
+                    requestAuthItem.add(new RequestAuthItem(value.getPaths().getPath(),
+                            value.getPaths().getPermission(),
+                            new ProfileConfigurationHandlerChain(handlerClassList)));
+                }
         );
     }
 

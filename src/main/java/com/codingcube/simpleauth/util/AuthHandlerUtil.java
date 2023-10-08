@@ -242,8 +242,11 @@ public class AuthHandlerUtil {
                     final String permission = authItem.getPermission();
                     final Class<? extends AutoAuthHandler> handlerClass = authItem.getHandlerClass();
                     final Class<? extends AutoAuthHandlerChain> handlerChainClass = authItem.getHandlerChainClass();
-
-                    if (handlerClass != null){
+                    final AutoAuthHandler handler = authItem.getHandler();
+                    final AutoAuthHandlerChain handlerChain = authItem.getHandlerChain();
+                    if (handlerChain != null){
+                        AuthHandlerUtil.handlerChain(handlerChain, applicationContext, request, permission, log, source);
+                    }else if (handlerClass != null){
                         //deal with Handler
                         AuthHandlerUtil.handler(request, permission, handlerClass, applicationContext, log, source);
                     }else if (handlerChainClass != null){
