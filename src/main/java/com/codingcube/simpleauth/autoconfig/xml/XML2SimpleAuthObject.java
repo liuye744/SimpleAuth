@@ -3,6 +3,7 @@ package com.codingcube.simpleauth.autoconfig.xml;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.domain.*;
+import com.codingcube.simpleauth.autoconfig.execption.JSONParseException;
 import com.codingcube.simpleauth.autoconfig.execption.XMLParseException;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 import org.apache.tomcat.util.security.MD5Encoder;
@@ -225,7 +226,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                     final Method setPathId = objClazz.getMethod("setPathId", String.class);
                     setPathId.invoke(obj, pathIdAttribute.getValue().trim());
                 } catch (NoSuchMethodException| InvocationTargetException | IllegalAccessException e) {
-                    e.printStackTrace();
+                    throw new XMLParseException(e);
                 }
             }else {
                 //装配Path
@@ -235,7 +236,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                     final Method setPaths = objClazz.getMethod("setPaths", Paths.class);
                     setPaths.invoke(obj, paths);
                 } catch (NoSuchMethodException| InvocationTargetException | IllegalAccessException e) {
-                    e.printStackTrace();
+                    throw new XMLParseException(e);
                 }
 
                 //查询是否注册Paths

@@ -15,6 +15,8 @@ import org.springframework.util.DigestUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -38,12 +40,12 @@ public class JSON2SimpleAuthObject implements Config2SimpleAuthObject {
                 sb.append(new String(read));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new JSONParseException(path + " initialization error.");
         }
         try {
             this.jsonObject = new JSONObject(sb.toString());
         } catch (JSONException e) {
-            throw new JSONParseException(e);
+            throw new JSONParseException(path + " formatting error",e);
         }
 
         this.handlerMap = new HashMap<>();
@@ -113,18 +115,7 @@ public class JSON2SimpleAuthObject implements Config2SimpleAuthObject {
                             handler.setId(handler.getClazz());
                         }
 
-                        if (handler.getPaths() != null){
-                            //互通外部的PathsId 与 Paths 内部Id
-                            if (handler.getPaths().getId() !=null
-                                    && handler.getPathsId() == null){
-                                handler.setPathsId(handler.getPaths().getId());
-                            }
-                            if (handler.getPaths().getId() == null
-                                    && handler.getPathsId() != null){
-                                handler.getPaths().setId(handler.getPathsId());
-                            }
-                            this.pathsMap.computeIfAbsent(handler.getPathsId(), k -> handler.getPaths());
-                        }
+                        assemblePaths(handler);
                         this.handlerMap.put(handler.getId(), handler);
                     }
                 } catch (JSONException e) {
@@ -169,18 +160,7 @@ public class JSON2SimpleAuthObject implements Config2SimpleAuthObject {
                             }
                         }
                         //装配Path
-                        if (handlerChain.getPaths() != null){
-                            //互通外部的PathsId 与 Paths 内部Id
-                            if (handlerChain.getPaths().getId() !=null
-                                    && handlerChain.getPathId() == null){
-                                handlerChain.setPathId(handlerChain.getPaths().getId());
-                            }
-                            if (handlerChain.getPaths().getId() == null
-                                    && handlerChain.getPathId() != null){
-                                handlerChain.getPaths().setId(handlerChain.getPathId());
-                            }
-                            this.pathsMap.computeIfAbsent(handlerChain.getPathId(), k -> handlerChain.getPaths());
-                        }
+                        assemblePaths(handlerChain);
                         this.handlerChainMap.put(handlerChain.getId(), handlerChain);
                     }
                 } catch (JSONException e) {
@@ -208,18 +188,7 @@ public class JSON2SimpleAuthObject implements Config2SimpleAuthObject {
                         limit.setTokenLimit(limit.getTokenLimit());
                         limit.setEffectiveStrategic(limit.getEffectiveStrategic());
                         //装配Path
-                        if (limit.getPaths() != null){
-                            //互通外部的PathsId 与 Paths 内部Id
-                            if (limit.getPaths().getId() !=null
-                                    && limit.getPathId() == null){
-                                limit.setPathId(limit.getPaths().getId());
-                            }
-                            if (limit.getPaths().getId() == null
-                                    && limit.getPathId() != null){
-                                limit.getPaths().setId(limit.getPathId());
-                            }
-                            this.pathsMap.computeIfAbsent(limit.getPathId(), k -> limit.getPaths());
-                        }
+                        assemblePaths(limit);
                         this.limitMap.put(limit.getId(), limit);
                     }
                 } catch (JSONException e) {
@@ -227,5 +196,30 @@ public class JSON2SimpleAuthObject implements Config2SimpleAuthObject {
                 }
             }
         }
+    }
+
+    private void assemblePaths(Object obj){
+        final Class<?> clazz = obj.getClass();
+        try {
+            final Method getPaths = clazz.getMethod("getPaths");
+            final Method getPathId = clazz.getMethod("getPathId");
+            final Method setPathId = clazz.getMethod("setPathId", String.class);
+            final Paths paths = (Paths) getPaths.invoke(obj);
+            if (paths != null){
+                if (paths.getId() !=null
+                        && getPathId.invoke(obj) == null){
+                    setPathId.invoke(obj, paths.getId());
+                }
+                if (paths.getId() == null
+                        && getPathId.invoke(obj) != null){
+                    paths.setId((String) getPathId.invoke(obj));
+                }
+                this.pathsMap.putIfAbsent((String) getPathId.invoke(obj), paths);
+            }
+
+        } catch (NoSuchMethodException |IllegalAccessException | InvocationTargetException e) {
+            throw new JSONParseException();
+        }
+
     }
 }

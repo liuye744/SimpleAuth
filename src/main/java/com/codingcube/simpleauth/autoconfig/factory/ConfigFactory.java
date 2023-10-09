@@ -78,7 +78,7 @@ public class ConfigFactory {
         final Map<String, HandlerChain> handlerChainMap = simpleAuthConfig.getHandlerChainMap();
         handlerMap.forEach((key, value) ->{
             //装配Paths
-            final String pathId = value.getPathsId();
+            final String pathId = value.getPathId();
             if (pathId != null){
                 value.setPaths(pathsMap.get(pathId));
             }

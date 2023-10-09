@@ -7,6 +7,7 @@ import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
+import com.codingcube.simpleauth.autoconfig.execption.ConfigurationParseException;
 import com.codingcube.simpleauth.autoconfig.factory.ConfigFactory;
 import com.codingcube.simpleauth.autoconfig.json.JSON2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.xml.XML2SimpleAuthObject;
@@ -304,11 +305,12 @@ public class AuthHandlerUtil {
                     final Object objInstance = clazz.getConstructor().newInstance();
                     beanMap.put(clazz.getName(), objInstance);
                 }
-            } catch ( NoSuchMethodException
-                    | InstantiationException
+            } catch ( NoSuchMethodException e) {
+                throw new ConfigurationParseException(clazz.getName() + " Requires a parameterless constructor, or remove the related configuration.");
+            } catch (InstantiationException
                     | IllegalAccessException
-                    | InvocationTargetException e) {
-                e.printStackTrace();
+                    | InvocationTargetException e){
+                throw new ConfigurationParseException(e);
             }
 
         }

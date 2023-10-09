@@ -13,15 +13,15 @@ public class Handler {
     @JSONField(name = "scope")
     private String scope;
     @JSONField(name = "pathsId")
-    private String pathsId;
+    private String pathId;
     @JSONField(name = "paths")
     private Paths paths;
 
-    public Handler(String id, String clazz, String scope, String pathsId) {
+    public Handler(String id, String clazz, String scope, String pathId) {
         this.id = id;
         this.clazz = clazz;
         this.scope = scope;
-        this.pathsId = pathsId;
+        this.pathId = pathId;
     }
 
     public Class<? extends AutoAuthHandler> getHandlerClass() {
@@ -32,9 +32,9 @@ public class Handler {
         this.handlerClass = handlerClass;
     }
 
-    public Handler(String id, String pathsId) {
+    public Handler(String id, String pathId) {
         this.id = id;
-        this.pathsId = pathsId;
+        this.pathId = pathId;
     }
 
     public Handler(String id) {
@@ -61,12 +61,12 @@ public class Handler {
         this.scope = scope;
     }
 
-    public String getPathsId() {
-        return pathsId;
+    public String getPathId() {
+        return pathId;
     }
 
-    public void setPathsId(String pathsId) {
-        this.pathsId = pathsId;
+    public void setPathId(String pathId) {
+        this.pathId = pathId;
     }
 
     public Paths getPaths() {

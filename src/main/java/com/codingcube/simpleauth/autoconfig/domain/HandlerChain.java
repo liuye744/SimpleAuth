@@ -9,7 +9,7 @@ public class HandlerChain {
     String id;
     @JSONField(name = "list")
     List<Handler> handlerList;
-    @JSONField(name = "pathId")
+    @JSONField(name = "pathsId")
     String pathId;
     @JSONField(name = "paths")
     Paths paths;
