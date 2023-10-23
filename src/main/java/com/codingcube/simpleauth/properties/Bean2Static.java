@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class Bean2Static {
 
-    public Bean2Static(LogProper logProper, FunctionProper functionProper) {
+    public Bean2Static(LogProper logProper, FunctionProper functionProper, AuthProper authProper) {
         LogProper.setStaticShowOptList(logProper.getShowOptList());
 
         FunctionProper.setHandlerCacheStatic(functionProper.isHandlerCache());
@@ -31,5 +31,8 @@ public class Bean2Static {
                     throw new TargetNotFoundException("Initialization error, CompleteLimit has been assembled.", e);
                 }
         }
+
+        AuthProper.setVerifyKeyStatic(authProper.getVerifyKey());
+        AuthProper.setVerifyValueStatic(authProper.getVerifyValue());
     }
 }
