@@ -1,5 +1,7 @@
 package com.codingcube.simpleauth.properties;
 
+import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
+import com.codingcube.simpleauth.autoconfig.execption.ConfigurationParseException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenBucket;
@@ -36,5 +38,12 @@ public class Bean2Static {
         AuthProper.setVerifyValueStatic(authProper.getVerifyValue());
 
         LogProper.setDateFormatStatic(logProper.getDateFormat());
+
+        try {
+            final Class<? extends AutoAuthHandler> clazz = (Class<? extends AutoAuthHandler>) Class.forName(authProper.getDefaultHandler());
+            AuthProper.setDefaultHandlerClazz(clazz);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationParseException(authProper.getDefaultHandler()+" not found");
+        }
     }
 }

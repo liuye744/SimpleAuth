@@ -8,8 +8,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
+import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
+import com.codingcube.simpleauth.properties.AuthProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -67,43 +69,43 @@ public class AutoAuth {
                          Class<? extends AutoAuthHandler>[] autoAuthServices,
                          Class<? extends AutoAuthHandlerChain>[] authentications,
                          String permissions
-    )throws Throwable{
+    )throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         //authenticate authority
         //If the AutoAuthChain is configured and autoAuthService is not configured, the DefaultAutoAuthService will be abandoned.
         boolean isExecuteDefault = true;
-        try {
-            if (
-                //authentications(AutoAuthChain) parameter is the default.
-                    !((Class[])IsAuthor.class.getMethod("handlerChain").getDefaultValue())[0].getName()
-                            .equals(authentications[0].getName())
-                            &&
-                            //authentications(AutoAuthService) parameter is not the default
-                            ((Class[])IsAuthor.class.getMethod("handler").getDefaultValue())[0].getName()
-                                    .equals(autoAuthServices[0].getName())
-            )
+        Class<?> defaultAnnotationHandlerClass = ((Class<?>[])IsAuthor.class.getMethod("handler").getDefaultValue())[0];
+        final Class<?> defaultAnnotationHandlerChainClass = ((Class<?>[]) IsAuthor.class.getMethod("handlerChain").getDefaultValue())[0];
 
-            {
-                isExecuteDefault = false;
-            }
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+        if (
+            //authentications(AutoAuthChain) parameter is the default.
+                !defaultAnnotationHandlerChainClass
+                        .equals(authentications[0])
+                        &&
+                        //authentications(AutoAuthService) parameter is not the default
+                        defaultAnnotationHandlerClass
+                                .equals(autoAuthServices[0])
+        )
+
+        {
+            isExecuteDefault = false;
         }
         //execute autoAuthService
         if (isExecuteDefault){
+            if (autoAuthServices.length != 0 && defaultAnnotationHandlerClass == autoAuthServices[0]){
+                autoAuthServices[0] = AuthProper.getDefaultHandlerClazz();
+            }
             Arrays.stream(autoAuthServices).forEach(
                     (item)-> AuthHandlerUtil.handler(request, permissions, item, applicationContext, log, "annotation")
             );
         }
         //execute autoAuthChain
         Arrays.stream(authentications).forEach(
-                (items)->{
+                (items) -> {
                     AutoAuthHandlerChain autoAuthHandlerChain = AuthHandlerUtil.getBean(applicationContext, items);
                     AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions, log, "annotation");
                 }
         );
         return joinPoint.proceed();
-
     }
-
 }

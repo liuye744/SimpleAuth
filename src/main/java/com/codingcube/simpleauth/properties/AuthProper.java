@@ -1,5 +1,7 @@
 package com.codingcube.simpleauth.properties;
 
+import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
+import com.codingcube.simpleauth.auth.handler.DefaultAuthHandler;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "simple-auth.auth")
@@ -8,6 +10,9 @@ public class AuthProper {
     private static String verifyKeyStatic = "simple_auth_verify_key";
     private String verifyValue = "8552D986272D4ACFAD5933D76262212B";
     private static String verifyValueStatic = "8552D986272D4ACFAD5933D76262212B";
+
+    private String defaultHandler = "com.codingcube.simpleauth.auth.handler.DefaultAuthHandler";
+    private static Class<? extends AutoAuthHandler> defaultHandlerClazz = DefaultAuthHandler.class;
 
     public String getVerifyKey() {
         return verifyKey;
@@ -39,5 +44,21 @@ public class AuthProper {
 
     public static void setVerifyValueStatic(String verifyValueStatic) {
         AuthProper.verifyValueStatic = verifyValueStatic;
+    }
+
+    public String getDefaultHandler() {
+        return defaultHandler;
+    }
+
+    public void setDefaultHandler(String defaultHandler) {
+        this.defaultHandler = defaultHandler;
+    }
+
+    public static Class<? extends AutoAuthHandler> getDefaultHandlerClazz() {
+        return defaultHandlerClazz;
+    }
+
+    public static void setDefaultHandlerClazz(Class<? extends AutoAuthHandler> defaultHandlerClazz) {
+        AuthProper.defaultHandlerClazz = defaultHandlerClazz;
     }
 }
