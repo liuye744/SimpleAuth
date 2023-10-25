@@ -34,5 +34,7 @@ public class Bean2Static {
 
         AuthProper.setVerifyKeyStatic(authProper.getVerifyKey());
         AuthProper.setVerifyValueStatic(authProper.getVerifyValue());
+
+        LogProper.setDateFormatStatic(logProper.getDateFormat());
     }
 }

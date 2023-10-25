@@ -54,8 +54,10 @@ public class AuthHandlerUtil {
             simpleAuthConfig = factory.getConfig("simpleauth.xml");
         }else {
             simpleauthFile = AuthHandlerUtil.class.getClassLoader().getResourceAsStream("simpleauth.json");
-            ConfigFactory factory = new ConfigFactory(JSON2SimpleAuthObject.class);
-            simpleAuthConfig = factory.getConfig("simpleauth.json");
+            if (simpleauthFile != null){
+                ConfigFactory factory = new ConfigFactory(JSON2SimpleAuthObject.class);
+                simpleAuthConfig = factory.getConfig("simpleauth.json");
+            }
         }
 
         if (simpleAuthConfig != null){

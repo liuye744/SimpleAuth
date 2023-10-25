@@ -7,6 +7,8 @@ import com.codingcube.simpleauth.properties.LogProper;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Deque;
 
@@ -22,6 +24,7 @@ public class LogLimitFormat {
     private final Class<? extends EffectiveStrategic> effectiveStrategic;
     private final boolean effective;
     private final boolean result;
+    private final DateTimeFormatter dateFormatter;
 
 
     public LogLimitFormat(int times, int seconds, int ban, String item, Class<? extends SignStrategic> signStrategic, String sign, String source, boolean judgeAfterReturn, Class<? extends EffectiveStrategic> effectiveStrategic, boolean effective, boolean result) {
@@ -36,6 +39,8 @@ public class LogLimitFormat {
         this.effectiveStrategic = effectiveStrategic;
         this.effective = effective;
         this.result = result;
+
+        this.dateFormatter = DateTimeFormatter.ofPattern(LogProper.getDateFormatStatic());
     }
 
     @Override
@@ -45,7 +50,8 @@ public class LogLimitFormat {
             optionList = new CompleteLimit();
         }
         StringBuilder sb = new StringBuilder("SimpleAuth limit => \r\n" + "\tmax-times: " + times + "\r\n" +
-                "\ttime: " + optionList.size() + "\r\n" +
+                "\ttime: "+dateFormatter.format(LocalDateTime.now())+"\r\n"+
+                "\tnumber of times: " + optionList.size() + "\r\n" +
                 "\tseconds: " + seconds + "\r\n" +
                 "\tban: " + ban + "\r\n" +
                 "\titem: " + item + "\r\n" +

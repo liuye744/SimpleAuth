@@ -8,6 +8,8 @@ public class LogProper {
     private String limitLogImpl = "NoLogging";
     private Boolean showOptList = false;
     private static Boolean staticShowOptList = false;
+    private String dateFormat = "yyyy-MM-dd HH:mm:ss";
+    private static String dateFormatStatic = "yyyy-MM-dd HH:mm:ss";
 
     public String getLogImpl() {
         return logImpl;
@@ -39,5 +41,21 @@ public class LogProper {
 
     public static void setStaticShowOptList(Boolean staticShowOptList) {
         LogProper.staticShowOptList = staticShowOptList;
+    }
+
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
+    public static String getDateFormatStatic() {
+        return dateFormatStatic;
+    }
+
+    public static void setDateFormatStatic(String dateFormatStatic) {
+        LogProper.dateFormatStatic = dateFormatStatic;
     }
 }
