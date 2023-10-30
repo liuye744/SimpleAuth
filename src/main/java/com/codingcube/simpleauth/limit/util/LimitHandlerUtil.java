@@ -1,20 +1,21 @@
 package com.codingcube.simpleauth.limit.util;
 
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
-import com.codingcube.simpleauth.exception.AccessIsRestrictedException;
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import com.codingcube.simpleauth.limit.dynamic.RequestLimitItem;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
-import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
 
 public class LimitHandlerUtil {
     public static void preHandlerRequestLimitItem(List<RequestLimitItem> requestLimitItem,
@@ -42,7 +43,11 @@ public class LimitHandlerUtil {
                         LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
                                 source, true, limitItem.getEffectiveStrategic(), true, false);
                         log.debug(limitFormat.toString());
-                        throw new AccessIsRestrictedException();
+                        final Class<? extends RejectedStratagem> reject = limitItem.getReject();
+                        final RejectedStratagem bean = AuthHandlerUtil.getBean(applicationContext, reject);
+                        bean.doRejected(request,
+                                ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
+                                limitFormat);
                     }
                 }
             }

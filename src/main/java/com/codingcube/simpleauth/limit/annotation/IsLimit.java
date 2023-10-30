@@ -2,8 +2,10 @@ package com.codingcube.simpleauth.limit.annotation;
 
 import com.codingcube.simpleauth.limit.strategic.DefaultEffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.DefaultSignStrategic;
+import com.codingcube.simpleauth.limit.strategic.DefaultLimitRejectedStratagem;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 
@@ -35,4 +37,6 @@ public @interface IsLimit {
     boolean judgeAfterReturn() default true;
     //Current limiting algorithm
     Class<? extends TokenLimit> tokenLimit() default CompleteLimit.class;
+    //rejectedStratagem
+    Class<? extends RejectedStratagem> rejected() default DefaultLimitRejectedStratagem.class;
 }

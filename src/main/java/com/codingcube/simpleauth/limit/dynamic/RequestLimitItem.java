@@ -4,7 +4,9 @@ import com.codingcube.simpleauth.auth.strategic.DefaultItemStrategic;
 import com.codingcube.simpleauth.auth.strategic.DefaultSignStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.limit.strategic.DefaultEffectiveStrategic;
+import com.codingcube.simpleauth.limit.strategic.DefaultLimitRejectedStratagem;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 
@@ -20,6 +22,7 @@ public class RequestLimitItem {
     private Class<? extends SignStrategic> signStrategic = DefaultSignStrategic.class;
     private Class<? extends EffectiveStrategic> effectiveStrategic = DefaultEffectiveStrategic.class;
     private Class<? extends TokenLimit> tokenLimit = CompleteLimit.class;
+    private Class<? extends RejectedStratagem> reject = DefaultLimitRejectedStratagem.class;
 
     public RequestLimitItem(List<String> path, Integer times, Integer seconds, Integer ban, Class<? extends SignStrategic> itemStrategic, Class<? extends SignStrategic> signStrategic, Class<? extends EffectiveStrategic> effectiveStrategic) {
         this.path = path;
@@ -67,6 +70,18 @@ public class RequestLimitItem {
         this.signStrategic = signStrategic;
         this.effectiveStrategic = effectiveStrategic;
         this.tokenLimit = tokenLimit;
+    }
+
+    public RequestLimitItem(List<String> path, Integer times, Integer seconds, Integer ban, Class<? extends SignStrategic> itemStrategic, Class<? extends SignStrategic> signStrategic, Class<? extends EffectiveStrategic> effectiveStrategic, Class<? extends TokenLimit> tokenLimit, Class<? extends RejectedStratagem> reject) {
+        this.path = path;
+        this.times = times;
+        this.seconds = seconds;
+        this.ban = ban;
+        this.itemStrategic = itemStrategic;
+        this.signStrategic = signStrategic;
+        this.effectiveStrategic = effectiveStrategic;
+        this.tokenLimit = tokenLimit;
+        this.reject = reject;
     }
 
     public Class<? extends TokenLimit> getTokenLimit() {
@@ -131,5 +146,13 @@ public class RequestLimitItem {
 
     public void setEffectiveStrategic(Class<? extends EffectiveStrategic> effectiveStrategic) {
         this.effectiveStrategic = effectiveStrategic;
+    }
+
+    public Class<? extends RejectedStratagem> getReject() {
+        return reject;
+    }
+
+    public void setReject(Class<? extends RejectedStratagem> reject) {
+        this.reject = reject;
     }
 }

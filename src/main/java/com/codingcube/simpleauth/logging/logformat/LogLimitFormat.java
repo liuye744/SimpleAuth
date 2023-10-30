@@ -67,4 +67,48 @@ public class LogLimitFormat {
         sb.append("\tPass or not: ").append(result);
         return sb.toString();
     }
+
+    public int getTimes() {
+        return times;
+    }
+
+    public int getSeconds() {
+        return seconds;
+    }
+
+    public int getBan() {
+        return ban;
+    }
+
+    public String getItem() {
+        return item;
+    }
+
+    public Class<? extends SignStrategic> getSignStrategic() {
+        return signStrategic;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public boolean isJudgeAfterReturn() {
+        return judgeAfterReturn;
+    }
+
+    public Class<? extends EffectiveStrategic> getEffectiveStrategic() {
+        return effectiveStrategic;
+    }
+
+    public boolean isEffective() {
+        return effective;
+    }
+
+    public boolean isResult() {
+        return result;
+    }
 }
