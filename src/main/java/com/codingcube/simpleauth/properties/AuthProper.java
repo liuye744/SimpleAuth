@@ -2,6 +2,8 @@ package com.codingcube.simpleauth.properties;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.handler.DefaultAuthHandler;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
+import com.codingcube.simpleauth.auth.strategic.DefaultAuthRejectedStratagem;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "simple-auth.auth")
@@ -13,6 +15,9 @@ public class AuthProper {
 
     private String defaultHandler = "com.codingcube.simpleauth.auth.handler.DefaultAuthHandler";
     private static Class<? extends AutoAuthHandler> defaultHandlerClazz = DefaultAuthHandler.class;
+
+    private String defaultRejected = "com.codingcube.simpleauth.auth.strategic.DefaultAuthRejectedStratagem";
+    private static Class<? extends AuthRejectedStratagem> defaultRejectedClazz = DefaultAuthRejectedStratagem.class;
 
     public String getVerifyKey() {
         return verifyKey;
@@ -60,5 +65,21 @@ public class AuthProper {
 
     public static void setDefaultHandlerClazz(Class<? extends AutoAuthHandler> defaultHandlerClazz) {
         AuthProper.defaultHandlerClazz = defaultHandlerClazz;
+    }
+
+    public String getDefaultRejected() {
+        return defaultRejected;
+    }
+
+    public void setDefaultRejected(String defaultRejected) {
+        this.defaultRejected = defaultRejected;
+    }
+
+    public static Class<? extends AuthRejectedStratagem> getDefaultRejectedClazz() {
+        return defaultRejectedClazz;
+    }
+
+    public static void setDefaultRejectedClazz(Class<? extends AuthRejectedStratagem> defaultRejectedClazz) {
+        AuthProper.defaultRejectedClazz = defaultRejectedClazz;
     }
 }

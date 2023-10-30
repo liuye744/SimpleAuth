@@ -4,7 +4,9 @@ import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
 import com.codingcube.simpleauth.auth.interceptor.AutoAuthChainInterceptor;
 import com.codingcube.simpleauth.auth.interceptor.AutoAuthInterceptor;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.logging.LogFactory;
+import com.codingcube.simpleauth.properties.AuthProper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
@@ -36,7 +38,10 @@ public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
      * @return InterceptorRegistration
      */
     public InterceptorRegistration addAuthHandler(Class<? extends AutoAuthHandler> autoAuthHandler){
-        return registry.addInterceptor(new AutoAuthInterceptor(autoAuthHandler, applicationContext, logFactory));
+        return registry.addInterceptor(new AutoAuthInterceptor(autoAuthHandler,
+                applicationContext,
+                logFactory,
+                AuthProper.getDefaultRejectedClazz()));
     }
 
     /**
@@ -45,7 +50,10 @@ public abstract class SimpleAuthWebConfig implements WebMvcConfigurer {
      * @return InterceptorRegistration
      */
     public InterceptorRegistration addAuthHandler(String handlerBeanName){
-        return registry.addInterceptor(new AutoAuthInterceptor(handlerBeanName, applicationContext));
+        return registry.addInterceptor(new AutoAuthInterceptor(handlerBeanName,
+                applicationContext,
+                logFactory,
+                AuthProper.getDefaultRejectedClazz()));
     }
 
     /**

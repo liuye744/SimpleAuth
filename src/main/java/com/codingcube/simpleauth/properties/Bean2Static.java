@@ -1,6 +1,7 @@
 package com.codingcube.simpleauth.properties;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.autoconfig.execption.ConfigurationParseException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
@@ -44,6 +45,13 @@ public class Bean2Static {
             AuthProper.setDefaultHandlerClazz(clazz);
         } catch (ClassNotFoundException e) {
             throw new ConfigurationParseException(authProper.getDefaultHandler()+" not found");
+        }
+
+        try {
+            final Class<? extends AuthRejectedStratagem> clazz = (Class<? extends AuthRejectedStratagem>) Class.forName(authProper.getDefaultRejected());
+            AuthProper.setDefaultRejectedClazz(clazz);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
         }
     }
 }

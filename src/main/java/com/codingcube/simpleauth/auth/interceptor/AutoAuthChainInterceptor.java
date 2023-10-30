@@ -5,6 +5,7 @@ import com.codingcube.simpleauth.auth.PermissionOperate;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
+import com.codingcube.simpleauth.properties.AuthProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
@@ -34,7 +35,7 @@ public class AutoAuthChainInterceptor  implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         AutoAuthHandlerChain autoAuthHandlerChain = AuthHandlerUtil.getBean(applicationContext, handlerChainClass);
         final String permissions = (String) request.getAttribute(PermissionOperate.PERMISSIONS);
-        AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions, log, "SimpleAuth Interceptor");
+        AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions, AuthProper.getDefaultRejectedClazz(), log, "SimpleAuth Interceptor");
         return true;
     }
 }

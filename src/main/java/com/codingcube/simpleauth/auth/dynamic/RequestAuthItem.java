@@ -2,6 +2,8 @@ package com.codingcube.simpleauth.auth.dynamic;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class RequestAuthItem {
     private Class<? extends AutoAuthHandlerChain> handlerChainClass;
     private AutoAuthHandlerChain handlerChain;
     private AutoAuthHandler handler;
+    private Class<? extends AuthRejectedStratagem> rejected;
 
     public RequestAuthItem(List<String> path, String permission) {
         this.path = path;
@@ -28,6 +31,16 @@ public class RequestAuthItem {
         list.add(path);
         this.path = list;
         this.permission = permission;
+    }
+
+    public RequestAuthItem(List<String> path, String permission, Class<? extends AutoAuthHandler> handlerClass, Class<? extends AutoAuthHandlerChain> handlerChainClass, AutoAuthHandlerChain handlerChain, AutoAuthHandler handler, Class<? extends AuthRejectedStratagem> rejected) {
+        this.path = path;
+        this.permission = permission;
+        this.handlerClass = handlerClass;
+        this.handlerChainClass = handlerChainClass;
+        this.handlerChain = handlerChain;
+        this.handler = handler;
+        this.rejected = rejected;
     }
 
     public RequestAuthItem(Class<? extends AutoAuthHandlerChain> handlerChainClass, List<String> path, String permission) {
@@ -117,6 +130,14 @@ public class RequestAuthItem {
 
     public void setHandler(AutoAuthHandler handler) {
         this.handler = handler;
+    }
+
+    public Class<? extends AuthRejectedStratagem> getRejected() {
+        return rejected;
+    }
+
+    public void setRejected(Class<? extends AuthRejectedStratagem> rejected) {
+        this.rejected = rejected;
     }
 
     @Override

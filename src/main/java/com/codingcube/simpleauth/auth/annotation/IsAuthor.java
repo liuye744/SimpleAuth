@@ -4,6 +4,10 @@ import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
 import com.codingcube.simpleauth.auth.handler.DefaultAuthHandler;
 import com.codingcube.simpleauth.auth.handler.DefaultAuthHandlerChain;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
+import com.codingcube.simpleauth.auth.strategic.DefaultAuthRejectedStratagem;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,4 +26,6 @@ public @interface IsAuthor {
     Class<? extends AutoAuthHandler>[] handler() default DefaultAuthHandler.class;
     //Multiple auth Handler Class
     Class<? extends AutoAuthHandlerChain>[] handlerChain() default DefaultAuthHandlerChain.class;
+    //rejected Stratagem
+    Class<? extends AuthRejectedStratagem> rejected() default DefaultAuthRejectedStratagem.class;
 }

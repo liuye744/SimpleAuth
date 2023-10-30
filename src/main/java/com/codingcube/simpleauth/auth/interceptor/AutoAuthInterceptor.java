@@ -1,5 +1,6 @@
 package com.codingcube.simpleauth.auth.interceptor;
 
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
@@ -10,12 +11,15 @@ import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author CodingCube<br>
@@ -27,17 +31,27 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
     private String handlerBeanName;
     private AutoAuthHandler handler;
     private final ApplicationContext applicationContext;
-    private Log log;
+    private final Class<? extends AuthRejectedStratagem> rejectedStratagem;
+    private final Log log;
 
-    public AutoAuthInterceptor(Class<? extends AutoAuthHandler> handlerClass, ApplicationContext applicationContext, LogFactory logFactory) {
+    public AutoAuthInterceptor(Class<? extends AutoAuthHandler> handlerClass,
+                               ApplicationContext applicationContext,
+                               LogFactory logFactory,
+                               Class<? extends AuthRejectedStratagem> rejectedStratagem) {
         this.handlerClass = handlerClass;
         this.applicationContext = applicationContext;
         this.log = logFactory.getLog(this.getClass());
+        this.rejectedStratagem = rejectedStratagem;
     }
 
-    public AutoAuthInterceptor(String handlerBeanName, ApplicationContext applicationContext) {
+    public AutoAuthInterceptor(String handlerBeanName,
+                               ApplicationContext applicationContext,
+                               LogFactory logFactory,
+                               Class<? extends AuthRejectedStratagem> rejectedStratagem) {
         this.handlerBeanName = handlerBeanName;
         this.applicationContext = applicationContext;
+        this.log = logFactory.getLog(this.getClass());
+        this.rejectedStratagem = rejectedStratagem;
     }
 
     @Override
@@ -61,7 +75,10 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
         LogAuthFormat logAuthFormat = new LogAuthFormat(request, "SimpleAuth Interceptor", author, this.handlerClass.getName(), permissionString);
         log.debug(logAuthFormat.toString());
         if (!author){
-            throw new PermissionsException("lack of permissions");
+            final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, this.rejectedStratagem);
+            rejectedStratagem.doRejected(request,
+                    ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
+                    logAuthFormat);
         }
         return true;
     }

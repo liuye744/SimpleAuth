@@ -4,6 +4,7 @@ import com.codingcube.simpleauth.annotation.SimpleCache;
 import com.codingcube.simpleauth.auth.dynamic.RequestAuthItem;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.autoconfig.domain.SimpleAuthConfig;
@@ -14,6 +15,7 @@ import com.codingcube.simpleauth.autoconfig.xml.XML2SimpleAuthObject;
 import com.codingcube.simpleauth.exception.PermissionsException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
@@ -27,6 +29,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -87,7 +90,13 @@ public class AuthHandlerUtil {
      * @param log log类
      * @param source 请求来源
      */
-    public static void handlerChain(AutoAuthHandlerChain autoAuthHandlerChain, ApplicationContext applicationContext, HttpServletRequest request, String permissions, Log log, String source){
+    public static void handlerChain(AutoAuthHandlerChain autoAuthHandlerChain,
+                                    ApplicationContext applicationContext,
+                                    HttpServletRequest request,
+                                    String permissions,
+                                    Class<? extends AuthRejectedStratagem> rejectClass,
+                                    Log log,
+                                    String source){
         final List<Object> autoAuthServiceList = autoAuthHandlerChain.getAutoAuthServiceList();
         autoAuthServiceList.forEach(
                 (item)->{
@@ -106,7 +115,10 @@ public class AuthHandlerUtil {
                     log.debug(logAuthFormat.toString());
                     if (!author){
                         //Permission not met
-                        throw new PermissionsException("lack of permissions");
+                        final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, rejectClass);
+                        rejectedStratagem.doRejected(request,
+                                ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
+                                logAuthFormat);
                     }
                 }
         );
@@ -122,13 +134,21 @@ public class AuthHandlerUtil {
      * @param log log类
      * @param source 请求来源
      */
-    public static void handler(HttpServletRequest request, String permission, Class<? extends AutoAuthHandler> handlerClass, ApplicationContext applicationContext, Log log, String source) {
+    public static void handler(HttpServletRequest request,
+                               String permission,
+                               Class<? extends AutoAuthHandler> handlerClass,
+                               ApplicationContext applicationContext,
+                               Class<? extends AuthRejectedStratagem> rejectClass,
+                               Log log, String source) {
         AutoAuthHandler authHandler = getBean(applicationContext, handlerClass);
         final boolean author = authHandler.isAuthor(request, permission);
         LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission);
         log.debug(logAuthFormat.toString());
         if (!author){
-            throw new PermissionsException("lack of permissions");
+            final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, rejectClass);
+            rejectedStratagem.doRejected(request,
+                    ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
+                    logAuthFormat);
         }
     }
 
@@ -256,15 +276,16 @@ public class AuthHandlerUtil {
                     final Class<? extends AutoAuthHandlerChain> handlerChainClass = authItem.getHandlerChainClass();
                     final AutoAuthHandler handler = authItem.getHandler();
                     final AutoAuthHandlerChain handlerChain = authItem.getHandlerChain();
+                    final Class<? extends AuthRejectedStratagem> rejected = authItem.getRejected();
                     if (handlerChain != null){
-                        AuthHandlerUtil.handlerChain(handlerChain, applicationContext, request, permission, log, source);
+                        AuthHandlerUtil.handlerChain(handlerChain, applicationContext, request, permission,rejected, log, source);
                     }else if (handlerClass != null){
                         //deal with Handler
-                        AuthHandlerUtil.handler(request, permission, handlerClass, applicationContext, log, source);
+                        AuthHandlerUtil.handler(request, permission, handlerClass, applicationContext,rejected, log, source);
                     }else if (handlerChainClass != null){
                         //deal with handlerChain
                         final AutoAuthHandlerChain authHandlerChain = AuthHandlerUtil.getBean(applicationContext, handlerChainClass);
-                        AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission, log, source);
+                        AuthHandlerUtil.handlerChain(authHandlerChain, applicationContext, request, permission,rejected, log, source);
                     }else {
                         //parameter error
                         throw new InvalidParameterException("Requires either AutoAuthHandler or AutoAuthHandlerChain");
