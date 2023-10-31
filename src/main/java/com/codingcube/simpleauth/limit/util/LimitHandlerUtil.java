@@ -48,6 +48,7 @@ public class LimitHandlerUtil {
                         bean.doRejected(request,
                                 ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
                                 limitFormat);
+                        return;
                     }
                 }
             }

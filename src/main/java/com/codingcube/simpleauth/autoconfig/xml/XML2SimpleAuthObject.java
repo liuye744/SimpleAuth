@@ -137,6 +137,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
                 id = DigestUtils.md5DigestAsHex(sb.toString().getBytes(StandardCharsets.UTF_8));
             }
             final HandlerChain handlerChain = new HandlerChain(id, handlerList);
+            handlerChain.setRejected(handlerChainElement.getChild("rejected").getValue());
             assemblePath(handlerChainElement, handlerChain);
 
             if (this.handlerChainMap.get(handlerChain.getId()) != null){
@@ -200,6 +201,8 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
 
         //装配scope标签
         handler.setScope(this.parseStringValue(element.getChild("scope")));
+        //rejected
+        handler.setRejected(this.parseStringValue(element.getChild("rejected")));
         //装配path
         assemblePath(element, handler);
         return handler;
@@ -266,6 +269,8 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         limit.setEffectiveStrategic(this.parseStringValue(element.getChild("effectiveStrategic")));
         //String tokenLimit;
         limit.setTokenLimit(this.parseStringValue(element.getChild("tokenLimit")));
+        //rejected
+        limit.setRejected(this.parseStringValue(element.getChild("rejected")));
         //Paths
         assemblePath(element, limit);
         return limit;

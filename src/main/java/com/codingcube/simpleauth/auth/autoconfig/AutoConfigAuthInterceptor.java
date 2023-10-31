@@ -29,7 +29,9 @@ public class AutoConfigAuthInterceptor implements HandlerInterceptor{
                     if (value.getPaths() != null){
                         requestAuthItem.add(new RequestAuthItem(value.getPaths().getPath(),
                                 value.getPaths().getPermission(),
-                                value.getHandlerClass()));
+                                value.getHandlerClass(),
+                                value.getRejectedClass()
+                        ));
                     }
                 }
         );
@@ -41,7 +43,9 @@ public class AutoConfigAuthInterceptor implements HandlerInterceptor{
                     handlerList.forEach(item -> handlerClassList.add(item.getHandlerClass()));
                     requestAuthItem.add(new RequestAuthItem(value.getPaths().getPath(),
                             value.getPaths().getPermission(),
-                            new ProfileConfigurationHandlerChain(handlerClassList)));
+                            new ProfileConfigurationHandlerChain(handlerClassList),
+                            value.getRejectedClass())
+                    );
                 }
         );
     }

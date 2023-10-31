@@ -1,11 +1,14 @@
 package com.codingcube.simpleauth.autoconfig.domain;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.auth.strategic.DefaultItemStrategic;
 import com.codingcube.simpleauth.auth.strategic.DefaultSignStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.limit.strategic.DefaultEffectiveStrategic;
+import com.codingcube.simpleauth.limit.strategic.DefaultLimitRejectedStratagem;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 
@@ -30,6 +33,9 @@ public class Limit {
     @JSONField(name = "tokenLimit")
     private String tokenLimit;
     private Class<? extends TokenLimit> tokenLimitClass;
+    @JSONField(name = "rejected")
+    private String rejected;
+    private Class<? extends RejectedStratagem> rejectedClass;
     @JSONField(name = "pathsId")
     private String pathId;
     @JSONField(name = "paths")
@@ -165,6 +171,22 @@ public class Limit {
 
     public void setTokenLimitClass(Class<? extends TokenLimit> tokenLimitClass) {
         this.tokenLimitClass = tokenLimitClass ==null ? CompleteLimit.class:tokenLimitClass;
+    }
+
+    public String getRejected() {
+        return rejected;
+    }
+
+    public void setRejected(String rejected) {
+        this.rejected = rejected;
+    }
+
+    public Class<? extends RejectedStratagem> getRejectedClass() {
+        return rejectedClass;
+    }
+
+    public void setRejectedClass(Class<? extends RejectedStratagem> rejectedClass) {
+        this.rejectedClass = rejectedClass ==null ? DefaultLimitRejectedStratagem.class:rejectedClass;
     }
 
     public Paths getPaths() {

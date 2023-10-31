@@ -3,6 +3,9 @@ package com.codingcube.simpleauth.autoconfig.domain;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
+import com.codingcube.simpleauth.auth.strategic.DefaultAuthRejectedStratagem;
+import com.codingcube.simpleauth.limit.strategic.DefaultEffectiveStrategic;
 
 public class Handler {
     @JSONField(name = "id")
@@ -10,6 +13,9 @@ public class Handler {
     @JSONField(name = "class")
     private String clazz;
     private Class<? extends AutoAuthHandler> handlerClass;
+    @JSONField(name = "rejected")
+    private String rejected;
+    private Class<? extends AuthRejectedStratagem> rejectedClass;
     @JSONField(name = "scope")
     private String scope;
     @JSONField(name = "pathsId")
@@ -79,5 +85,24 @@ public class Handler {
 
     public String getId() {
         return id;
+    }
+
+    public String getRejected() {
+        return rejected;
+    }
+
+    public void setRejected(String rejected) {
+        if (rejected == null){
+            this.rejectedClass = DefaultAuthRejectedStratagem.class;
+        }
+        this.rejected = rejected;
+    }
+
+    public Class<? extends AuthRejectedStratagem> getRejectedClass() {
+        return rejectedClass;
+    }
+
+    public void setRejectedClass(Class<? extends AuthRejectedStratagem> rejectedClass) {
+        this.rejectedClass = rejectedClass ==null ? DefaultAuthRejectedStratagem.class:rejectedClass;
     }
 }

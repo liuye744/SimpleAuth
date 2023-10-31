@@ -98,30 +98,28 @@ public class AuthHandlerUtil {
                                     Log log,
                                     String source){
         final List<Object> autoAuthServiceList = autoAuthHandlerChain.getAutoAuthServiceList();
-        autoAuthServiceList.forEach(
-                (item)->{
-                    AutoAuthHandler autoAuth;
-                    if (item instanceof String ){
-                        //item is BeanName
-                        autoAuth = applicationContext.getBean((String) item, AutoAuthHandler.class);
-                    }else if (item instanceof Class){
-                        //item is class of AutoAuthService
-                        autoAuth = getBean(applicationContext, (Class<? extends AutoAuthHandler>) item);
-                    }else {
-                        throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
-                    }
-                    final boolean author = autoAuth.isAuthor(request, permissions);
-                    LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+ " handlerChain "+autoAuthHandlerChain.getClass().getName(), author, autoAuth.getClass().getName(), permissions);
-                    log.debug(logAuthFormat.toString());
-                    if (!author){
-                        //Permission not met
-                        final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, rejectClass);
-                        rejectedStratagem.doRejected(request,
-                                ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
-                                logAuthFormat);
-                    }
-                }
-        );
+        for (Object item : autoAuthServiceList) {
+            AutoAuthHandler autoAuth;
+            if (item instanceof String) {
+                //item is BeanName
+                autoAuth = applicationContext.getBean((String) item, AutoAuthHandler.class);
+            } else if (item instanceof Class) {
+                //item is class of AutoAuthService
+                autoAuth = getBean(applicationContext, (Class<? extends AutoAuthHandler>) item);
+            } else {
+                throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
+            }
+            final boolean author = autoAuth.isAuthor(request, permissions);
+            LogAuthFormat logAuthFormat = new LogAuthFormat(request, source + " handlerChain " + autoAuthHandlerChain.getClass().getName(), author, autoAuth.getClass().getName(), permissions);
+            log.debug(logAuthFormat.toString());
+            if (!author) {
+                //Permission not met
+                final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, rejectClass);
+                rejectedStratagem.doRejected(request,
+                        ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
+                        logAuthFormat);
+            }
+        }
 
     }
 

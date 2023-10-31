@@ -83,7 +83,9 @@ public class ConfigFactory {
                 value.setPaths(pathsMap.get(pathId));
             }
             //装配Clazz
-            value.setHandlerClass(this.getClassForName (value.getClazz()));
+            value.setHandlerClass(this.getClassForName(value.getClazz()));
+            //装配rejected
+            value.setRejectedClass(this.getClassForName(value.getRejected()));
             //检查scope
             if (value.getScope() == null){
                 value.setScope("singleton");
@@ -107,6 +109,10 @@ public class ConfigFactory {
             if (value.getTokenLimitClass() == null){
                 value.setTokenLimitClass(getClassForName(value.getTokenLimit()));
             }
+            //装配TokenLimitClass
+            if (value.getRejectedClass() == null){
+                value.setRejectedClass(getClassForName(value.getRejected()));
+            }
         });
         handlerChainMap.forEach(
             (key, value) -> {
@@ -123,6 +129,8 @@ public class ConfigFactory {
                         handlerList.set(i, findHandler);
                     }
                 }
+                //装配rejected
+                value.setRejectedClass(this.getClassForName(value.getRejected()));
                 //装配Paths
                 final String pathId = value.getPathId();
                 if (pathId != null){
@@ -135,9 +143,15 @@ public class ConfigFactory {
 
     private <T> T getClassForName(String className){
         try {
-            return (T)Class.forName(className);
+            if (className == null){
+                return null;
+            }else {
+                return (T)Class.forName(className);
+            }
         } catch (ClassNotFoundException e) {
             throw new ConfigurationParseException("class:"+className+" not find", e);
+        } catch (ClassCastException e) {
+            return null;
         }
     }
 }

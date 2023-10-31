@@ -32,6 +32,7 @@ public class LogAuthFormat {
     @Override
     public String toString() {
         return "SimpleAuth auth => \r\n\turi: "+request.getRequestURI() +"\r\n"+
+                "\trequest hash: "+request.hashCode()+"\r\n"+
                 "\ttime: "+dateFormatter.format(LocalDateTime.now())+"\r\n"+
                 "\thandlerName: "+handlerName+"\r\n"+
                 "\tsource: "+source+"\r\n"+

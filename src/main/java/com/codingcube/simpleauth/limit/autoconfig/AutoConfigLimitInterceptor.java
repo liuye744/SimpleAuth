@@ -39,7 +39,8 @@ public class AutoConfigLimitInterceptor implements HandlerInterceptor {
                                 value.getItemStrategicClass(),
                                 value.getSignStrategicClass(),
                                 value.getEffectiveStrategicClass(),
-                                value.getTokenLimitClass()
+                                value.getTokenLimitClass(),
+                                value.getRejectedClass()
                         )
                 )
         );

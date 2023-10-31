@@ -52,7 +52,9 @@ public class AutoConfigLimitAdvice implements ResponseBodyAdvice<Object> {
                             value.getItemStrategicClass(),
                             value.getSignStrategicClass(),
                             value.getEffectiveStrategicClass(),
-                            value.getTokenLimitClass())
+                            value.getTokenLimitClass(),
+                            value.getRejectedClass()
+                            )
                     )
             );
         }
