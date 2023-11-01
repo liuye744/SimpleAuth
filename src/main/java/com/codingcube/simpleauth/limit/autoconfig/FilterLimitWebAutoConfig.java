@@ -2,6 +2,7 @@ package com.codingcube.simpleauth.limit.autoconfig;
 
 import com.codingcube.simpleauth.auth.autoconfig.AutoConfigAuthInterceptor;
 import com.codingcube.simpleauth.logging.LogFactory;
+import com.codingcube.simpleauth.properties.Bean2Static;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -18,6 +19,8 @@ public class FilterLimitWebAutoConfig  implements WebMvcConfigurer {
     private ApplicationContext applicationContext;
     @Resource
     private LogFactory logFactory;
+    @Resource
+    private Bean2Static bean2Static;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -32,6 +35,6 @@ public class FilterLimitWebAutoConfig  implements WebMvcConfigurer {
     @Bean
     @ConditionalOnMissingBean(AutoConfigLimitAdvice.class)
     public AutoConfigLimitAdvice autoConfigLimitAdvice(LogFactory logFactory){
-        return new AutoConfigLimitAdvice(logFactory);
+        return new AutoConfigLimitAdvice(logFactory, bean2Static);
     }
 }

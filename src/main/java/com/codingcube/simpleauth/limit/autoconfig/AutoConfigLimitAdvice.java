@@ -6,6 +6,7 @@ import com.codingcube.simpleauth.limit.dynamic.RequestLimitItem;
 import com.codingcube.simpleauth.limit.util.LimitHandlerUtil;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
+import com.codingcube.simpleauth.properties.Bean2Static;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodParameter;
@@ -39,7 +40,7 @@ public class AutoConfigLimitAdvice implements ResponseBodyAdvice<Object> {
         return true;
     }
 
-    public AutoConfigLimitAdvice(LogFactory logFactory) {
+    public AutoConfigLimitAdvice(LogFactory logFactory, Bean2Static bean2Static) {
         final SimpleAuthConfig simpleAuthConfig = AuthHandlerUtil.simpleAuthConfig;
         if (simpleAuthConfig != null && simpleAuthConfig.getLimitMap().size()!=0){
             final Map<String, Limit> limitMap = simpleAuthConfig.getLimitMap();

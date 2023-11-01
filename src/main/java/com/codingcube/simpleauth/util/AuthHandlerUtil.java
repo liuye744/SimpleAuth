@@ -62,11 +62,8 @@ public class AuthHandlerUtil {
                 simpleAuthConfig = factory.getConfig("simpleauth.json");
             }
         }
-
         if (simpleAuthConfig != null){
             //初始化SimpleAuthBean
-
-
             //初始化handler Limit Clazz2Id
             //handler
             {

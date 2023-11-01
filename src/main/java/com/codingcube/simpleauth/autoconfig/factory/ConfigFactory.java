@@ -3,6 +3,8 @@ package com.codingcube.simpleauth.autoconfig.factory;
 import com.codingcube.simpleauth.autoconfig.Config2SimpleAuthObject;
 import com.codingcube.simpleauth.autoconfig.domain.*;
 import com.codingcube.simpleauth.autoconfig.execption.ConfigurationParseException;
+import com.codingcube.simpleauth.properties.AuthProper;
+import com.codingcube.simpleauth.properties.LimitProper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -85,7 +87,11 @@ public class ConfigFactory {
             //装配Clazz
             value.setHandlerClass(this.getClassForName(value.getClazz()));
             //装配rejected
-            value.setRejectedClass(this.getClassForName(value.getRejected()));
+            if (value.getRejected() != null){
+                value.setRejectedClass(this.getClassForName(value.getRejected()));
+            }else {
+                value.setRejectedClass(AuthProper.getDefaultRejectedClazz());
+            }
             //检查scope
             if (value.getScope() == null){
                 value.setScope("singleton");
@@ -109,9 +115,11 @@ public class ConfigFactory {
             if (value.getTokenLimitClass() == null){
                 value.setTokenLimitClass(getClassForName(value.getTokenLimit()));
             }
-            //装配TokenLimitClass
-            if (value.getRejectedClass() == null){
+            //装配Rejected
+            if (value.getRejectedClass() != null){
                 value.setRejectedClass(getClassForName(value.getRejected()));
+            }else {
+                value.setRejectedClass(LimitProper.getDefaultRejectedClazz());
             }
         });
         handlerChainMap.forEach(
@@ -130,7 +138,11 @@ public class ConfigFactory {
                     }
                 }
                 //装配rejected
-                value.setRejectedClass(this.getClassForName(value.getRejected()));
+                if (value.getRejected() != null){
+                    value.setRejectedClass(this.getClassForName(value.getRejected()));
+                }else {
+                    value.setRejectedClass(AuthProper.getDefaultRejectedClazz());
+                }
                 //装配Paths
                 final String pathId = value.getPathId();
                 if (pathId != null){
