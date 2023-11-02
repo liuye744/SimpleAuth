@@ -30,7 +30,6 @@ public class LimitHandlerUtil {
             final List<String> pathList = limitItem.getPath();
             for (String path : pathList) {
                 if (antPathMatcher.match(path, requestURI)) {
-                    request.setAttribute(ACCORD_SIGN + source, limitItem);
                     //Create sign
                     SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getSignStrategic());
                     final String sign = signStrategic.sign(request, null);
@@ -38,6 +37,8 @@ public class LimitHandlerUtil {
                     //Verify that this request is recorded.
                     final SignStrategic itemStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getItemStrategic());
                     final String item = itemStrategic.sign(request, null);
+
+                    request.setAttribute(ACCORD_SIGN + source, new AttributeItem(limitItem, sign, item));
 
                     final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, limitItem.getTimes(),
                             limitItem.getSeconds(), limitItem.getBan(), limitItem.getTokenLimit());
@@ -62,16 +63,13 @@ public class LimitHandlerUtil {
                                                    Log log,
                                                    Object result,
                                                    String source){
-        RequestLimitItem limitItem  = (RequestLimitItem) request.getAttribute(ACCORD_SIGN + source);
+        final AttributeItem attributeItem = (AttributeItem) request.getAttribute(ACCORD_SIGN + source);
+        RequestLimitItem limitItem  = attributeItem.getLimitItem();
         if (limitItem == null){
             return;
         }
-        SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getSignStrategic());
-        final String sign = signStrategic.sign(request, null);
-
-        //Verify that this request is recorded.
-        final SignStrategic itemStrategic= AuthHandlerUtil.getBean(applicationContext, limitItem.getItemStrategic());
-        final String item = itemStrategic.sign(request, null);
+        final String sign = attributeItem.getSign();
+        final String item = attributeItem.getItem();
 
         EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, limitItem.getEffectiveStrategic());
         final Boolean isEffective = effectiveStrategicInstance.effective(request,null, result);
@@ -80,6 +78,29 @@ public class LimitHandlerUtil {
         log.debug(limitFormat.toString());
         if (!isEffective){
             LimitInfoUtil.delRecord(item, sign);
+        }
+    }
+    private static class AttributeItem{
+        final private RequestLimitItem limitItem;
+        final private String sign;
+        final private String item;
+
+        public AttributeItem(RequestLimitItem limitItem, String sign, String item) {
+            this.limitItem = limitItem;
+            this.sign = sign;
+            this.item = item;
+        }
+
+        public RequestLimitItem getLimitItem() {
+            return limitItem;
+        }
+
+        public String getSign() {
+            return sign;
+        }
+
+        public String getItem() {
+            return item;
         }
     }
 }
