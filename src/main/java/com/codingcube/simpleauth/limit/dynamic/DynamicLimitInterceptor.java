@@ -32,8 +32,7 @@ public class DynamicLimitInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         final List<RequestLimitItem> requestLimitItem = requestLimitItemProvider.getRequestLimitItem();
-        LimitHandlerUtil.preHandlerRequestLimitItem(requestLimitItem,antPathMatcher, request, applicationContext, log, "dynamic limit");
-
+        LimitHandlerUtil.preHandlerRequestLimitItem(requestLimitItem, antPathMatcher, request, applicationContext, log, "dynamic limit");
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -25,10 +26,7 @@ import java.util.List;
 @ConditionalOnProperty("simple-auth.func.dynamic-limit")
 public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
     @Resource
-    private RequestLimitItemProvider requestLimitItemProvider;
-    @Resource
     private ApplicationContext applicationContext;
-    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final Log log;
 
     @Override
@@ -42,14 +40,9 @@ public class DynamicLimitAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public Object beforeBodyWrite(Object o, MethodParameter methodParameter, MediaType mediaType, Class aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
-        final ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (requestAttributes == null){
-            return o;
-        }
-        final HttpServletRequest request = requestAttributes.getRequest();
-        final List<RequestLimitItem> requestLimitItem = requestLimitItemProvider.getRequestLimitItem();
-        LimitHandlerUtil.postHandlerRequestLimitItem(requestLimitItem, request,
-                antPathMatcher, applicationContext, log, o, "dynamic limit");
+        final HttpServletRequest request = ((ServletServerHttpRequest) serverHttpRequest).getServletRequest();
+        LimitHandlerUtil.postHandlerRequestLimitItem(request,
+                applicationContext, log, o, "dynamic limit");
         return o;
     }
 }

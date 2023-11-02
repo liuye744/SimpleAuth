@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -64,10 +65,10 @@ public class AutoConfigLimitAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public Object beforeBodyWrite(Object o, MethodParameter methodParameter, MediaType mediaType, Class aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+        final HttpServletRequest request = ((ServletServerHttpRequest) serverHttpRequest).getServletRequest();
 
-        LimitHandlerUtil.postHandlerRequestLimitItem(requestLimitItem, request,
-                antPathMatcher, applicationContext, log, o, "Profile configuration limit");
+        LimitHandlerUtil.postHandlerRequestLimitItem(request,
+                 applicationContext, log, o, "Profile configuration limit");
         return o;
     }
 

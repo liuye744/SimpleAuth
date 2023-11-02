@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class LimitHandlerUtil {
+    private final static String ACCORD_SIGN = "SIMPLEAUTH_VERIFY_SIGN";
     public static void preHandlerRequestLimitItem(List<RequestLimitItem> requestLimitItem,
                                                   AntPathMatcher antPathMatcher,
                                                   HttpServletRequest request,
@@ -29,6 +30,7 @@ public class LimitHandlerUtil {
             final List<String> pathList = limitItem.getPath();
             for (String path : pathList) {
                 if (antPathMatcher.match(path, requestURI)) {
+                    request.setAttribute(ACCORD_SIGN + source, limitItem);
                     //Create sign
                     SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getSignStrategic());
                     final String sign = signStrategic.sign(request, null);
@@ -55,35 +57,29 @@ public class LimitHandlerUtil {
         }
     }
 
-    public static void postHandlerRequestLimitItem(List<RequestLimitItem> requestLimitItem,
-                                                   HttpServletRequest request,
-                                                   AntPathMatcher antPathMatcher,
+    public static void postHandlerRequestLimitItem(HttpServletRequest request,
                                                    ApplicationContext applicationContext,
                                                    Log log,
                                                    Object result,
                                                    String source){
-        final String requestURI = request.getRequestURI();
-        for (RequestLimitItem limitItem : requestLimitItem) {
-            final List<String> pathList = limitItem.getPath();
-            for (String path : pathList) {
-                if (antPathMatcher.match(path, requestURI)){
-                    SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getSignStrategic());
-                    final String sign = signStrategic.sign(request, null);
+        RequestLimitItem limitItem  = (RequestLimitItem) request.getAttribute(ACCORD_SIGN + source);
+        if (limitItem == null){
+            return;
+        }
+        SignStrategic signStrategic = AuthHandlerUtil.getBean(applicationContext, limitItem.getSignStrategic());
+        final String sign = signStrategic.sign(request, null);
 
-                    //Verify that this request is recorded.
-                    final SignStrategic itemStrategic= AuthHandlerUtil.getBean(applicationContext, limitItem.getItemStrategic());
-                    final String item = itemStrategic.sign(request, null);
+        //Verify that this request is recorded.
+        final SignStrategic itemStrategic= AuthHandlerUtil.getBean(applicationContext, limitItem.getItemStrategic());
+        final String item = itemStrategic.sign(request, null);
 
-                    EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, limitItem.getEffectiveStrategic());
-                    final Boolean isEffective = effectiveStrategicInstance.effective(request,null, result);
-                    LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
-                            source, true, limitItem.getEffectiveStrategic(), isEffective, true);
-                    log.debug(limitFormat.toString());
-                    if (!isEffective){
-                        LimitInfoUtil.delRecord(item, sign);
-                    }
-                }
-            }
+        EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, limitItem.getEffectiveStrategic());
+        final Boolean isEffective = effectiveStrategicInstance.effective(request,null, result);
+        LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
+                source, true, limitItem.getEffectiveStrategic(), isEffective, true);
+        log.debug(limitFormat.toString());
+        if (!isEffective){
+            LimitInfoUtil.delRecord(item, sign);
         }
     }
 }
