@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("com.codingcube.simpleauth.auth")
 @ComponentScan("com.codingcube.simpleauth.limit")
+@ComponentScan("com.codingcube.simpleauth.validated")
 @ComponentScan("com.codingcube.simpleauth.logging")
 @ComponentScan("com.codingcube.simpleauth.properties")
 @ComponentScan("com.codingcube.simpleauth.security")

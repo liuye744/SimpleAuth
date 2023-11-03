@@ -64,6 +64,9 @@ public class LimitHandlerUtil {
                                                    Object result,
                                                    String source){
         final AttributeItem attributeItem = (AttributeItem) request.getAttribute(ACCORD_SIGN + source);
+        if (attributeItem == null){
+            return;
+        }
         RequestLimitItem limitItem  = attributeItem.getLimitItem();
         if (limitItem == null){
             return;
