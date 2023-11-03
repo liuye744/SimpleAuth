@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author CodingCube<br>*
  * Default sign Generation Strategy Class*
  */
-public class DefaultSignStrategic extends SignStrategic{
+public class DefaultSignStrategic implements SignStrategic{
     @Override
     public String sign(HttpServletRequest request, SimpleJoinPoint joinPoint) {
         return request.getRemoteAddr();

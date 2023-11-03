@@ -7,7 +7,7 @@ import org.aspectj.lang.Signature;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class DiffParameterSign extends SignStrategic {
+public class DiffParameterSign implements SignStrategic {
     @Override
     public String sign(HttpServletRequest request, SimpleJoinPoint joinPoint) {
         final Object[] args = joinPoint.getArgs();

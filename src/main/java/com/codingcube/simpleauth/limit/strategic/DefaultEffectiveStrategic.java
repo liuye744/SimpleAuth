@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author CodingCube<br>*
  * Default Effective Record Class*
  */
-public class DefaultEffectiveStrategic extends EffectiveStrategic {
+public class DefaultEffectiveStrategic implements EffectiveStrategic {
 
     @Override
     public Boolean effective(HttpServletRequest request, SimpleJoinPoint joinPoint, Object result) {
