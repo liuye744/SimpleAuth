@@ -4,7 +4,6 @@ package com.codingcube.simpleauth.validated.util;
 import com.codingcube.simpleauth.exception.ValidateException;
 
 import java.util.Date;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -128,16 +127,21 @@ public class SVU {
      * 正则校验
      */
     public static boolean pattern(String content, String regex){
+        final boolean notNull = notNull(content, regex);
+        if (!notNull){
+            return false;
+        }
         Pattern pattern = Pattern.compile(regex);
         return pattern.matcher(content).matches();
     }
     public static BooleanCompute patternDelay(String content, String regex){
-        return ()-> {
-            Pattern pattern = Pattern.compile(regex);
-            return pattern.matcher(content).matches();
-        };
+        return ()-> pattern(content, regex);
     }
     public static boolean pattern(String message, String content, String regex){
+        final boolean notNull = notNull(message, content, regex);
+        if (!notNull){
+            throw new ValidateException(message);
+        }
         Pattern pattern = Pattern.compile(regex);
         boolean matches = pattern.matcher(content).matches();
         if (!matches){
@@ -146,14 +150,7 @@ public class SVU {
         return true;
     }
     public static BooleanCompute patternDelay(String message, String content, String regex){
-        return ()-> {
-            Pattern pattern = Pattern.compile(regex);
-            boolean matches = pattern.matcher(content).matches();
-            if (!matches){
-                throw new ValidateException(message);
-            }
-            return true;
-        };
+        return ()-> pattern(message, content, regex);
     }
 
     /**
@@ -183,6 +180,15 @@ public class SVU {
             if (!bc.run()) throw new ValidateException(message);
         }
         return true;
+    }
+
+    /**
+     * 若obj不为空则运行booleanCompute
+     */
+    public static void processIfNotEmpty(Object obj, BooleanCompute booleanCompute){
+        if (obj != null){
+            booleanCompute.run();
+        }
     }
 
     /**
