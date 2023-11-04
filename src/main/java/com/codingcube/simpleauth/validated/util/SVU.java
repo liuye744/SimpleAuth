@@ -4,6 +4,8 @@ package com.codingcube.simpleauth.validated.util;
 import com.codingcube.simpleauth.exception.ValidateException;
 
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author CodingCube<br>
@@ -36,14 +38,14 @@ public class SVU {
      * 检查base 是否在 start 与 end 之间(Integer)*
      */
     public static boolean range(Integer base, Integer start, Integer end){
-        return SVU.notNull(base, start ,end) && (base > start && base < end);
+        return SVU.notNull(base, start ,end) && (base >= start && base <= end);
     }
 
     public static BooleanCompute rangeDelay(Integer base, Integer start, Integer end){
         return ()-> range(base, start, end);
     }
     public static boolean range(String message, Integer base, Integer start, Integer end){
-        final boolean result = SVU.notNull(base, start ,end) && (base > start && base < end);
+        final boolean result = SVU.notNull(base, start ,end) && (base >= start && base <= end);
         if (!result){
             throw new ValidateException(message);
         }
@@ -58,14 +60,14 @@ public class SVU {
      * 检查base 是否在 start 与 end 之间 (Long)*
      */
     public static boolean range(Long base, Long start, Long end){
-        return SVU.notNull(base, start ,end) && (base > start && base < end);
+        return SVU.notNull(base, start ,end) && (base >= start && base <= end);
     }
 
     public static BooleanCompute rangeDelay(Long base, Long start, Long end){
         return ()-> range(base, start, end);
     }
     public static boolean range(String message, Long base, Long start, Long end){
-        final boolean result = SVU.notNull(base, start ,end) && (base > start && base < end);
+        final boolean result = SVU.notNull(base, start ,end) && (base >= start && base <= end);
         if (!result){
             throw new ValidateException(message);
         }
@@ -80,14 +82,14 @@ public class SVU {
      * 检查时间是否在在 start 与 end 之间(Date)*
      */
     public static boolean range(Date base, Date start, Date end){
-        return notNull(base, start, end) && base.compareTo(start) > 0 && end.compareTo(base) > 0;
+        return notNull(base, start, end) && base.compareTo(start) >= 0 && end.compareTo(base) >= 0;
     }
 
     public static BooleanCompute rangeDelay(Date base, Date start, Date end){
         return ()-> SVU.range(base, start, end);
     }
     public static boolean range(String message, Date base, Date start, Date end){
-        final boolean result = notNull(base, start, end) && base.compareTo(start) > 0 && end.compareTo(base) > 0;
+        final boolean result = notNull(base, start, end) && base.compareTo(start) >= 0 && end.compareTo(base) >= 0;
         if (!result){
             throw new ValidateException(message);
         }
@@ -95,13 +97,7 @@ public class SVU {
     }
 
     public static BooleanCompute rangeDelay(String message, Date base, Date start, Date end){
-        return ()-> {
-            final boolean result = notNull(base, start, end) && base.compareTo(start) > 0 && end.compareTo(base) > 0;
-            if (!result){
-                throw new ValidateException(message);
-            }
-            return true;
-        };
+        return ()-> range(message, base, start, end);
     }
 
     /**
@@ -109,7 +105,7 @@ public class SVU {
      */
     public static boolean lengthRange(String base, Integer start, Integer end){
         final int length;
-        return SVU.notNull(base, start, end) && (length = base.length()) > start && length < end;
+        return SVU.notNull(base, start, end) && (length = base.length()) >= start && length <= end;
     }
 
     public static BooleanCompute lengthRangeDelay(String base, Integer start, Integer end){
@@ -117,7 +113,7 @@ public class SVU {
     }
     public static boolean lengthRange(String message, String base, Integer start, Integer end){
         final int length;
-        final boolean result = SVU.notNull(base, start, end) && (length = base.length()) > start && length < end;
+        final boolean result = SVU.notNull(base, start, end) && (length = base.length()) >= start && length <= end;
         if (!result){
             throw new ValidateException(message);
         }
@@ -126,6 +122,38 @@ public class SVU {
 
     public static BooleanCompute lengthRangeDelay(String message, String base, Integer start, Integer end){
         return ()-> SVU.lengthRange(message, base, start, end);
+    }
+
+    /**
+     * 正则校验
+     */
+    public static boolean pattern(String content, String regex){
+        Pattern pattern = Pattern.compile(regex);
+        return pattern.matcher(content).matches();
+    }
+    public static BooleanCompute patternDelay(String content, String regex){
+        return ()-> {
+            Pattern pattern = Pattern.compile(regex);
+            return pattern.matcher(content).matches();
+        };
+    }
+    public static boolean pattern(String message, String content, String regex){
+        Pattern pattern = Pattern.compile(regex);
+        boolean matches = pattern.matcher(content).matches();
+        if (!matches){
+            throw new ValidateException(message);
+        }
+        return true;
+    }
+    public static BooleanCompute patternDelay(String message, String content, String regex){
+        return ()-> {
+            Pattern pattern = Pattern.compile(regex);
+            boolean matches = pattern.matcher(content).matches();
+            if (!matches){
+                throw new ValidateException(message);
+            }
+            return true;
+        };
     }
 
     /**
