@@ -1,6 +1,7 @@
 package com.codingcube.simpleauth.validated.aspect;
 
 import com.codingcube.simpleauth.exception.ValidateException;
+import com.codingcube.simpleauth.exception.ValidateMethodException;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import com.codingcube.simpleauth.validated.annotation.SimpleValidate;
 import com.codingcube.simpleauth.validated.strategic.ValidateRejectedStratagem;
@@ -32,7 +33,7 @@ public class AutoValidated {
             //寻找类上的validateObj
             final SimpleValidate classAnnotation = joinPoint.getTarget().getClass().getAnnotation(SimpleValidate.class);
             if (classAnnotation == null || (validateObj = classAnnotation.value()) == Object.class){
-                throw new ValidateException("Requires a validate class as the value parameter, which can be placed on method or class annotations");
+                throw new ValidateMethodException("Requires a validate class as the value parameter, which can be placed on method or class annotations");
             }
         }
         final Method[] methods = validateObj.getMethods();
@@ -49,7 +50,7 @@ public class AutoValidated {
         return joinPoint.proceed();
     }
 
-    private void validate(Method method, String methodName, Class<?> validateObj, final Class<? extends ValidateRejectedStratagem> rejectedClazz, ProceedingJoinPoint joinPoint) {
+    private void validate(Method method, String methodName, Class<?> validateObj, final Class<? extends ValidateRejectedStratagem> rejectedClazz, ProceedingJoinPoint joinPoint) throws Throwable {
         if (method.getName().equals(methodName)) {
             final Object[] args = joinPoint.getArgs();
             for (Object target : args) {
@@ -66,12 +67,12 @@ public class AutoValidated {
                                 return;
                             }
                         }else {
-                            throw new ValidateException("he return value type of "+ methodName +" should be Boolean.");
+                            throw new ValidateMethodException("he return value type of "+ methodName +" should be Boolean.");
                         }
                     } catch (IllegalAccessException e) {
-                        throw new ValidateException(methodName + " illegal access " + validateObj, e);
-                    } catch (InvocationTargetException e) {
-                        throw new ValidateException(methodName + " not found in " + validateObj, e);
+                        throw new ValidateMethodException(methodName + " illegal access " + validateObj, e);
+                    }catch (InvocationTargetException e) {
+                        throw e.getCause();
                     }
                 }
             }
