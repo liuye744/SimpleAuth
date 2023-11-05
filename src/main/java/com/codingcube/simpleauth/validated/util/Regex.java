@@ -7,12 +7,17 @@ public class Regex {
     public final static String EMAIL = "^w+([-+.]w+)*@w+([-.]w+)*.w+([-.]w+)*$";
 
     /**
-     * 网站
+     * URL
      */
-    public final static String URL = "[a-zA-Z0-9\\-\\.]+\\.[a-zA-Z]{2,}(:[0-9]{1,5})?(\\/[\\S]*)?$";
+    public final static String URL = "^(https?:\\/\\/)?(([0-9a-z.]+\\.[a-z]+)|(([0-9]{1,3}\\.){3}[0-9]{1,3}))(:[0-9]+)?(\\/[0-9a-z%/.\\-_]*)?(\\?[0-9a-z=&%_\\-]*)?(\\#[0-9a-z=&%_\\-]*)?$";
 
     /**
-     * 网站
+     * 提取超链接
+     */
+    public final static String EXTRACT_HYPERLINK = "(<a\\\\s*(?!.*\\\\brel=)[^>]*)(href=”https?:\\\\/\\\\/)((?!(?:(?:www\\\\.)?’.implode(‘|(?:www\\\\.)?’, $follow_list).’))[^” rel=”external nofollow” ]+)”((?!.*\\\\brel=)[^>]*)(?:[^>]*)>";
+
+    /**
+     * 域名
      */
     public final static String DOMAIN_NAME = "^[a-zA-Z0-9\\-\\.]+\\.[a-zA-Z]{2,}$";
 
@@ -41,6 +46,16 @@ public class Regex {
      * 汉字
      */
     public final static String CHINESE_CHARACTER = "^[\\u4e00-\\u9fa5]{0,}$";
+
+    /**
+     * 日语字符
+     */
+    public final static String JAPANESE_CHARACTER = "^[\\u3040-\\u309F\\u30A0-\\u30FF\\u31F0-\\u31FF]+$";
+
+    /**
+     * 校验日期格式（yyyy-mm-dd）
+     */
+    public final static String DATE = "^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$";
 
     /**
      * 必须包含大小写字母和数字的组合，不能使用特殊字符，长度在8-16之间
@@ -105,6 +120,12 @@ public class Regex {
      * 中国车牌号
      */
     public final static String CHINESE_LICENSE_PLATE_NUMBER = "^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$";
+
+    /**
+     * MAC
+     */
+    public final static String MAC = "^((([a-f0-9]{2}:){5})|(([a-f0-9]{2}-){5}))[a-f0-9]{2}$";
+
     /**
      * ipv4
      */
@@ -114,6 +135,7 @@ public class Regex {
      * 提取ipv4*
      */
     public final static String EXTRACT_IPv4 = "\\d+\\.\\d+\\.\\d+\\.\\d+";
+
     /**
      * ipv6
      */
