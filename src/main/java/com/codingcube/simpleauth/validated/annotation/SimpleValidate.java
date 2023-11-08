@@ -1,6 +1,7 @@
 package com.codingcube.simpleauth.validated.annotation;
 
 
+import com.codingcube.simpleauth.util.NullTarget;
 import com.codingcube.simpleauth.validated.strategic.DefaultValidateRejectedStratagem;
 import com.codingcube.simpleauth.validated.strategic.ValidateRejectedStratagem;
 
@@ -14,5 +15,5 @@ import java.lang.annotation.Target;
 public @interface SimpleValidate {
     Class<?> value() default Object.class;
     String[] methods() default {"validate"};
-    Class<? extends ValidateRejectedStratagem> rejected() default DefaultValidateRejectedStratagem.class;
+    Class<? extends ValidateRejectedStratagem> rejected() default NullTarget.class;
 }

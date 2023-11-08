@@ -2,7 +2,9 @@ package com.codingcube.simpleauth.validated.aspect;
 
 import com.codingcube.simpleauth.exception.ValidateException;
 import com.codingcube.simpleauth.exception.ValidateMethodException;
+import com.codingcube.simpleauth.properties.ValidateProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
+import com.codingcube.simpleauth.util.NullTarget;
 import com.codingcube.simpleauth.validated.annotation.SimpleValidate;
 import com.codingcube.simpleauth.validated.strategic.ValidateRejectedStratagem;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,14 +30,20 @@ public class AutoValidated {
     public Object validateMethod(ProceedingJoinPoint joinPoint, SimpleValidate simpleValidate) throws Throwable{
         final String[] methodsString = simpleValidate.methods();
         Class<?> validateObj = simpleValidate.value();
-        final Class<? extends ValidateRejectedStratagem> rejected = simpleValidate.rejected();
+        Class<? extends ValidateRejectedStratagem> rejected = simpleValidate.rejected();
+        final SimpleValidate classAnnotation = joinPoint.getTarget().getClass().getAnnotation(SimpleValidate.class);
         if (validateObj == Object.class){
             //寻找类上的validateObj
-            final SimpleValidate classAnnotation = joinPoint.getTarget().getClass().getAnnotation(SimpleValidate.class);
             if (classAnnotation == null || (validateObj = classAnnotation.value()) == Object.class){
                 throw new ValidateMethodException("Requires a validate class as the value parameter, which can be placed on method or class annotations");
             }
         }
+        if (rejected == NullTarget.class){
+            if (classAnnotation == null || (rejected = classAnnotation.rejected()) == NullTarget.class ){
+                rejected = ValidateProper.getDefaultRejectedClazz();
+            }
+        }
+
         final Method[] methods = validateObj.getMethods();
 
         for (Method method : methods) {

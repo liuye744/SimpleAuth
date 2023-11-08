@@ -8,12 +8,13 @@ import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenBucket;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
+import com.codingcube.simpleauth.validated.strategic.ValidateRejectedStratagem;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Bean2Static {
 
-    public Bean2Static(LogProper logProper, FunctionProper functionProper, AuthProper authProper, LimitProper limitProper) {
+    public Bean2Static(LogProper logProper, FunctionProper functionProper, AuthProper authProper, LimitProper limitProper, ValidateProper validateProper) {
         LogProper.setStaticShowOptList(logProper.getShowOptList());
 
         FunctionProper.setHandlerCacheStatic(functionProper.isHandlerCache());
@@ -57,6 +58,13 @@ public class Bean2Static {
         try {
             final Class<? extends RejectedStratagem> clazz = (Class<? extends RejectedStratagem>) Class.forName(limitProper.getDefaultRejected());
             LimitProper.setDefaultRejectedClazz(clazz);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
+        }
+
+        try {
+            final Class<? extends ValidateRejectedStratagem> clazz = (Class<? extends ValidateRejectedStratagem>) Class.forName(validateProper.getDefaultRejected());
+            ValidateProper.setDefaultRejectedClazz(clazz);
         } catch (ClassNotFoundException e) {
             throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
         }
