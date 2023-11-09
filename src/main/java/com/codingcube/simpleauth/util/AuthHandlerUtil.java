@@ -19,6 +19,7 @@ import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.strategic.SimpleJoinPoint;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.logformat.LogAuthFormat;
+import com.codingcube.simpleauth.properties.AuthProper;
 import com.codingcube.simpleauth.properties.FunctionProper;
 import com.codingcube.simpleauth.util.support.BeanDefinition;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -111,6 +112,9 @@ public class AuthHandlerUtil {
             log.debug(logAuthFormat.toString());
             if (!author) {
                 //Permission not met
+                if (rejectClass == NullTarget.class){
+                    rejectClass = AuthProper.getDefaultRejectedClazz();
+                }
                 final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, rejectClass);
                 rejectedStratagem.doRejected(request,
                         ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
@@ -140,6 +144,9 @@ public class AuthHandlerUtil {
         LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission);
         log.debug(logAuthFormat.toString());
         if (!author){
+            if (rejectClass == NullTarget.class){
+                rejectClass = AuthProper.getDefaultRejectedClazz();
+            }
             final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, rejectClass);
             rejectedStratagem.doRejected(request,
                     ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),

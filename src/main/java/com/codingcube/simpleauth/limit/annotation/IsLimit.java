@@ -8,6 +8,7 @@ import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
+import com.codingcube.simpleauth.util.NullTarget;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -38,5 +39,5 @@ public @interface IsLimit {
     //Current limiting algorithm
     Class<? extends TokenLimit> tokenLimit() default CompleteLimit.class;
     //rejectedStratagem
-    Class<? extends RejectedStratagem> rejected() default DefaultLimitRejectedStratagem.class;
+    Class<? extends RejectedStratagem> rejected() default NullTarget.class;
 }

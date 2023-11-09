@@ -14,7 +14,9 @@ import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
 import com.codingcube.simpleauth.properties.FunctionProper;
+import com.codingcube.simpleauth.properties.LimitProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
+import com.codingcube.simpleauth.util.NullTarget;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -142,6 +144,9 @@ public class AutoLimit {
             LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
                     "annotation limit", judgeAfterReturn,effectiveStrategic,true, false);
             log.debug(limitFormat.toString());
+            if (rejectedStratagem == NullTarget.class){
+                rejectedStratagem = LimitProper.getDefaultRejectedClazz();
+            }
             final RejectedStratagem rejectedStratagemBean = AuthHandlerUtil.getBean(applicationContext, rejectedStratagem);
             rejectedStratagemBean.doRejected(request, ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse(), limitFormat);
         }
