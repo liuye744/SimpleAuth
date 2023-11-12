@@ -1,11 +1,11 @@
 package com.codingcube.simpleauth.validated.aspect;
 
-import com.codingcube.simpleauth.exception.ValidateException;
 import com.codingcube.simpleauth.exception.ValidateMethodException;
 import com.codingcube.simpleauth.properties.ValidateProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import com.codingcube.simpleauth.util.NullTarget;
 import com.codingcube.simpleauth.validated.annotation.SimpleValidate;
+import com.codingcube.simpleauth.validated.domain.ReflectMethod;
 import com.codingcube.simpleauth.validated.strategic.ValidateRejectedStratagem;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -18,6 +18,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Aspect
@@ -25,6 +27,8 @@ import java.util.Objects;
 public class AutoValidated {
     @Resource
     ApplicationContext application;
+
+    final Map<String, ReflectMethod> reflectMethodMap = new HashMap<>();
 
     @Around("@annotation(simpleValidate)")
     public Object validateMethod(ProceedingJoinPoint joinPoint, SimpleValidate simpleValidate) throws Throwable{
@@ -44,14 +48,63 @@ public class AutoValidated {
             }
         }
 
-        final Method[] methods = validateObj.getMethods();
-
-        for (Method method : methods) {
-            if (method.getParameterCount() != 1) {
-                continue;
+        for (String methodName : methodsString) {
+            final String key = key(validateObj, methodName);
+            ReflectMethod reflectMethod = reflectMethodMap.get(key);
+            if (reflectMethod == null){
+                //初始化
+                final Method[] methods = validateObj.getMethods();
+                final Object bean = AuthHandlerUtil.getBean(application, validateObj);
+                for (Method method : methods) {
+                    if (method.getParameterCount() == 1 && method.getName().equals(methodName)){
+                        method.setAccessible(true);
+                        final ReflectMethod newReflectMethod = new ReflectMethod(bean, method, method.getParameterTypes()[0]);
+                        if (reflectMethodMap.get(key) == null){
+                            synchronized (reflectMethodMap){
+                                if (reflectMethodMap.get(key) == null){
+                                    reflectMethodMap.put(key, newReflectMethod);
+                                }else {
+                                    reflectMethodMap.get(key).setNext(newReflectMethod);
+                                }
+                            }
+                        }
+                    }
+                }
+                reflectMethod = reflectMethodMap.get(key);
             }
-            for (String methodName : methodsString) {
-                validate(method, methodName, validateObj, rejected, joinPoint);
+
+            while (reflectMethod != null){
+                final Method method = reflectMethod.getMethod();
+                final Object validateBean = reflectMethod.getInstance();
+                final Class<?> param = reflectMethod.getParam();
+
+
+                final Object[] args = joinPoint.getArgs();
+                for (int i = 0; i < args.length; i++) {
+                    Object target = args[i];
+                    if (param == target.getClass()) {
+                        //成功验证一个后跳出循环
+                        i = Integer.MAX_VALUE - 1;
+                        try {
+                            final Object validatedResult = method.invoke(validateBean, target);
+                            if (validatedResult instanceof Boolean){
+                                if (!(Boolean) validatedResult){
+                                    //验证失败
+                                    final ValidateRejectedStratagem rejectedInstance = AuthHandlerUtil.getBean(application, rejected);
+                                    final ServletRequestAttributes attributes = (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes());
+                                    rejectedInstance.doRejected(attributes.getRequest(), attributes.getResponse(), target);
+                                }
+                            }else {
+                                throw new ValidateMethodException("he return value type of "+ methodName +" should be Boolean.");
+                            }
+                        } catch (IllegalAccessException e) {
+                            throw new ValidateMethodException(methodName + " illegal access " + validateObj, e);
+                        }catch (InvocationTargetException e) {
+                            throw e.getCause();
+                        }
+                    }
+                }
+                reflectMethod = reflectMethod.getNext();
             }
         }
 
@@ -86,5 +139,9 @@ public class AutoValidated {
             }
         }
 
+    }
+
+    private String key(Class<?> validateObjClazz, String methodName){
+        return validateObjClazz.getName() + "$" + methodName;
     }
 }
