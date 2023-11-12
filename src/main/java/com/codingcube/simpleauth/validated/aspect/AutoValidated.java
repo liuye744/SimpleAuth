@@ -52,24 +52,7 @@ public class AutoValidated {
             final String key = key(validateObj, methodName);
             ReflectMethod reflectMethod = reflectMethodMap.get(key);
             if (reflectMethod == null){
-                //初始化
-                final Method[] methods = validateObj.getMethods();
-                final Object bean = AuthHandlerUtil.getBean(application, validateObj);
-                for (Method method : methods) {
-                    if (method.getParameterCount() == 1 && method.getName().equals(methodName)){
-                        method.setAccessible(true);
-                        final ReflectMethod newReflectMethod = new ReflectMethod(bean, method, method.getParameterTypes()[0]);
-                        if (reflectMethodMap.get(key) == null){
-                            synchronized (reflectMethodMap){
-                                if (reflectMethodMap.get(key) == null){
-                                    reflectMethodMap.put(key, newReflectMethod);
-                                }else {
-                                    reflectMethodMap.get(key).setNext(newReflectMethod);
-                                }
-                            }
-                        }
-                    }
-                }
+                initReflectMethodCache(key, validateObj, methodName);
                 reflectMethod = reflectMethodMap.get(key);
             }
 
@@ -111,29 +94,25 @@ public class AutoValidated {
         return joinPoint.proceed();
     }
 
-    private void validate(Method method, String methodName, Class<?> validateObj, final Class<? extends ValidateRejectedStratagem> rejectedClazz, ProceedingJoinPoint joinPoint) throws Throwable {
-        if (method.getName().equals(methodName)) {
-            final Object[] args = joinPoint.getArgs();
-            for (Object target : args) {
-                if (method.getParameterTypes()[0] == target.getClass()) {
-                    final Object validateBean = AuthHandlerUtil.getBean(application, validateObj);
-                    try {
-                        final Object validatedResult = method.invoke(validateBean, target);
-                        if (validatedResult instanceof Boolean){
-                            if (!(Boolean) validatedResult){
-                                //验证失败
-                                final ValidateRejectedStratagem rejected = AuthHandlerUtil.getBean(application, rejectedClazz);
-                                final ServletRequestAttributes attributes = (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes());
-                                rejected.doRejected(attributes.getRequest(), attributes.getResponse(), target);
-                                return;
-                            }
+    private void initReflectMethodCache(String key, Class<?> validateObj, String methodName){
+        synchronized (getReflectMethodCacheMapMutex()){
+            //初始化
+            if(reflectMethodMap.get(key) == null){
+                final Method[] methods = validateObj.getMethods();
+                final Object bean = AuthHandlerUtil.getBean(application, validateObj);
+                for (Method method : methods) {
+                    if (method.getParameterCount() == 1 && method.getName().equals(methodName)){
+                        method.setAccessible(true);
+                        final ReflectMethod newReflectMethod = new ReflectMethod(bean, method, method.getParameterTypes()[0]);
+                        if (reflectMethodMap.get(key) == null){
+                            reflectMethodMap.put(key, newReflectMethod);
                         }else {
-                            throw new ValidateMethodException("he return value type of "+ methodName +" should be Boolean.");
+                            ReflectMethod mapReflectMethod = reflectMethodMap.get(key);
+                            while (mapReflectMethod.getNext() != null){
+                                mapReflectMethod = mapReflectMethod.getNext();
+                            }
+                            mapReflectMethod.setNext(newReflectMethod);
                         }
-                    } catch (IllegalAccessException e) {
-                        throw new ValidateMethodException(methodName + " illegal access " + validateObj, e);
-                    }catch (InvocationTargetException e) {
-                        throw e.getCause();
                     }
                 }
             }
@@ -143,5 +122,9 @@ public class AutoValidated {
 
     private String key(Class<?> validateObjClazz, String methodName){
         return validateObjClazz.getName() + "$" + methodName;
+    }
+
+    private Object getReflectMethodCacheMapMutex(){
+        return reflectMethodMap;
     }
 }
