@@ -58,7 +58,15 @@ public class AutoValidated {
         SimpleValidate simpleValidate = method.getAnnotation(SimpleValidate.class);
 
         final SimpleValidate classAnnotation = joinPoint.getTarget().getClass().getAnnotation(SimpleValidate.class);
-        final Class<?> validateObj = getValidateObjected(simpleValidate, classAnnotation);
+        Class<?> validateObj;
+        if (simpleValidate == null ||(validateObj=simpleValidate.value()) == Object.class){
+            //寻找类上的validateObj
+            if (classAnnotation == null || (validateObj = classAnnotation.value()) == Object.class ){
+                //全局ValidatedObjected
+                validateObj = ValidateProper.getDefaultValidateObjectClazz();
+            }
+        }
+
         final Class<? extends ValidateRejectedStratagem> rejected = getValidateRejected(simpleValidate, classAnnotation);
 
 
@@ -70,6 +78,13 @@ public class AutoValidated {
             for (Annotation annotation : parameterAnnotation) {
                 if (annotation.annotationType() == SimpleValidate.class){
                     final String[] methodsString = ((SimpleValidate) annotation).methods();
+                    final Class<?> parameterValidateObj = ((SimpleValidate) annotation).value();
+                    if (parameterValidateObj != Object.class){
+                        validateObj = parameterValidateObj;
+                    }
+                    if (validateObj == Object.class){
+                        throw new ValidateMethodException("Requires a validate class as the value parameter, which can be placed on parameter or class annotations");
+                    }
                     //存在methodsString 执行positiveMethod
                     if (methodsString.length != 0){
                         doPositiveMethodName(validateObj, methodsString, rejected, joinPoint);
@@ -87,8 +102,8 @@ public class AutoValidated {
     }
 
     private Class<?> getValidateObjected(SimpleValidate simpleValidate,SimpleValidate fatherSimpleValidate){
-        Class<?> validateObj;
-        if (simpleValidate == null || (validateObj=simpleValidate.value()) == Object.class){
+        Class<?> validateObj = simpleValidate.value();
+        if (validateObj == Object.class){
             //寻找类上的validateObj
             if (fatherSimpleValidate == null || (validateObj = fatherSimpleValidate.value()) == Object.class ){
                 //全局ValidatedObjected
@@ -176,7 +191,7 @@ public class AutoValidated {
             initReflectParameterCache(parameterKey, validateObj, parameter.getClass());
             reflectMethod = reflectParameterMap.get(parameterKey);
         }
-        while (reflectMethod.getNext() != null){
+        while (reflectMethod != null){
             final Method method = reflectMethod.getMethod();
             final Object instance = reflectMethod.getInstance();
 
@@ -270,28 +285,6 @@ public class AutoValidated {
 
     private String parameterKey(Class<?> validateObjClazz, Class<?> parameter){
         return validateObjClazz.getName() + "$" + parameter.getName();
-    }
-
-    /**
-     * 获取添加有指定注解的参数列表*
-     * @param method 方法
-     * @param joinPoint 切点
-     * @param annotationClass 注解类型
-     * @return 参数列表
-     */
-    private Object[] getParameterContainAnnotation(Method method,ProceedingJoinPoint joinPoint, Class<?> annotationClass){
-        List<Object> objects = new ArrayList<>();
-//        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-//        final Object[] args = joinPoint.getArgs();
-//        for (int i = 0; i < parameterAnnotations.length; i++) {
-//            Annotation[] parameterAnnotation = parameterAnnotations[i];
-//            for (Annotation annotation : parameterAnnotation) {
-//                if (annotation.annotationType() == annotationClass){
-//                    objects.add(args[i]);
-//                }
-//            }
-//        }
-        return objects.toArray();
     }
 
     private Object getReflectMethodCacheMapMutex(){
