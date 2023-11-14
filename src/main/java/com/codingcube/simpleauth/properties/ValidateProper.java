@@ -12,6 +12,9 @@ public class ValidateProper {
     private String defaultRejected = "com.codingcube.simpleauth.validated.strategic.DefaultValidateRejectedStratagem";
     private static Class<? extends ValidateRejectedStratagem> defaultRejectedClazz = DefaultValidateRejectedStratagem.class;
 
+    private String defaultValidateObject = "java.lang.Object";
+    private static Class<?> defaultValidateObjectClazz = Object.class;
+
     public String getDefaultRejected() {
         return defaultRejected;
     }
@@ -26,5 +29,21 @@ public class ValidateProper {
 
     public static void setDefaultRejectedClazz(Class<? extends ValidateRejectedStratagem> defaultRejectedClazz) {
         ValidateProper.defaultRejectedClazz = defaultRejectedClazz;
+    }
+
+    public String getDefaultValidateObject() {
+        return defaultValidateObject;
+    }
+
+    public void setDefaultValidateObject(String defaultValidateObject) {
+        this.defaultValidateObject = defaultValidateObject;
+    }
+
+    public static Class<?> getDefaultValidateObjectClazz() {
+        return defaultValidateObjectClazz;
+    }
+
+    public static void setDefaultValidateObjectClazz(Class<?> defaultValidateObjectClazz) {
+        ValidateProper.defaultValidateObjectClazz = defaultValidateObjectClazz;
     }
 }

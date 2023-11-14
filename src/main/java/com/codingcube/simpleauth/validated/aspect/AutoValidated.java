@@ -38,8 +38,11 @@ public class AutoValidated {
         final SimpleValidate classAnnotation = joinPoint.getTarget().getClass().getAnnotation(SimpleValidate.class);
         if (validateObj == Object.class){
             //寻找类上的validateObj
-            if (classAnnotation == null || (validateObj = classAnnotation.value()) == Object.class){
-                throw new ValidateMethodException("Requires a validate class as the value parameter, which can be placed on method or class annotations");
+            if (classAnnotation == null || (validateObj = classAnnotation.value()) == Object.class ){
+                //全局ValidatedObjected
+                if ((validateObj = ValidateProper.getDefaultValidateObjectClazz()) == Object.class){
+                    throw new ValidateMethodException("Requires a validate class as the value parameter, which can be placed on method or class annotations");
+                }
             }
         }
         if (rejected == NullTarget.class){

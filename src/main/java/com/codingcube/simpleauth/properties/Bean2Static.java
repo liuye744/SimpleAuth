@@ -68,5 +68,12 @@ public class Bean2Static {
         } catch (ClassNotFoundException e) {
             throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
         }
+
+        try {
+            final Class<?> clazz =  Class.forName(validateProper.getDefaultValidateObject());
+            ValidateProper.setDefaultValidateObjectClazz(clazz);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
+        }
     }
 }
