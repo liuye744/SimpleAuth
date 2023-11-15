@@ -141,6 +141,10 @@ public class AutoValidated {
                 reflectMethod = reflectMethodMap.get(key);
             }
 
+            if(reflectMethod == null){
+                throw new ValidateMethodException("No matching method found for "+ methodName +" in the class "+validateObj);
+            }
+
             while (reflectMethod != null){
                 final Method method = reflectMethod.getMethod();
                 final Object validateBean = reflectMethod.getInstance();
@@ -190,6 +194,9 @@ public class AutoValidated {
         if (reflectMethod == null){
             initReflectParameterCache(parameterKey, validateObj, parameter.getClass());
             reflectMethod = reflectParameterMap.get(parameterKey);
+        }
+        if(reflectMethod == null){
+            throw new ValidateMethodException("No method found with only one parameter of type " + parameter.getClass()+" in "+ validateObj);
         }
         while (reflectMethod != null){
             final Method method = reflectMethod.getMethod();
