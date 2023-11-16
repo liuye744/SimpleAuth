@@ -18,6 +18,15 @@ public abstract class AutoAuthHandlerChain {
 
     public abstract void addChain();
 
+    final public AutoAuthHandlerChain add(String beanName){
+        return addLast(beanName);
+    }
+
+    final public AutoAuthHandlerChain add(Class<? extends AutoAuthHandler> auto){
+        autoAuthServiceList.add(auto);
+        return this;
+    }
+
     final public AutoAuthHandlerChain addLast(Class<? extends AutoAuthHandler> auto){
         autoAuthServiceList.add(auto);
         return this;

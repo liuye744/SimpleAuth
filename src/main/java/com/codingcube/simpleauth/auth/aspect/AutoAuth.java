@@ -8,6 +8,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import com.codingcube.simpleauth.auth.handler.AutoAuthHandlerChain;
+import com.codingcube.simpleauth.auth.handler.DefaultAuthHandler;
+import com.codingcube.simpleauth.auth.handler.DefaultAuthHandlerChain;
 import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.logging.Log;
@@ -69,42 +71,40 @@ public class AutoAuth {
 
 
     public Object doAuth(ProceedingJoinPoint joinPoint,
-                         Class<? extends AutoAuthHandler>[] autoAuthServices,
-                         Class<? extends AutoAuthHandlerChain>[] authentications,
+                         Class<? extends AutoAuthHandler>[] handlerClass,
+                         Class<? extends AutoAuthHandlerChain>[] handlerChainClass,
                          String permissions,
                          Class<? extends AuthRejectedStratagem> reject
     )throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         //authenticate authority
-        //If the AutoAuthChain is configured and autoAuthService is not configured, the DefaultAutoAuthService will be abandoned.
+        //If the handlerChain is configured and handler is not configured, the DefaultAutoAuthService will be abandoned.
         boolean isExecuteDefault = true;
-        Class<?> defaultAnnotationHandlerClass = ((Class<?>[])IsAuthor.class.getMethod("handler").getDefaultValue())[0];
-        final Class<?> defaultAnnotationHandlerChainClass = ((Class<?>[]) IsAuthor.class.getMethod("handlerChain").getDefaultValue())[0];
+        final Class<?> defaultAnnotationHandlerClass = DefaultAuthHandler.class;
+        final Class<?> defaultAnnotationHandlerChainClass = DefaultAuthHandlerChain.class;
 
         if (
-            //authentications(AutoAuthChain) parameter is the default.
-                !defaultAnnotationHandlerChainClass
-                        .equals(authentications[0])
-                        &&
-                        //authentications(AutoAuthService) parameter is not the default
-                        defaultAnnotationHandlerClass
-                                .equals(autoAuthServices[0])
+            //handlerChain parameter is not the default.
+            !defaultAnnotationHandlerChainClass.equals(handlerChainClass[0])
+                    &&
+            //handler parameter is the default
+            handlerClass.length == 1 &&
+            defaultAnnotationHandlerClass.equals(handlerClass[0])
         )
-
         {
             isExecuteDefault = false;
         }
-        //execute autoAuthService
+        //execute handler
         if (isExecuteDefault){
-            if (autoAuthServices.length != 0 && defaultAnnotationHandlerClass == autoAuthServices[0]){
-                autoAuthServices[0] = AuthProper.getDefaultHandlerClazz();
+            if (handlerClass.length == 1 && defaultAnnotationHandlerClass == handlerClass[0]){
+                handlerClass[0] = AuthProper.getDefaultHandlerClazz();
             }
-            Arrays.stream(autoAuthServices).forEach(
+            Arrays.stream(handlerClass).forEach(
                     (item)-> AuthHandlerUtil.handler(request, permissions, item, applicationContext, reject, log, "annotation")
             );
         }
-        //execute autoAuthChain
-        Arrays.stream(authentications).forEach(
+        //execute handlerChain
+        Arrays.stream(handlerChainClass).forEach(
                 (items) -> {
                     AutoAuthHandlerChain autoAuthHandlerChain = AuthHandlerUtil.getBean(applicationContext, items);
                     AuthHandlerUtil.handlerChain(autoAuthHandlerChain, applicationContext, request, permissions, reject, log, "annotation");
