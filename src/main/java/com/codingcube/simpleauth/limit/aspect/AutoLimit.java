@@ -13,6 +13,7 @@ import com.codingcube.simpleauth.logging.logformat.LogLimitFormat;
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.properties.EvaluationEnvironmentContext;
 import com.codingcube.simpleauth.properties.FunctionProper;
 import com.codingcube.simpleauth.properties.LimitProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
@@ -21,6 +22,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -37,6 +43,8 @@ import java.util.Objects;
 public class AutoLimit {
     @Resource
     private ApplicationContext applicationContext;
+    @Resource
+    private Environment environment;
     private final Log log;
 
     public AutoLimit(LogFactory logFactory) {
@@ -117,7 +125,13 @@ public class AutoLimit {
     )throws Throwable {
         if (!"".equals(annotationItem)){
             //Analytic SpEL
-            recordItem = annotationItem;
+            try {
+                EvaluationContext environmentContext = new EvaluationEnvironmentContext(environment);
+                final Expression expression = new SpelExpressionParser().parseExpression(annotationItem);
+                recordItem = expression.getValue(environmentContext, String.class);
+            }catch (Exception e){
+                recordItem = annotationItem;
+            }
         }
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 
