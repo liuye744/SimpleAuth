@@ -23,6 +23,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * 自动校验参数切面类 *
+ * @author CodingCube*
+ */
 @Aspect
 @Component
 public class AutoValidated {
@@ -229,7 +233,7 @@ public class AutoValidated {
      * @param validateObj 缓存实例类型
      * @param methodName 方法名
      */
-    private void initReflectMethodCache(String key, Class<?> validateObj, String methodName){
+    public void initReflectMethodCache(String key, Class<?> validateObj, String methodName){
         synchronized (getReflectMethodCacheMapMutex()){
             //初始化
             if(reflectMethodMap.get(key) == null){
@@ -251,7 +255,7 @@ public class AutoValidated {
      * @param validateObj 缓存实例类型
      * @param parameter 缓存参数类型(仅缓存存在一个实例的对象)
      */
-    private void initReflectParameterCache(String key, Class<?> validateObj, Class<?> parameter){
+    public void initReflectParameterCache(String key, Class<?> validateObj, Class<?> parameter){
         synchronized (getReflectParameterCacheMapMutex()){
             if(reflectParameterMap.get(key) == null){
                 final Method[] methods = validateObj.getMethods();
@@ -286,11 +290,11 @@ public class AutoValidated {
         }
     }
 
-    private String key(Class<?> validateObjClazz, String methodName){
+    public String key(Class<?> validateObjClazz, String methodName){
         return validateObjClazz.getName() + "$" + methodName;
     }
 
-    private String parameterKey(Class<?> validateObjClazz, Class<?> parameter){
+    public String parameterKey(Class<?> validateObjClazz, Class<?> parameter){
         return validateObjClazz.getName() + "$" + parameter.getName();
     }
 
