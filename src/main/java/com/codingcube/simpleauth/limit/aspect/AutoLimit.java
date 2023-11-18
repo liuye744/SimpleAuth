@@ -147,7 +147,9 @@ public class AutoLimit {
         if (!judgeAfterReturn){
             final Boolean isEffective = effectiveStrategicInstance.effective(request, new SimpleJoinPoint(joinPoint),null);
             if (!isEffective){
-                LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign, "annotation limit",false,effectiveStrategic,true, false);
+                LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem,
+                        signStrategicClazz,sign, "annotation limit",false,
+                        effectiveStrategic,true, false, rejectedStratagem);
                 log.debug(limitFormat.toString());
                 return joinPoint.proceed();
             }
@@ -156,7 +158,7 @@ public class AutoLimit {
         final Boolean addRecord = LimitInfoUtil.addRecord(recordItem, sign, limit, seconds, ban, tokenLimitClazz);
         if (!addRecord){
             LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
-                    "annotation limit", judgeAfterReturn,effectiveStrategic,true, false);
+                    "annotation limit", judgeAfterReturn,effectiveStrategic,true, false, rejectedStratagem);
             log.debug(limitFormat.toString());
             if (rejectedStratagem == NullTarget.class){
                 rejectedStratagem = LimitProper.getDefaultRejectedClazz();
@@ -169,7 +171,7 @@ public class AutoLimit {
         if (judgeAfterReturn){
             final Boolean isEffective = effectiveStrategicInstance.effective(request, new SimpleJoinPoint(joinPoint), result);
             LogLimitFormat limitFormat = new LogLimitFormat(limit, seconds, ban, recordItem, signStrategicClazz,sign,
-                    "annotation limit", judgeAfterReturn,effectiveStrategic,isEffective, true);
+                    "annotation limit", judgeAfterReturn,effectiveStrategic,isEffective, true, rejectedStratagem);
             log.debug(limitFormat.toString());
             if (!isEffective){
                 LimitInfoUtil.delRecord(recordItem, sign);

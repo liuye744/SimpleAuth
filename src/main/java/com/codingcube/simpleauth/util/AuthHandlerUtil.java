@@ -108,7 +108,7 @@ public class AuthHandlerUtil {
                 throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
             }
             final boolean author = autoAuth.isAuthor(request, permissions);
-            LogAuthFormat logAuthFormat = new LogAuthFormat(request, source + " handlerChain " + autoAuthHandlerChain.getClass().getName(), author, autoAuth.getClass().getName(), permissions);
+            LogAuthFormat logAuthFormat = new LogAuthFormat(request, source + " handlerChain " + autoAuthHandlerChain.getClass().getName(), author, autoAuth.getClass().getName(), permissions, rejectClass);
             log.debug(logAuthFormat.toString());
             if (!author) {
                 //Permission not met
@@ -141,7 +141,7 @@ public class AuthHandlerUtil {
                                Log log, String source) {
         AutoAuthHandler authHandler = getBean(applicationContext, handlerClass);
         final boolean author = authHandler.isAuthor(request, permission);
-        LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission);
+        LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission, rejectClass);
         log.debug(logAuthFormat.toString());
         if (!author){
             if (rejectClass == NullTarget.class){

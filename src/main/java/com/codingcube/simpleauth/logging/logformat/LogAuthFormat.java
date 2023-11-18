@@ -1,6 +1,7 @@
 package com.codingcube.simpleauth.logging.logformat;
 
 import com.codingcube.simpleauth.auth.PermissionOperate;
+import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.properties.LogProper;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,15 +18,16 @@ public class LogAuthFormat {
     private final boolean pass;
     private final String handlerName;
     private final String permission;
+    private final Class<? extends AuthRejectedStratagem> rejectedClass;
     private final DateTimeFormatter dateFormatter;
 
-    public LogAuthFormat(HttpServletRequest request, String source, boolean pass, String handlerName, String permission) {
+    public LogAuthFormat(HttpServletRequest request, String source, boolean pass, String handlerName, String permission, Class<? extends AuthRejectedStratagem> rejectedClass) {
         this.request = request;
         this.source = source;
         this.pass = pass;
         this.handlerName = handlerName;
         this.permission = permission;
-
+        this.rejectedClass = rejectedClass;
         this.dateFormatter = DateTimeFormatter.ofPattern(LogProper.getDateFormatStatic());
     }
 
@@ -39,6 +41,7 @@ public class LogAuthFormat {
                 "\tRequired permission: "+permission+"\r\n"+
                 "\tPermissions to carry: "+ request.getAttribute(PermissionOperate.PERMISSIONS) +"\r\n"+
                 "\tPrincipal to carry: "+ request.getAttribute(PermissionOperate.PRINCIPAL) +"\r\n"+
+                "\tRejected Class: "+ rejectedClass +"\r\n"+
                 "\tPass or not: "+pass+"";
     }
 }

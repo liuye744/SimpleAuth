@@ -1,6 +1,7 @@
 package com.codingcube.simpleauth.logging.logformat;
 
 import com.codingcube.simpleauth.limit.LimitInfoUtil;
+import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.properties.LogProper;
@@ -24,10 +25,21 @@ public class LogLimitFormat {
     private final Class<? extends EffectiveStrategic> effectiveStrategic;
     private final boolean effective;
     private final boolean result;
+    private final Class<? extends RejectedStratagem> rejectedClass;
     private final DateTimeFormatter dateFormatter;
 
 
-    public LogLimitFormat(int times, int seconds, int ban, String item, Class<? extends SignStrategic> signStrategic, String sign, String source, boolean judgeAfterReturn, Class<? extends EffectiveStrategic> effectiveStrategic, boolean effective, boolean result) {
+    public LogLimitFormat(int times,
+                          int seconds,
+                          int ban,
+                          String item,
+                          Class<? extends SignStrategic> signStrategic,
+                          String sign,
+                          String source,
+                          boolean judgeAfterReturn,
+                          Class<? extends EffectiveStrategic> effectiveStrategic,
+                          boolean effective, boolean result,
+                          Class<? extends RejectedStratagem> rejectedClass) {
         this.times = times;
         this.seconds = seconds;
         this.ban = ban;
@@ -39,6 +51,7 @@ public class LogLimitFormat {
         this.effectiveStrategic = effectiveStrategic;
         this.effective = effective;
         this.result = result;
+        this.rejectedClass = rejectedClass;
 
         this.dateFormatter = DateTimeFormatter.ofPattern(LogProper.getDateFormatStatic());
     }
@@ -60,7 +73,8 @@ public class LogLimitFormat {
                 "\tsource: " + source + "\r\n" +
                 "\tjudgeAfterReturn: "+ judgeAfterReturn +"\r\n" +
                 "\teffectiveStrategic: " + effectiveStrategic.getName() + "\r\n" +
-                "\teffective: " + effective + "\r\n");
+                "\teffective: " + effective + "\r\n" +
+                "\trejected Class: " + rejectedClass + "\r\n");
         if (LogProper.getStaticShowOptList()){
             sb.append("\toptionList: ").append(optionList).append("\r\n");
         }

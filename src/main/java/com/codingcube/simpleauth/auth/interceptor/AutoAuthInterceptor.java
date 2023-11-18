@@ -72,7 +72,7 @@ public class AutoAuthInterceptor implements HandlerInterceptor {
         String permissionString = permissions==null?"":permissions.toString();
 
         final boolean author = this.handler.isAuthor(request, permissionString);
-        LogAuthFormat logAuthFormat = new LogAuthFormat(request, "SimpleAuth Interceptor", author, this.handlerClass.getName(), permissionString);
+        LogAuthFormat logAuthFormat = new LogAuthFormat(request, "SimpleAuth Interceptor", author, this.handlerClass.getName(), permissionString, this.rejectedStratagem);
         log.debug(logAuthFormat.toString());
         if (!author){
             final AuthRejectedStratagem rejectedStratagem = AuthHandlerUtil.getBean(applicationContext, this.rejectedStratagem);

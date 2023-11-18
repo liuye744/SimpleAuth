@@ -43,7 +43,7 @@ public class CacheAutoValidatedBeanPostProcessor implements BeanPostProcessor {
                         final Class<?> paramValidateObj = paramValidateAnnotation.value();
                         final String[] methodsString = paramValidateAnnotation.methods();
 
-                        final Class<?> validateObj = getValidateObj(Object.class,
+                        final Class<?> validateObj = getValidateObj(
                                 ValidateProper.getDefaultValidateObjectClazz(),
                                 paramValidateObj,
                                 methodValidateObj,
@@ -67,7 +67,7 @@ public class CacheAutoValidatedBeanPostProcessor implements BeanPostProcessor {
                     methodsString = new String[1];
                     methodsString[0] = "validate";
                 }
-                final Class<?> validateObj = getValidateObj(Object.class,
+                final Class<?> validateObj = getValidateObj(
                         ValidateProper.getDefaultValidateObjectClazz(),
                         methodValidateObj,
                         classValidateObj);
@@ -81,9 +81,9 @@ public class CacheAutoValidatedBeanPostProcessor implements BeanPostProcessor {
         return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
     }
 
-    private Class<?> getValidateObj(Class<?> invalidValue, Class<?> defaultValue ,Class<?> ...valueList){
+    private Class<?> getValidateObj(Class<?> defaultValue, Class<?>... valueList){
         for (Class<?> value : valueList) {
-            if (value != invalidValue){
+            if (value != Object.class){
                 return value;
             }
         }

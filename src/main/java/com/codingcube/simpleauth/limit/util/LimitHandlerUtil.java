@@ -43,10 +43,10 @@ public class LimitHandlerUtil {
                     final Boolean addRecord = LimitInfoUtil.addRecord(item, sign, limitItem.getTimes(),
                             limitItem.getSeconds(), limitItem.getBan(), limitItem.getTokenLimit());
                     if (!addRecord) {
-                        LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
-                                source, true, limitItem.getEffectiveStrategic(), true, false);
-                        log.debug(limitFormat.toString());
                         final Class<? extends RejectedStratagem> reject = limitItem.getReject();
+                        LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
+                                source, true, limitItem.getEffectiveStrategic(), true, false, reject);
+                        log.debug(limitFormat.toString());
                         final RejectedStratagem bean = AuthHandlerUtil.getBean(applicationContext, reject);
                         bean.doRejected(request,
                                 ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse(),
@@ -77,7 +77,7 @@ public class LimitHandlerUtil {
         EffectiveStrategic effectiveStrategicInstance = AuthHandlerUtil.getBean(applicationContext, limitItem.getEffectiveStrategic());
         final Boolean isEffective = effectiveStrategicInstance.effective(request,null, result);
         LogLimitFormat limitFormat = new LogLimitFormat(limitItem.getTimes(), limitItem.getSeconds(), limitItem.getBan(), item, limitItem.getSignStrategic(), sign,
-                source, true, limitItem.getEffectiveStrategic(), isEffective, true);
+                source, true, limitItem.getEffectiveStrategic(), isEffective, true, limitItem.getReject());
         log.debug(limitFormat.toString());
         if (!isEffective){
             LimitInfoUtil.delRecord(item, sign);
