@@ -15,11 +15,16 @@ import com.codingcube.simpleauth.autoconfig.domain.Handler;
 import com.codingcube.simpleauth.logging.Log;
 import com.codingcube.simpleauth.logging.LogFactory;
 import com.codingcube.simpleauth.properties.AuthProper;
+import com.codingcube.simpleauth.properties.EvaluationEnvironmentContext;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -35,6 +40,8 @@ import java.util.Objects;
 public class AutoAuth {
     @Resource
     private ApplicationContext applicationContext;
+    @Resource
+    private Environment environment;
     Log log;
 
     public AutoAuth(LogFactory logFactory) {
@@ -45,7 +52,13 @@ public class AutoAuth {
     public Object isAuthorClass(ProceedingJoinPoint joinPoint, IsAuthor isAuthor) throws Throwable {
         final Class<? extends AutoAuthHandler>[] autoAuthServices = isAuthor.handler();
         final Class<? extends AutoAuthHandlerChain>[] authentications = isAuthor.handlerChain();
-        final String permissions = isAuthor.value();
+        String permissions = isAuthor.value();
+        try {
+            EvaluationContext environmentContext = new EvaluationEnvironmentContext(environment);
+            final Expression expression = new SpelExpressionParser().parseExpression(permissions);
+            permissions = expression.getValue(environmentContext, String.class);
+        }catch (Exception ignored){
+        }
         final Class<? extends AuthRejectedStratagem> rejected = isAuthor.rejected();
 
         return doAuth(joinPoint, autoAuthServices, authentications, permissions, rejected);
@@ -59,7 +72,13 @@ public class AutoAuth {
     public Object isAuthorClass(ProceedingJoinPoint joinPoint, SimpleAuth simpleAuth) throws Throwable {
         final Class<? extends AutoAuthHandler>[] autoAuthServices = simpleAuth.handler();
         final Class<? extends AutoAuthHandlerChain>[] authentications = simpleAuth.handlerChain();
-        final String permissions = simpleAuth.value();
+        String permissions = simpleAuth.value();
+        try {
+            EvaluationContext environmentContext = new EvaluationEnvironmentContext(environment);
+            final Expression expression = new SpelExpressionParser().parseExpression(permissions);
+            permissions = expression.getValue(environmentContext, String.class);
+        }catch (Exception ignored){
+        }
         final Class<? extends AuthRejectedStratagem> rejected = simpleAuth.rejected();
 
         return doAuth(joinPoint, autoAuthServices, authentications, permissions, rejected);
