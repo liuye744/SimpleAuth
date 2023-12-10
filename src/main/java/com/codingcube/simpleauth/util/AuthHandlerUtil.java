@@ -107,7 +107,14 @@ public class AuthHandlerUtil {
             } else {
                 throw new TargetNotFoundException("handlerChain error. The value can only be String or Class<? extends AutoAuthHandler>");
             }
-            final boolean author = autoAuth.isAuthor(request, permissions);
+            boolean author = false;
+            try{
+                author = autoAuth.isAuthor(request, permissions);
+            }catch (Exception e){
+                LogAuthFormat logAuthFormat = new LogAuthFormat(request, source + " handlerChain " + autoAuthHandlerChain.getClass().getName(), author, autoAuth.getClass().getName(), permissions, rejectClass);
+                log.debug(logAuthFormat.toString());
+                throw e;
+            }
             LogAuthFormat logAuthFormat = new LogAuthFormat(request, source + " handlerChain " + autoAuthHandlerChain.getClass().getName(), author, autoAuth.getClass().getName(), permissions, rejectClass);
             log.debug(logAuthFormat.toString());
             if (!author) {
@@ -140,7 +147,15 @@ public class AuthHandlerUtil {
                                Class<? extends AuthRejectedStratagem> rejectClass,
                                Log log, String source) {
         AutoAuthHandler authHandler = getBean(applicationContext, handlerClass);
-        final boolean author = authHandler.isAuthor(request, permission);
+        boolean author = false;
+        try{
+            author = authHandler.isAuthor(request, permission);
+        }catch(Exception e){
+            //Handler中抛出异常前打印日志
+            LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission, rejectClass);
+            log.debug(logAuthFormat.toString());
+            throw e;
+        }
         LogAuthFormat logAuthFormat = new LogAuthFormat(request, source+" handler", author,handlerClass.getName(), permission, rejectClass);
         log.debug(logAuthFormat.toString());
         if (!author){
