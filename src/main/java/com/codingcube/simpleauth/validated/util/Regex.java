@@ -23,16 +23,20 @@ public class Regex {
 
     /**
      * 长度在6~18之间，只能包含字母、数字和下划线
+     * The length should be between 6 and 18, and can only contain letters, numbers, and underscores.
      */
     public final static String PASSWORD = "^[a-zA-Z]\\w{5,17}$";
 
     /**
      * 必须包含大小写字母和数字的组合，可以使用特殊字符，长度在8-16之间
+     * It must contain a combination of uppercase and lowercase letters, as well as numbers. Special characters are allowed, and the length should be between 8 and 16.
      */
     public final static String STRONG_PASSWORD = "^(?=.\\d)(?=.[a-z])(?=.*[A-Z]).{8,16}$";
 
     /**
      * 必须包含大小写字母、数字、特殊字符的组合，长度在8-16之间
+     *
+     * It must contain a combination of uppercase and lowercase letters, numbers, and special characters. The length should be between 8 and 16.
      */
     public final static String COMPLEX_PASSWORD = "^(?=(.*[0-9]))(?=.*[\\!@#$%^&*()\\\\[\\]{}\\-_+=~`|:;\"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,16}$";
 
@@ -78,7 +82,7 @@ public class Regex {
     public final static String CHINESE_LANDLINE_NUMBER = "^\\d{3}-\\d{8}|\\d{4}-\\d{7}$";
 
     /**
-     * 中国固定电话号码
+     * 国际固定电话号码
      */
     public final static String INTERNATIONAL_PHONE_NUMBERS = "^(?:(?:\\(?(?:00|\\+)([1-4]\\d\\d|[1-9]\\d?)\\)?)?[\\-\\.\\ \\\\\\/]?)?((?:\\(?\\d{1,}\\)?[\\-\\.\\ \\\\\\/]?){0,})(?:[\\-\\.\\ \\\\\\/]?(?:#|ext\\.?|extension|x)[\\-\\.\\ \\\\\\/]?(\\d+))?$";
 

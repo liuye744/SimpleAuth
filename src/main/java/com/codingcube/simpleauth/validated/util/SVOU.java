@@ -3,6 +3,7 @@ package com.codingcube.simpleauth.validated.util;
 import com.codingcube.simpleauth.exception.ValidateException;
 
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.codingcube.simpleauth.validated.util.SVU.notNull;
@@ -161,4 +162,37 @@ public class SVOU {
     public static BooleanCompute patternDelay(String message, String content, String regex){
         return ()-> pattern(message, content, regex);
     }
+
+    public static <T> boolean checkList(List<T> list, BooleanGenericCompute<T> bc){
+        if (list == null || list.size()==0){
+            return true;
+        }
+        for (T t : list) {
+            if (!bc.run(t)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static <T> boolean checkList(String message, List<T> list, BooleanGenericCompute<T> bc){
+        if (list == null || list.size()==0){
+            return true;
+        }
+        for (T t : list) {
+            if (!bc.run(t)) {
+                throw new ValidateException(message);
+            }
+        }
+        return true;
+    }
+
+    public static <T> BooleanCompute checkListDelay(List<T> list, BooleanGenericCompute<T> bc){
+        return () -> checkList(list, bc);
+    }
+
+    public static <T> BooleanCompute checkListDelay(String message, List<T> list, BooleanGenericCompute<T> bc){
+        return () -> checkList(message, list, bc);
+    }
+
 }
