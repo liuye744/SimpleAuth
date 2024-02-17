@@ -1,9 +1,13 @@
 package com.codingcube.simpleauth.limit;
 
+import com.codingcube.simpleauth.limit.cache.KeyCache;
+import com.codingcube.simpleauth.limit.cache.impl.DefaultCache;
 import com.codingcube.simpleauth.limit.strategic.BanKeyStratagem;
 import com.codingcube.simpleauth.limit.util.TokenLimit;
+import com.codingcube.simpleauth.properties.LimitProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,9 +16,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * Core Utility Class for Access Limitation Feature*
  */
 public class LimitInfoUtil {
-    private static final Map<String, Map<String, TokenLimit>> limitInfo = new ConcurrentHashMap<>();
-    private static final Map<String, Date> ban = new ConcurrentHashMap<>();
-    private static final Map<String, Integer> secondsRecord = new ConcurrentHashMap<>();
+    private static KeyCache<Map<String, TokenLimit>> limitInfo;
+    private static KeyCache<Date> ban;
+    private static KeyCache<Integer> secondsRecord;
+
+    static {
+        try {
+            limitInfo = LimitProper.getDefaultLimitCacheClazz().getConstructor().newInstance();
+            ban = LimitProper.getDefaultBanCacheClazz().getConstructor().newInstance();
+            secondsRecord =LimitProper.getDefaultSecondsCacheClazz().getConstructor().newInstance();
+
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * append record*
@@ -107,7 +122,7 @@ public class LimitInfoUtil {
      * Get banned IP Map*
      * @return Map<IP, Ban Time>
      */
-    public static Map<String, Date> getBanMap(){
+    public static KeyCache<Date> getBanMap(){
         return ban;
     }
 
@@ -115,7 +130,7 @@ public class LimitInfoUtil {
      * *
      * @return Map<recordItem, Map<sign, Deque<Option Time>>>
      */
-    public static Map<String,Map<String, TokenLimit>> getLimitInfo(){
+    public static KeyCache<Map<String, TokenLimit>> getLimitInfo(){
         return limitInfo;
     }
 

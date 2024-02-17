@@ -4,6 +4,7 @@ import com.codingcube.simpleauth.auth.handler.AutoAuthHandler;
 import com.codingcube.simpleauth.auth.strategic.AuthRejectedStratagem;
 import com.codingcube.simpleauth.autoconfig.execption.ConfigurationParseException;
 import com.codingcube.simpleauth.exception.TargetNotFoundException;
+import com.codingcube.simpleauth.limit.cache.KeyCache;
 import com.codingcube.simpleauth.limit.strategic.RejectedStratagem;
 import com.codingcube.simpleauth.limit.util.CompleteLimit;
 import com.codingcube.simpleauth.limit.util.TokenBucket;
@@ -42,36 +43,42 @@ public class Bean2Static {
 
         LogProper.setDateFormatStatic(logProper.getDateFormat());
 
+        //AuthProper
         try {
-            final Class<? extends AutoAuthHandler> clazz = (Class<? extends AutoAuthHandler>) Class.forName(authProper.getDefaultHandler());
-            AuthProper.setDefaultHandlerClazz(clazz);
-        } catch (ClassNotFoundException e) {
-            throw new ConfigurationParseException(authProper.getDefaultHandler()+" not found");
-        }
+            final Class<? extends AutoAuthHandler> defaultHandlerClazz = (Class<? extends AutoAuthHandler>) Class.forName(authProper.getDefaultHandler());
+            AuthProper.setDefaultHandlerClazz(defaultHandlerClazz);
 
-        try {
-            final Class<? extends AuthRejectedStratagem> clazz = (Class<? extends AuthRejectedStratagem>) Class.forName(authProper.getDefaultRejected());
-            AuthProper.setDefaultRejectedClazz(clazz);
-        } catch (ClassNotFoundException e) {
-            throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
-        }
-        try {
-            final Class<? extends RejectedStratagem> clazz = (Class<? extends RejectedStratagem>) Class.forName(limitProper.getDefaultRejected());
-            LimitProper.setDefaultRejectedClazz(clazz);
+            final Class<? extends AuthRejectedStratagem> defaultRejectedClazz = (Class<? extends AuthRejectedStratagem>) Class.forName(authProper.getDefaultRejected());
+            AuthProper.setDefaultRejectedClazz(defaultRejectedClazz);
         } catch (ClassNotFoundException e) {
             throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
         }
 
+        //LimitProper
         try {
-            final Class<? extends ValidateRejectedStratagem> clazz = (Class<? extends ValidateRejectedStratagem>) Class.forName(validateProper.getDefaultRejected());
-            ValidateProper.setDefaultRejectedClazz(clazz);
+            final Class<? extends RejectedStratagem> defaultRejectedClazz = (Class<? extends RejectedStratagem>) Class.forName(limitProper.getDefaultRejected());
+            LimitProper.setDefaultRejectedClazz(defaultRejectedClazz);
+
+            final Class<? extends KeyCache> defaultBanCacheClazz = (Class<? extends KeyCache>) Class.forName(limitProper.getDefaultBanCache());
+            LimitProper.setDefaultBanCacheClazz(defaultBanCacheClazz);
+
+            final Class<? extends KeyCache> defaultLimitCacheClazz = (Class<? extends KeyCache>) Class.forName(limitProper.getDefaultLimitCache());
+            LimitProper.setDefaultLimitCacheClazz(defaultLimitCacheClazz);
+
+            final Class<? extends KeyCache> defaultSecondsCacheClazz = (Class<? extends KeyCache>) Class.forName(limitProper.getDefaultSecondsCache());
+            LimitProper.setDefaultSecondsCacheClazz(defaultSecondsCacheClazz);
+
         } catch (ClassNotFoundException e) {
             throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
         }
 
+        //ValidateProper
         try {
-            final Class<?> clazz =  Class.forName(validateProper.getDefaultValidateObject());
-            ValidateProper.setDefaultValidateObjectClazz(clazz);
+            final Class<? extends ValidateRejectedStratagem> defaultRejectedClazz = (Class<? extends ValidateRejectedStratagem>) Class.forName(validateProper.getDefaultRejected());
+            ValidateProper.setDefaultRejectedClazz(defaultRejectedClazz);
+
+            final Class<?> defaultValidateObjectClazz =  Class.forName(validateProper.getDefaultValidateObject());
+            ValidateProper.setDefaultValidateObjectClazz(defaultValidateObjectClazz);
         } catch (ClassNotFoundException e) {
             throw new ConfigurationParseException(authProper.getDefaultRejected()+" not found");
         }
