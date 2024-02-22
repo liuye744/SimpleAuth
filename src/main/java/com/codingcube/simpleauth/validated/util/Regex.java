@@ -4,7 +4,7 @@ public class Regex {
     /**
      * 邮箱
      */
-    public final static String EMAIL = "^w+([-+.]w+)*@w+([-.]w+)*.w+([-.]w+)*$";
+    public final static String EMAIL = "\\w[-\\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\\.)+[A-Za-z]{2,14}";
 
     /**
      * URL
@@ -79,7 +79,7 @@ public class Regex {
     /**
      * 中国固定电话号码
      */
-    public final static String CHINESE_LANDLINE_NUMBER = "^\\d{3}-\\d{8}|\\d{4}-\\d{7}$";
+    public final static String CHINESE_LANDLINE_NUMBER = "^0\\d{2}(?:-?\\d{8}|-?\\d{7})$";
 
     /**
      * 国际固定电话号码
@@ -89,12 +89,12 @@ public class Regex {
     /**
      * 中国身份证号
      */
-    public final static String CHINESE_ID_NUMBER = "^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$";
+    public final static String CHINESE_ID_NUMBER = "^[1-9]\\d{5}(18|19|20)\\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$";
 
     /**
      * xml文件名
      */
-    public final static String XML_FILE_NAME = "^([a-zA-Z]+-?)+[a-zA-Z0-9]+\\\\.[x|X][m|M][l|L]$";
+    public final static String XML_FILE_NAME = "^([^\\\\/]+)+\\.[x|X][m|M][l|L]$";
 
     /**
      * HTML
@@ -104,7 +104,7 @@ public class Regex {
     /**
      * 中国邮政编码
      */
-    public final static String CHINA_POSTAL_CODE = "^[1-9]\\d{5}(?!\\d)$";
+    public final static String CHINA_POSTAL_CODE = "\\d{6}";
 
     /**
      * 子网掩码
@@ -117,7 +117,7 @@ public class Regex {
     public final static String TENCENT_QQ = "^[1-9][0-9]{4,}$";
 
     /**
-     * 带后缀的文件路径
+     * 带后缀的网络文件路径
      */
     public final static String FILE_PATH = "^((\\/|\\\\|\\/\\/|https?:\\\\\\\\|https?:\\/\\/)[a-z0-9 _@\\-^!#$%&+={}.\\/\\\\\\[\\]]+)+\\.[a-z]+$";
     /**
@@ -128,7 +128,7 @@ public class Regex {
     /**
      * MAC
      */
-    public final static String MAC = "^((([a-f0-9]{2}:){5})|(([a-f0-9]{2}-){5}))[a-f0-9]{2}$";
+    public final static String MAC = "^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})|([0-9A-Fa-f]{2}[-]){5}([0-9A-Fa-f]{2})$";
 
     /**
      * ipv4
@@ -136,7 +136,7 @@ public class Regex {
     public final static String IPv4 = "^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$";
 
     /**
-     * 提取ipv4*
+     * 提取ipv4
      */
     public final static String EXTRACT_IPv4 = "\\d+\\.\\d+\\.\\d+\\.\\d+";
 
