@@ -158,7 +158,7 @@ public class AutoValidated {
                 final Object[] args = joinPoint.getArgs();
                 for (int i = 0; i < args.length; i++) {
                     Object target = args[i];
-                    if (param == target.getClass()) {
+                    if (target == null || param == target.getClass()) {
                         //成功验证一个后跳出循环
                         i = Integer.MAX_VALUE - 1;
                         try {
