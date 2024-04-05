@@ -1,6 +1,9 @@
 package com.codingcube.simpleauth.validated.aspect;
 
 import com.codingcube.simpleauth.exception.ValidateMethodException;
+import com.codingcube.simpleauth.logging.Log;
+import com.codingcube.simpleauth.logging.LogFactory;
+import com.codingcube.simpleauth.logging.logformat.LogValidatedFormat;
 import com.codingcube.simpleauth.properties.ValidateProper;
 import com.codingcube.simpleauth.util.AuthHandlerUtil;
 import com.codingcube.simpleauth.util.NullTarget;
@@ -22,6 +25,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 自动校验参数切面类 *
@@ -35,6 +39,11 @@ public class AutoValidated {
 
     final Map<String, ReflectMethod> reflectMethodMap = new HashMap<>();
     final Map<String, ReflectMethod> reflectParameterMap = new HashMap<>();
+    Log log;
+
+    public AutoValidated(LogFactory logFactory) {
+        this.log = logFactory.getValidateLog(this.getClass());
+    }
 
     @Around("@annotation(simpleValidate)")
     public Object validateMethod(ProceedingJoinPoint joinPoint, SimpleValidate simpleValidate) throws Throwable{
@@ -164,6 +173,12 @@ public class AutoValidated {
                         try {
                             final Object validatedResult = method.invoke(validateBean, target);
                             if (validatedResult instanceof Boolean){
+                                //处理日志
+                                LogValidatedFormat logFormat = new LogValidatedFormat(validateBean.getClass(),
+                                        target==null? null:target.getClass(),
+                                        target==null? null:target.toString(),
+                                        (Boolean) validatedResult);
+                                log.debug(logFormat.toString());
                                 if (!(Boolean) validatedResult){
                                     //验证失败
                                     final ValidateRejectedStratagem rejectedInstance = AuthHandlerUtil.getBean(application, rejected);

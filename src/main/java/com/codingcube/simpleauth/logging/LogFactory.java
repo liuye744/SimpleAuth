@@ -17,6 +17,7 @@ public class LogFactory {
 
     private Constructor<? extends Log> logConstructor;
     private Constructor<? extends Log> limitLogConstructor;
+    private Constructor<? extends Log> validateLogConstructor;
 
 
     public LogFactory(LogProper logProper) {
@@ -26,8 +27,13 @@ public class LogFactory {
         final String limitLogImpl = logProper.getLimitLogImpl();
         limitLogConstructor = getLogImpl(limitLogImpl);
 
+        final String validatedLogImpl = logProper.getValidatedLogImpl();
+        validateLogConstructor = getLogImpl(validatedLogImpl);
+
         getLog(this.getClass()).debug("Auth Logging initialized using "+logConstructor.getDeclaringClass()+" adapter.");
         getLimitLog(this.getClass()).debug("Limit Logging initialized using "+limitLogConstructor.getDeclaringClass()+" adapter.");
+        getValidateLog(this.getClass()).debug("Validate Logging initialized using "+validateLogConstructor.getDeclaringClass()+" adapter.");
+
     }
 
     public Constructor<? extends Log> getLogImpl(String logImplString){
@@ -56,7 +62,15 @@ public class LogFactory {
         try {
             return limitLogConstructor.newInstance(aClass.getName());
         } catch (Throwable t) {
-            throw new LogException("Error creating logger for logger " + aClass.getName() + ".  Cause: " + t, t);
+            throw new LogException("Error creating logger for limit function " + aClass.getName() + ".  Cause: " + t, t);
+        }
+    }
+
+    public Log getValidateLog(Class<?> aClass) {
+        try {
+            return validateLogConstructor.newInstance(aClass.getName());
+        } catch (Throwable t) {
+            throw new LogException("Error creating logger for validate function " + aClass.getName() + ".  Cause: " + t, t);
         }
     }
 
@@ -82,5 +96,9 @@ public class LogFactory {
 
     public void setLimitLogConstructor(Constructor<? extends Log> limitLogConstructor) {
         this.limitLogConstructor = limitLogConstructor;
+    }
+
+    public void setValidateLogConstructor(Constructor<? extends Log> validateLogConstructor) {
+        this.validateLogConstructor = validateLogConstructor;
     }
 }

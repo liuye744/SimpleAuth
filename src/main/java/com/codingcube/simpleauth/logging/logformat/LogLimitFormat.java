@@ -7,6 +7,7 @@ import com.codingcube.simpleauth.limit.util.TokenLimit;
 import com.codingcube.simpleauth.properties.LogProper;
 import com.codingcube.simpleauth.limit.strategic.EffectiveStrategic;
 import com.codingcube.simpleauth.auth.strategic.SignStrategic;
+import com.codingcube.simpleauth.util.AuthHandlerUtil;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,11 +69,11 @@ public class LogLimitFormat {
                 "\tseconds: " + seconds + "\r\n" +
                 "\tban: " + ban + "\r\n" +
                 "\titem: " + item + "\r\n" +
-                "\tsignStrategic: " + signStrategic.getName() + "\r\n" +
+                "\tsignStrategic: " +  signStrategic + "\r\n" +
                 "\tsign: " + sign + "\r\n" +
                 "\tsource: " + source + "\r\n" +
                 "\tjudgeAfterReturn: "+ judgeAfterReturn +"\r\n" +
-                "\teffectiveStrategic: " + effectiveStrategic.getName() + "\r\n" +
+                "\teffectiveStrategic: " + effectiveStrategic + "\r\n" +
                 "\teffective: " + effective + "\r\n" +
                 "\trejected Class: " + rejectedClass + "\r\n");
         if (LogProper.getStaticShowOptList()){

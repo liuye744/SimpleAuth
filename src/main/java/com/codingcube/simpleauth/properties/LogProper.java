@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LogProper {
     private String logImpl = "NoLogging";
     private String limitLogImpl = "NoLogging";
+    private String validatedLogImpl = "NoLogging";
     private Boolean showOptList = false;
     private static Boolean staticShowOptList = false;
     private String dateFormat = "yyyy-MM-dd HH:mm:ss";
@@ -57,5 +58,13 @@ public class LogProper {
 
     public static void setDateFormatStatic(String dateFormatStatic) {
         LogProper.dateFormatStatic = dateFormatStatic;
+    }
+
+    public String getValidatedLogImpl() {
+        return validatedLogImpl;
+    }
+
+    public void setValidatedLogImpl(String validatedLogImpl) {
+        this.validatedLogImpl = validatedLogImpl;
     }
 }

@@ -381,4 +381,7 @@ public class AuthHandlerUtil {
         }
     }
 
+    public static String getClassName(Class<?> clazz){
+        return clazz==null? "null":clazz.getName();
+    }
 }
