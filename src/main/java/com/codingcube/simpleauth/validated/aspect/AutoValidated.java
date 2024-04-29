@@ -106,7 +106,7 @@ public class AutoValidated {
                     final Object targetParameter = args[i];
                     //不存在MethodsString 执行positiveParameter
 
-                    doPositiveParameter(validateObj, rejected, targetParameter);
+                    doPositiveParameter(validateObj, rejected, targetParameter, methodSignature.getParameterTypes()[i]);
                 }
             }
         }
@@ -206,16 +206,16 @@ public class AutoValidated {
      * @param rejected 拒绝策略
      * @param parameter 参数
      */
-    private void doPositiveParameter(Class<?> validateObj, Class<? extends ValidateRejectedStratagem> rejected, Object parameter) throws Throwable {
+    private void doPositiveParameter(Class<?> validateObj, Class<? extends ValidateRejectedStratagem> rejected, Object parameter, Class<?> parameterType) throws Throwable {
         //判断并初始化缓存
-        final String parameterKey = parameterKey(validateObj, parameter.getClass());
+        final String parameterKey = parameterKey(validateObj, parameterType);
         ReflectMethod reflectMethod = reflectParameterMap.get(parameterKey);
         if (reflectMethod == null){
-            initReflectParameterCache(parameterKey, validateObj, parameter.getClass());
+            initReflectParameterCache(parameterKey, validateObj, parameterType);
             reflectMethod = reflectParameterMap.get(parameterKey);
         }
         if(reflectMethod == null){
-            throw new ValidateMethodException("No method found with only one parameter of type " + parameter.getClass()+" in "+ validateObj);
+            throw new ValidateMethodException("No method found with only one parameter of type " + parameterType+" in "+ validateObj);
         }
         while (reflectMethod != null){
             final Method method = reflectMethod.getMethod();
