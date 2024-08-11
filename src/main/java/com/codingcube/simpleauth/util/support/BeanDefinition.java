@@ -1,44 +1,54 @@
 package com.codingcube.simpleauth.util.support;
 
-public class BeanDefinition {
-    /**
-     * false 0
-     * singleton 1
-     * prototype 2
-     * service 3
-     */
-    Integer type;
+import com.codingcube.simpleauth.util.support.scope.ScopeType;
 
-    public BeanDefinition(Integer type) {
+/**
+ * @author dhc
+ */
+public class BeanDefinition {
+    ScopeType type;
+    String beanName;
+    Class<?> clazz;
+
+    public BeanDefinition(Class<?> clazz) {
+        this.clazz = clazz;
+        type = ScopeType.SINGLETON;
+        this.beanName = clazz.getName();
+    }
+
+    public BeanDefinition(Class<?> clazz, ScopeType type) {
+        this.clazz = clazz;
+        this.beanName = clazz.getName();
         this.type = type;
     }
 
-    public BeanDefinition(String type) {
-        switch (type){
-            case "singleton":
-                this.type = 1;
-                break;
-            case "prototype":
-                this.type = 2;
-                break;
-            case "request":
-                this.type = 3;
-                break;
-            case "session":
-                this.type = 4;
-                break;
-            case "false":
-            default:
-                this.type = 0;
-                break;
-        }
+    public BeanDefinition(Class<?> clazz, String beanName, ScopeType type) {
+        this.type = type;
+        this.beanName = beanName;
+        this.clazz = clazz;
     }
 
-    public Integer getType() {
+    public ScopeType getType() {
         return type;
     }
 
-    public void setType(Integer type) {
+    public void setType(ScopeType type) {
         this.type = type;
+    }
+
+    public String getBeanName() {
+        return beanName;
+    }
+
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
+
+    public Class<?> getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(Class<?> clazz) {
+        this.clazz = clazz;
     }
 }

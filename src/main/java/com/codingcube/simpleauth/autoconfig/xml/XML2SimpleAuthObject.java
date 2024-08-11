@@ -52,6 +52,7 @@ public class XML2SimpleAuthObject implements Config2SimpleAuthObject {
         this.handlerChainMap = new HashMap<>();
     }
 
+    @Override
     public void initAttr(SimpleAuthConfig simpleAuthConfig) {
         this.pathsMap = simpleAuthConfig.getPathsMap();
         this.handlerMap = simpleAuthConfig.getHandlerMap();
