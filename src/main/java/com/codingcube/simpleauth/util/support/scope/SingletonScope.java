@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author dhc
  */
+@SuppressWarnings("unchecked")
 public class SingletonScope extends Scope{
     public static final ConcurrentHashMap<String, Object> beanMap = new ConcurrentHashMap<>(16);
 

@@ -9,6 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
+@SuppressWarnings("unchecked")
 public class RequestScope extends Scope{
     @Override
     public <T> T initBean(BeanDefinition beanDefinition) {
