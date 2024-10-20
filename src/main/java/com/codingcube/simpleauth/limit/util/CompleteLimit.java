@@ -7,12 +7,26 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class CompleteLimit implements TokenLimit{
     Deque<Date> optList =  new LinkedList<>();
-    private final Semaphore semaphore; // 信号量用于控制令牌的发放
+    /**
+     * 信号量用于控制令牌的发放
+     */
+    private final Semaphore semaphore;
+    /**
+     * 限制次数
+     */
     private Integer limit;
+    /**
+     * 限制时间seconds
+     */
     private Integer seconds;
+    /**
+     *  SECOND_SCALE
+     */
+    private final static Long SECOND_SCALE = 1000L;
 
     public CompleteLimit() {
         this.semaphore = new Semaphore(1);
@@ -84,7 +98,7 @@ public class CompleteLimit implements TokenLimit{
                 while (optList.size() > 0){
                     final Date last = optList.getLast();
                     final Date current = new Date();
-                    if ((current.getTime() - last.getTime())/1000 > seconds){
+                    if ((current.getTime() - last.getTime()) > seconds*SECOND_SCALE){
                         //expired
                         optList.removeLast();
                     }else {
@@ -106,7 +120,7 @@ public class CompleteLimit implements TokenLimit{
                 }
                 final Date last = optList.getLast();
                 final Date current = new Date();
-                if ((current.getTime() - last.getTime())/1000 > seconds){
+                if ((current.getTime() - last.getTime()) > seconds*SECOND_SCALE){
                     //expired
                     optList.removeLast();
                 }else {
