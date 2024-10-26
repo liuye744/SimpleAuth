@@ -110,7 +110,6 @@ public class CompleteLimit implements TokenLimit{
                     optList.addFirst(new Date());
                     return true;
                 }
-                //LimitInfoUtil.ban.put(banKey, new Date());
                 return false;
             }else {
                 //Judge whether the top level has expired and add records.
