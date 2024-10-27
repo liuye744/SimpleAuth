@@ -9,6 +9,9 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.annotation.Resource;
 
+/**
+ * @author CodingCube
+ */
 @Configuration
 public class FilterAuthWebAutoConfig implements WebMvcConfigurer {
     @Resource
@@ -23,7 +26,7 @@ public class FilterAuthWebAutoConfig implements WebMvcConfigurer {
             if (simpleAuthConfig.getHandlerMap().size() != 0
                     ||
                 simpleAuthConfig.getHandlerChainMap().size() != 0) {
-                registry.addInterceptor(new AutoConfigAuthInterceptor(applicationContext, logFactory)).addPathPatterns("/*").order(Integer.MAX_VALUE);
+                registry.addInterceptor(new AutoConfigAuthInterceptor(applicationContext, logFactory)).addPathPatterns("/**").order(Integer.MAX_VALUE);
             }
         }
     }

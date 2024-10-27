@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author CodingCube
+ */
 public class ConfigFactory {
     Class<? extends Config2SimpleAuthObject> config2SimpleAuthObjectClazz;
     SimpleAuthConfig simpleAuthConfig;
@@ -36,7 +39,7 @@ public class ConfigFactory {
             initConfig(configPathList.get(processedNum));
             processedNum++;
             currentConfigList.forEach(item-> {
-                if (!item.contains(".xml") || !item.contains(".json")){
+                if (!item.contains(".xml") && !item.contains(".json")){
                     findAndAdd(configPathList,item+".xml");
                 }else {
                     findAndAdd(configPathList,item);
@@ -94,7 +97,7 @@ public class ConfigFactory {
             }
             //检查scope
             if (value.getScope() == null){
-                value.setScope("singleton");
+                value.setScope("SINGLETON");
             }
         });
         limitMap.forEach((key, value) ->{

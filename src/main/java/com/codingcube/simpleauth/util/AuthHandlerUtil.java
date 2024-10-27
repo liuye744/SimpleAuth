@@ -277,7 +277,8 @@ public class AuthHandlerUtil {
      */
     private static BeanDefinition initBeanDefinition(Handler handler){
         final Class<? extends AutoAuthHandler> handlerClass = handler.getHandlerClass();
-        return new BeanDefinition(handlerClass, handler.getId(), ScopeType.valueOf(handler.getScope()));
+        final ScopeType scopeType = ScopeType.valueOf(handler.getScope().toUpperCase());
+        return new BeanDefinition(handlerClass, handler.getId(), scopeType);
     }
 
     /**
